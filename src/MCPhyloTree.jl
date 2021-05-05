@@ -1,8 +1,12 @@
 module MCPhyloTree
 
-
+    # load necessary packages
     using Statistics
     using DataStructures
+    using RecipesBase
+
+    ### Get Files
+
     # Type    
     include("Node.jl")
     
@@ -29,9 +33,11 @@ module MCPhyloTree
     include("Moves/Randomize.jl")
     include("Moves/Rerooting.jl")
 
-
     # utils
     include("utils.jl")
+
+    # plotting recipes
+    include("Plotting/tree_plot.jl")
 
     # Export Type
     export
@@ -89,7 +95,8 @@ module MCPhyloTree
         majority_consensus_tree,
         loose_consensus_tree,
         greedy_consensus_tree,
-        ladderize_tree, ladderize_tree!
+        ladderize_tree, ladderize_tree!,
+        create_tree_from_leaves
     
     # Distance
     export
@@ -105,11 +112,6 @@ module MCPhyloTree
         randomize, randomize!,
         reroot,
         SPR, SPR!
-
-
-
-
-
 
 
 end
