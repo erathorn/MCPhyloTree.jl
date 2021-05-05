@@ -10,3 +10,13 @@
     @test tree_height(rt) == 16.5
     @test tree_height(rt2) == 16.5
 end
+
+@testset "NJ" begin
+    D = [0. 3. 14. 12.; 3 0 13 11; 14. 13. 0. 4; 12. 11. 4. 0]
+    rt = neighbor_joining(D)
+    gst = parsing_newick_string("((a,b)c,d,e);")
+    MCPhyloTree.number_nodes!(gst)
+    set_binary!(gst)
+    @test RF(rt, gst) == 0
+    @test tree_length(rt) == 16
+end
