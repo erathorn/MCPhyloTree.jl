@@ -99,7 +99,7 @@ module MCPhyloTree
     # Moves
     export
         slide, slide!,
-        swing, sing!,
+        swing, swing!,
         change_edge_length!,
         NNI, NNI!
         randomize, randomize!,

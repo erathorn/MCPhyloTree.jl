@@ -6,4 +6,5 @@ using MCPhyloTree
     include("ladderize.jl")
     include("pruning.jl")
     include("spr.jl")
+    include("moves.jl")
 end
