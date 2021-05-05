@@ -15,10 +15,12 @@ function slide!(root::T) where {T<:GeneralNode}
     available = [node.num for node in post_order(root)]
     n = rand(available)
     target::T = find_num(root, n)
-    while target.nchild == 0 || any([ch.nchild == 0 for ch in target.children])
+
+    while target.nchild == 0 || target.root
         n = rand(available)
         target = find_num(root, n)
     end
+    
 
     # proportion of slide move is randomly selected
     proportion::Float64 = rand()
@@ -27,6 +29,7 @@ function slide!(root::T) where {T<:GeneralNode}
 
     # calculate and set new values
     move!(target, child, proportion)
+    nothing
 
 end # function slide!
 
@@ -73,6 +76,7 @@ function swing!(root::T) where {T<:GeneralNode}
 
     # calculate and set new values
     move!(child1, child2, proportion)
+    nothing
 end # function swing!
 
 """
