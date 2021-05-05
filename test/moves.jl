@@ -31,3 +31,21 @@ end
     @test l == l2
     @test l == l3
 end
+
+@testset "NNI" begin
+    tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,((O,P)E)F)G)H;")
+    set_binary!(tree)
+    
+    MCPhyloTree.number_nodes!(tree)
+    tr2 = deepcopy(tree)
+    res = NNI!(tr2)
+    while res == 0
+        res = NNI!(tr2)
+    end
+    
+    l = tree_length(tree)
+    l2 = tree_length(tr2)
+
+    @test l == l2 
+    @test MCPhyloTree.RF_int(tree, tr2) == 2
+end
