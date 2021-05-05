@@ -13,10 +13,22 @@ Returns result of algorithm as integer.
 * `tree2` : tree used to determine RF distance.
 """
 function RF(tree1::T, tree2::T)::Int64 where T <: GeneralNode
+    t1 = ladderize_tree(tree1)
+    t2 = ladderize_tree(tree2)
+    set_binary!(t1)
+    set_binary!(t2)
+    number_nodes!(t1)
+    number_nodes!(t2)
+
+    RF_int(t1, t2)
+end
+
+function RF_int(tree1::T, tree2::T)::Int64 where T <: GeneralNode
     bt3 = get_bipartitions(tree1)
     bt4 = get_bipartitions(tree2)
     length(bt3)+length(bt4) - 2* length(intersect(bt3, bt4))
 end
+
 
 """
     get_bipartitions(tree::T)::Vector{Tuple} where T <:GeneralNode

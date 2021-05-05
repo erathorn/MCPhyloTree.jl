@@ -40,7 +40,7 @@ function upgma(dm::Array{Float64,2})
     # build array of dummy leaves
     for i in 1:n
         new_leaf = Node("leaf_$i")
-        leaves[n] = (new_leaf, 0.0, 1)
+        leaves[i] = (new_leaf, 0.0, 1)
     end # end for
     upgma_int(dm, leaves)
 end
@@ -81,8 +81,8 @@ function upgma_int(
         # return (root) node when algorithm is finished
         n -= 1
         if n == 1
-            set_binary!(new_node)
-            number_nodes!(new_node)
+            set_binary!(new_cluster)
+            number_nodes!(new_cluster)
             return new_cluster
         end
         # initalize cluster weights

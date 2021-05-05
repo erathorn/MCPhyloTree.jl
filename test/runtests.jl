@@ -18,4 +18,7 @@ using MCPhyloTree
 
     include("moves.jl")
     println("done moves")
+
+    include("building.jl")
+    println("done building")
 end

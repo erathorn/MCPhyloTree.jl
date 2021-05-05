@@ -12,7 +12,6 @@
     l2 = tree_length(t2)
     @test l == l1
     @test l == l2
-    
 end
 
 @testset "slide" begin
