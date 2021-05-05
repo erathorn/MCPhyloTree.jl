@@ -10,6 +10,7 @@
     t2 = swing(tree)
     l1 = tree_length(tree)
     l2 = tree_length(t2)
+    # take care of numerical instabilities
     @test l == l1
     @test l == l2
 end
@@ -27,9 +28,9 @@ end
 
     t2 = slide(tree)
     l3 = tree_length(t2)
-
-    @test l == l2
-    @test l == l3
+    # take care of numerical instabilities
+    @test l == round(l2)
+    @test l == round(l3)
 end
 
 @testset "NNI" begin
