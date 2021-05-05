@@ -1,19 +1,4 @@
 """
-    load_newick(filename::String)
-
-This function loads all tree representations from a file
-"""
-
-function load_newick(filename::String)
-
-    open(filename, "r") do file
-        global content = readlines(file)
-    end
-    content
-end
-
-
-"""
     is_valid_newick_string(newick::String)
 
 This function checks if the given string is valid: is the brackets number matches and if the string ends with ";"
@@ -152,8 +137,11 @@ Returns an Array of Nodes; each Node is the root of the tree represented by a ne
 * `filename` : name of file containing newick strings to parse.
 """
 function ParseNewick(filename::String)::Array{GeneralNode,1}
-
-    list_of_trees = load_newick(filename)
+    
+    content = open(filename, "r") do file
+        readlines(file)
+    end
+    
     list_of_newicks = GeneralNode[]
     for content in list_of_trees
         if content == ""

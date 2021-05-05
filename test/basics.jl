@@ -83,3 +83,4 @@ end
     @test_throws ArgumentError MCPhyloTree.get_mother(find_by_name(tree1, "R"))
     @test MCPhyloTree.get_mother(find_by_name(tree1, "A")).name == "F"
 end
+

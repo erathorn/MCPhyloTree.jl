@@ -87,7 +87,6 @@ module MCPhyloTree
         to_covariance_ultra,
         to_df,
         to_distance_matrix,
-        load_newick,
         ParseNewick,
         parsing_newick_string,
         upgma,
