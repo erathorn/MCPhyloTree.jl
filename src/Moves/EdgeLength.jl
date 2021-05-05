@@ -61,11 +61,11 @@ function swing!(root::T) where {T<:GeneralNode}
     available = [node.num for node in post_order(root)]
     n = rand(available)
     target::T = find_num(root, n)
-    while target.nchild != 2
+    
+    while target.nchild < 2
         n = rand(available)
         target = find_num(root, n)
     end
-
     proportion::Float64 = rand()
 
     child1 = target.children[1]
