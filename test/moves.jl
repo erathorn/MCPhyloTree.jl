@@ -34,16 +34,14 @@ end
 end
 
 @testset "NNI" begin
-    tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,((O,P)E)F)G)H;")
+    tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,(O,P)E)G)H;")
     set_binary!(tree)
     
     MCPhyloTree.number_nodes!(tree)
     tr2 = deepcopy(tree)
-    res = NNI!(tr2)
-    while res == 0
-        res = NNI!(tr2)
-    end
     
+    res = NNI!(tr2, 10, true)
+        
     l = tree_length(tree)
     l2 = tree_length(tr2)
 
