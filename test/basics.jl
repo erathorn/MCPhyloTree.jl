@@ -1,4 +1,201 @@
 
+@testset "add_child!" begin
+    tree = MCPhyloTree.parsing_newick_string("(A,B,(C,D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    to_add = MCPhyloTree.parsing_newick_string("no_name;")
+    println(typeof(to_add))
+    root = MCPhyloTree.find_by_name(tree,"G")
+    MCPhyloTree.add_child!(root,to_add)
+    @test root.children[end].name == "no_name"
+    @test length(MCPhyloTree.post_order(tree))==8
+
+    tree = MCPhyloTree.parsing_newick_string("(A,B,(C,D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    to_add = MCPhyloTree.parsing_newick_string("no_name;")
+    println(typeof(to_add))
+    leaf = MCPhyloTree.find_by_name(tree,"D")
+    MCPhyloTree.add_child!(leaf,to_add)
+    @test leaf.children[end].name == "no_name"
+    @test length(MCPhyloTree.post_order(tree))==8
+
+
+    tree = MCPhyloTree.parsing_newick_string("(A,B,(C,D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    to_add = MCPhyloTree.parsing_newick_string("no_name;")
+    println(typeof(to_add))
+    mid = MCPhyloTree.find_by_name(tree,"F")
+    MCPhyloTree.add_child!(mid,to_add)
+
+    @test mid.children[end].name == "no_name"
+    @test length(MCPhyloTree.post_order(tree))==8
+end
+
+@testset "remove_child!" begin
+    tree = MCPhyloTree.parsing_newick_string("((A,B)C,(D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    mother = MCPhyloTree.find_by_name(tree,"C")
+    MCPhyloTree.remove_child!(mother,true)
+    @test length(mother.children) == 1
+    @test mother.children[1].name == "B"
+    @test length(MCPhyloTree.post_order(tree)) == 6
+
+    tree = MCPhyloTree.parsing_newick_string("((A,B)C,(D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    mother = MCPhyloTree.find_by_name(tree,"C")
+    MCPhyloTree.remove_child!(mother,false)
+    @test length(mother.children) == 1
+    @test mother.children[1].name == "A"
+    @test length(MCPhyloTree.post_order(tree)) == 6
+
+    tree = MCPhyloTree.parsing_newick_string("((A,B)C,(D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.remove_child!(tree,true)
+    @test tree.children[1].name == "F"
+    @test length(tree.children) == 1
+    @test length(MCPhyloTree.post_order(tree)) == 4
+
+end
+
+@testset "remove_child! by node" begin
+    tree = MCPhyloTree.parsing_newick_string("((A,B)C,(D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    mother = MCPhyloTree.find_by_name(tree,"C")
+    to_remove = MCPhyloTree.find_by_name(tree,"A")
+    MCPhyloTree.remove_child!(mother,to_remove)
+    @test length(mother.children) == 1
+    @test mother.children[1].name == "B"
+    @test length(MCPhyloTree.post_order(tree)) == 6
+
+    tree = MCPhyloTree.parsing_newick_string("((A,B)C,(D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    mother = MCPhyloTree.find_by_name(tree,"C")
+    to_remove = MCPhyloTree.find_by_name(tree,"B")
+    MCPhyloTree.remove_child!(mother,to_remove)
+    @test length(mother.children) == 1
+    @test mother.children[1].name == "A"
+    @test length(MCPhyloTree.post_order(tree)) == 6
+
+    tree = MCPhyloTree.parsing_newick_string("((A,B)C,(D,E)F)G;")
+    MCPhyloTree.number_nodes!(tree)
+    to_remove = MCPhyloTree.find_by_name(tree,"C")
+    MCPhyloTree.remove_child!(tree,to_remove)
+    @test tree.children[1].name == "F"
+    @test length(tree.children) == 1
+    @test length(MCPhyloTree.post_order(tree)) == 4
+end
+
+@testset "tree_length" begin
+    tree = MCPhyloTree.parsing_newick_string("((A:5,B:5)C:3.5,(D:5,E:5)F:5)G:5;")
+    @test MCPhyloTree.tree_length(tree) == 33.5
+end
+
+@testset "tree_height" begin
+    tree = MCPhyloTree.parsing_newick_string("((A:5,B:5)C:3.5,(D:5,E:5)F:5)G:5;")
+    @test MCPhyloTree.tree_height(tree) == 7
+end
+
+@testset "node_height" begin
+    tree = MCPhyloTree.parsing_newick_string("((A:5,B:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    println("test")
+    MCPhyloTree.node_height(tree)
+    @test tree.height == 14.0
+end
+
+@testset "node_depth" begin
+    tree = MCPhyloTree.parsing_newick_string("((A:5,B:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
+    mid = MCPhyloTree.find_by_name(tree,"F")
+    leaf = MCPhyloTree.find_by_name(tree, "A")
+    @test MCPhyloTree.node_depth(tree) == 0
+    @test MCPhyloTree.node_depth(mid) == 1
+    @test MCPhyloTree.node_depth(leaf) == 2
+end
+
+@testset "get_path" begin
+    tree = MCPhyloTree.parsing_newick_string("((A:5,B:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    mid = MCPhyloTree.find_by_name(tree,"F")
+    leaf = MCPhyloTree.find_by_name(tree,"A")
+    @test MCPhyloTree.get_path(tree,mid) == [6]
+    @test MCPhyloTree.get_path(tree,leaf) == [1, 5]
+end
+
+@testset "path_length" begin
+    tree = MCPhyloTree.parsing_newick_string("((A:5,B:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    mid = MCPhyloTree.find_by_name(tree,"F")
+    leaf = MCPhyloTree.find_by_name(tree,"A")
+    @test MCPhyloTree.path_length(tree,mid) == 5.0
+    @test MCPhyloTree.path_length(tree,leaf) == 14.0
+end
+
+@testset "get_sister" begin
+    tree = MCPhyloTree.parsing_newick_string("((A:5,B:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
+    mid = MCPhyloTree.find_by_name(tree,"F")
+    leaf = MCPhyloTree.find_by_name(tree,"A")
+    leafresult = MCPhyloTree.get_sister(leaf)
+    @test leafresult.name = "B"
+    midresult = MCPhyloTree.get_sister(mid)
+    @test midresult.name = "C"
+end
+
+@testset "set_binary!" begin
+    tree = MCPhyloTree.parsing_newick_string("((A:5,B:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
+    mid = MCPhyloTree.find_by_name(tree,"F")
+    leaf = MCPhyloTree.find_by_name(tree,"A")
+    @test tree.binary == "1"
+    @test leaf.binary =="1,0,0"
+    @test mid.binary == "1,1"
+end
+
+@testset "number_nodes!" begin
+    tree = MCPhyloTree.parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
+    mid = MCPhyloTree.find_by_name(tree,"F")
+    leaf = MCPhyloTree.find_by_name(tree,"A")
+    @test tree.num == 7
+    @test mid.num == 6
+    @test leaf.num == 1
+end
+
+@testset "blv" begin
+    tree = MCPhyloTree.parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
+    @test MCPhyloTree.get_branchlength_vector(tree) == [5.0, 5.0, 5.0, 5.0, 9.0, 5.0]
+    MCPhyloTree.set_branchlength_vector!(tree,[1.0,1.0,1.0,1.0,1.0,1.0])
+    @test MCPhyloTree.get_branchlength_vector(tree) == [1.0,1.0,1.0,1.0,1.0,1.0]
+    @test MCPhyloTree.get_sum_seperate_length!(tree) == [2.0, 4.0, 0.0, 0.0]
+end
+
+@testset "internal_external" begin
+    tree = MCPhyloTree.parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
+    map = MCPhyloTree.internal_external_map(tree)
+    @test map == [0, 0, 0, 0, 1, 1]
+    @test MCPhyloTree.internal_external(tree) == [0, 0, 0, 0, 1, 1]
+end
+
+@testset "check_binary" begin
+    tree = MCPhyloTree.parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    @test MCPhyloTree.check_binary(tree)
+    tree = MCPhyloTree.parsing_newick_string("((B:5)C:9,(D:5,E:5)F:5)G:5;")
+    @test !MCPhyloTree.check_binary(tree)
+    tree = MCPhyloTree.parsing_newick_string("((B:5,A:5,X:5)C:9,(D:5,E:5)F:5)G:5;")
+    @test !MCPhyloTree.check_binary(tree)
+end
+
+
+
+
 @testset "insert_node!" begin
     tree = MCPhyloTree.parsing_newick_string("(A,B,(C,D,E)F)G;")
     insert_tree = MCPhyloTree.parsing_newick_string("(A,B,((C,D,E)no_name)F)G;")
@@ -83,4 +280,3 @@ end
     @test_throws ArgumentError MCPhyloTree.get_mother(find_by_name(tree1, "R"))
     @test MCPhyloTree.get_mother(find_by_name(tree1, "A")).name == "F"
 end
-

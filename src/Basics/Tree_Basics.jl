@@ -268,7 +268,7 @@ function get_path(ancestor::T, descendant::T)::Vector{Int64} where T<:GeneralNod
     path::Vector{Int64} = []
     while descendant.num != ancestor.num
         push!(path, descendant.num)
-        descendant = get_mohter(descendant)
+        descendant = get_mother(descendant)
     end
     path
 end

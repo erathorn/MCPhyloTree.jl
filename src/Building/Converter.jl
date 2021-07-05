@@ -16,7 +16,7 @@ function to_df(root::GeneralNode)::Tuple{Array{Float64}, Vector{String}}
     for i in post_order_iteration
         if i.nchild != 0
             ind = indexin(i.name, name_list)
-            for j in i.child
+            for j in i.children
                 ind2 = indexin(j.name, name_list)
                 temp_ar[ind[1], ind2[1]] = j.inc_length
             end # end for
