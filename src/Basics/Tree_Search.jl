@@ -47,7 +47,6 @@ Returns reference to Node.
 * `num` : number of desired Node.
 """
 function find_num(root::T, num::I)::T  where {T<:GeneralNode, I<:Integer}
-    po = post_order(root)
     store = T[]
     found = find_num(root, num, store)
     if length(store) == 0
@@ -84,6 +83,9 @@ function find_num(root::T, num::I, rn::Vector{T})::Bool  where {T<:GeneralNode, 
         # if the node is not yet found continue
         for child in root.children
             found = find_num(child, num,  rn)
+            if found
+                break
+            end #if
         end
     end # if
     return found
@@ -105,7 +107,7 @@ Returns a reference to the desired Node.
 """
 function find_binary(root::T, bin::String)::T where T<:GeneralNode
     rv = root
-    for i in split(bin[1:end-1],",")[2:end]
+    for i in split(bin[1:end],",")[2:end]
         rv = rv.children[parse(Int64, i)+1]
     end
     rv

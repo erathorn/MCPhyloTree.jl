@@ -508,6 +508,10 @@ end
 
 function find_lca(tree::T, node1::T, node2::T)::T  where T<:GeneralNode
     nb = lcp(node1.binary, node2.binary)
+    thing = nb[end]
+    if nb[end] == ','
+        nb = nb[1:end-1]
+    end
     if nb == node1.binary
         return node1
     end

@@ -7,9 +7,9 @@ module MCPhyloTree
 
     ### Get Files
 
-    # Type    
+    # Type
     include("Node.jl")
-    
+
     # Basic Functionality
     include("Basics/Tree_Basics.jl")
     include("Basics/Tree_Traversal.jl")
@@ -44,7 +44,7 @@ module MCPhyloTree
         GeneralNode,
         Node,
         FNode
-    
+
     export
         add_child!,
         delete_node!,
@@ -72,7 +72,7 @@ module MCPhyloTree
         newick,
         find_by_name
 
-    # getters 
+    # getters
     export
         get_branchlength_vector,
         get_leaves,
@@ -80,9 +80,9 @@ module MCPhyloTree
         get_path,
         get_sister,
         get_bipartitions
-    
+
     # Building
-    export 
+    export
         to_covariance,
         to_covariance_ultra,
         to_df,
@@ -96,7 +96,7 @@ module MCPhyloTree
         greedy_consensus_tree,
         ladderize_tree, ladderize_tree!,
         create_tree_from_leaves
-    
+
     # Distance
     export
         RF,
