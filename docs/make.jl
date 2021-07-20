@@ -1,4 +1,4 @@
-using Documenter, Example
+using Documenter
 
 makedocs(build   = "build",
     clean   = true,
