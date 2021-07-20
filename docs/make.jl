@@ -1,5 +1,4 @@
-include("../src/MCPhyloTree.jl")
-using Documenter, Example, DataStructures
+using Documenter, Example
 
 makedocs(build   = "build",
     clean   = true,
