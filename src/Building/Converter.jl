@@ -12,12 +12,13 @@ function to_df(root::GeneralNode)::Tuple{Array{Float64}, Vector{String}}
     post_order_iteration = post_order(root)
 
     name_list = [i.name for i in post_order_iteration]
+    num_list = [i.num for i in post_order_iteration]
     temp_ar = zeros(Float64, (length(post_order_iteration), length(post_order_iteration)))
     for i in post_order_iteration
         if i.nchild != 0
-            ind = indexin(i.name, name_list)
-            for j in i.child
-                ind2 = indexin(j.name, name_list)
+            ind = findfirst(i.num, num_list)
+            for j in i.children
+                ind2 = findfirst(j.num, num_list)
                 temp_ar[ind[1], ind2[1]] = j.inc_length
             end # end for
         end # end if

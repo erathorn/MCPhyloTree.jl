@@ -268,7 +268,7 @@ function get_path(ancestor::T, descendant::T)::Vector{Int64} where T<:GeneralNod
     path::Vector{Int64} = []
     while descendant.num != ancestor.num
         push!(path, descendant.num)
-        descendant = get_mohter(descendant)
+        descendant = get_mother(descendant)
     end
     path
 end
@@ -508,6 +508,10 @@ end
 
 function find_lca(tree::T, node1::T, node2::T)::T  where T<:GeneralNode
     nb = lcp(node1.binary, node2.binary)
+    thing = nb[end]
+    if nb[end] == ','
+        nb = nb[1:end-1]
+    end
     if nb == node1.binary
         return node1
     end

@@ -4,9 +4,15 @@ using MCPhyloTree
     include("basics.jl")
     println("done basics")
 
+    include("search.jl")
+    println("done search")
+
+    include("traversal.jl")
+    println("done traversal")
+
     include("consensus.jl")
     println("done consensus")
-    
+
     include("ladderize.jl")
     println("done ladderize")
 
