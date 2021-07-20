@@ -1,6 +1,6 @@
 
 tree = parsing_newick_string("(A,B,(C,(D,E)F)G)H;")
-number_nodes!(tree)
+MCPhyloTree.number_nodes!(tree)
 
 @testset "Pruning leaf" begin
     node_list = ["C"]

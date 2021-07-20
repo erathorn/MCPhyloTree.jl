@@ -1,7 +1,7 @@
 @testset "traversal" begin
     tree = parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
-    number_nodes!(tree)
-    set_binary!(tree)
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
     po_list = post_order(tree)
     retarray = []
     for x in po_list

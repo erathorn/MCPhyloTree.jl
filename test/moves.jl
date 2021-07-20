@@ -1,9 +1,9 @@
 
 @testset "swing" begin
     tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,((O,P)D,E)F)G)H;")
-    set_binary!(tree)
+    MCPhyloTree.set_binary!(tree)
 
-    number_nodes!(tree)
+    MCPhyloTree.number_nodes!(tree)
 
     l = tree_length(tree)
 
@@ -18,9 +18,9 @@ end
 
 @testset "slide" begin
     tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,((O,P)D,E)F)G)H;")
-    set_binary!(tree)
+    MCPhyloTree.set_binary!(tree)
 
-    number_nodes!(tree)
+    MCPhyloTree.number_nodes!(tree)
 
     l = tree_length(tree)
 
@@ -36,9 +36,9 @@ end
 
 @testset "NNI" begin
     tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,(O,P)E)G)H;")
-    set_binary!(tree)
+    MCPhyloTree.set_binary!(tree)
 
-    number_nodes!(tree)
+    MCPhyloTree.number_nodes!(tree)
     tr2 = deepcopy(tree)
 
     res = NNI!(tr2, 10, true)
@@ -61,7 +61,7 @@ end
 
 @testset "change_edge_length" begin
     tree = parsing_newick_string("((B:1,A:1)C:1,(D:1,E:1)F:1)G:1;")
-    number_nodes!(tree)
+    MCPhyloTree.number_nodes!(tree)
     change_edge_length!(tree)
     po_list = [x.inc_length for x in post_order(tree)]
     @test sum(po_list) != 7.0
@@ -69,15 +69,15 @@ end
 
 @testset "reroot" begin
     tree = parsing_newick_string("((B:1,A:1)C:1,(D:1,E:1)F:1)G:1;")
-    number_nodes!(tree)
+    MCPhyloTree.number_nodes!(tree)
     newtree = reroot(tree,"C")
     @test newick(newtree) == "(B:1.0,A:1.0,((D:1.0,E:1.0)F:1.0)G:1.0)C:1.0;"
 end
 
 @testset "SPR" begin
     tree2 = parsing_newick_string("(A,B,(C,(D,E)F)G)H;")
-    number_nodes!(tree2)
-    set_binary!(tree2)
+    MCPhyloTree.number_nodes!(tree2)
+    MCPhyloTree.set_binary!(tree2)
     subtree = find_by_name(tree2,"F")
     target = find_by_name(tree2,"A")
     nutree = perform_spr(tree2,subtree,target)

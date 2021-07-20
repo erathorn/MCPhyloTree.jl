@@ -1,7 +1,7 @@
 @testset "spr" begin
     binary_tree = parsing_newick_string("((raccoon:19.19959,bear:6.80041):0.84600,((sea_lion:11.99700,seal:12.00300):7.52973,((monkey:100.85930,cat:47.14069):20.59201,weasel:18.87953):2.09460):3.87382);")
-    number_nodes!(binary_tree)
-    set_binary!(binary_tree)
+    MCPhyloTree.number_nodes!(binary_tree)
+    MCPhyloTree.set_binary!(binary_tree)
 
     error_tree = parsing_newick_string("(raccoon:19.19959):0.84600;")
     error_tree_not_binary = parsing_newick_string("((raccoon:19.19959,bear:6.80041):0.84600,((sea_lion:11.99700,seal:12.00300,lizard:5.03):7.52973,((monkey:100.85930,cat:47.14069):20.59201,weasel:18.87953):2.09460):3.87382);")
@@ -19,7 +19,7 @@
 
     @test length(post_order(spr_binary)) == length(post_order(binary_tree))
 
-    number_nodes!(tree_binary_two)
+    MCPhyloTree.number_nodes!(tree_binary_two)
 
     spr_binary_two = SPR(tree_binary_two)
 

@@ -3,8 +3,8 @@
     rt = upgma(D, ["a","b","c","d","e"])
     rt2 = upgma(D)
     gst = parsing_newick_string("(((a,b)u,e)v,(c,d)w)r;")
-    number_nodes!(gst)
-    set_binary!(gst)
+    MCPhyloTree.number_nodes!(gst)
+    MCPhyloTree.set_binary!(gst)
 
     @test RF(rt, gst) == 0
     @test tree_height(rt) == 16.5
@@ -15,8 +15,8 @@ end
     D = [0. 3. 14. 12.; 3 0 13 11; 14. 13. 0. 4; 12. 11. 4. 0]
     rt = neighbor_joining(D,["a","b","d","e"])
     gst = parsing_newick_string("((a,b)c,d,e);")
-    number_nodes!(gst)
-    set_binary!(gst)
+    MCPhyloTree.number_nodes!(gst)
+    MCPhyloTree.set_binary!(gst)
     @test RF(rt, gst) == 0
     @test tree_length(rt) == 16
 end
@@ -28,8 +28,8 @@ end
 
 @testset "to_covariance" begin
     tree = parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
-    set_binary!(tree)
-    number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
+    MCPhyloTree.number_nodes!(tree)
     @test to_covariance(tree) == [14.0 9.0 0.0 0.0; 9.0 14.0 0.0 0.0; 0.0 0.0 10.0 5.0; 0.0 0.0 5.0 10.0]
 end
 
