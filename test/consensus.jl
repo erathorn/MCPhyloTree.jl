@@ -215,7 +215,7 @@ end
     queue[BitArray([0,1,1,0,0])] = -1
     queue[BitArray([1,1,1,0,0])] = -2
 
-    @test count_cluster_occurences(bit_vec) == queue
+    @test MCPhyloTree.count_cluster_occurences(bit_vec) == queue
 end
 
 

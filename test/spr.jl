@@ -21,7 +21,7 @@
 
     MCPhyloTree.number_nodes!(tree_binary_two)
 
-    spr_binary_two = SPR(tree_binary_two)
+    spr_binary_two = MCPhyloTree.SPR(tree_binary_two)
 
     @test length(Set([n.num for n in post_order(spr_binary_two)])) == length(Set([n.num for n in post_order(tree_binary_two)]))
 

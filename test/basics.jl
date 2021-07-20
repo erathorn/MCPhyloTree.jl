@@ -177,7 +177,7 @@ end
     MCPhyloTree.set_binary!(tree)
     map = MCPhyloTree.internal_external_map(tree)
     @test map == [0, 0, 0, 0, 1, 1]
-    @test internal_external(tree) == [0, 0, 0, 0, 1, 1]
+    @test MCPhyloTree.internal_external(tree) == [0, 0, 0, 0, 1, 1]
 end
 
 @testset "check_binary" begin
