@@ -1,3 +1,4 @@
+include("../src/MCPhyloTree.jl")
 using Documenter
 
 makedocs(build   = "build",
