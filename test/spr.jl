@@ -31,7 +31,7 @@
 
 
 
-    spr_binary_risky = risky_SPR(binary_tree)
+    spr_binary_risky = MCPhyloTree.risky_SPR(binary_tree)
 
     @test length(Set([n.num for n in post_order(spr_binary_risky)])) == length(Set([n.num for n in post_order(binary_tree)]))
     @test round(tree_length(spr_binary_risky);digits=3) == round(tree_length(spr_binary);digits=3)
