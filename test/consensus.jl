@@ -12,7 +12,7 @@
                            (A.mother.num, (false, missing)), (G.mother.num, (false, missing)), (F.mother.num, (false, missing)),
                            (G.mother.mother.num, (true, 1.0)), (A.num, (true, 1.0)), (B.num, (true, 1.0)), (C.num, (true, 1.0)),
                            (D.num, (true, 1.0)), (E.num, (true, 1.0)), (F.num, (true, 1.0)), (G.num, (true, 1.0)), (H.num, (true, 1.0))])
-    @test isequal(find_common_clusters(ref_tree, tree2) , expected_dict)
+    @test isequal(MCPhyloTree.find_common_clusters(ref_tree, tree2) , expected_dict)
 
     tree3 = parsing_newick_string("((A,(C,(D,(B,E)))),(G,(F,H)))")
     MCPhyloTree.number_nodes!(tree3)
@@ -25,7 +25,7 @@
                            (A.mother.num, (true, 1.0)), (G.mother.num, (true, 1.0)), (F.mother.num, (false, missing)),
                            (A.mother.mother.num, (true, 1.0)), (A.num, (true, 1.0)), (B.num, (true, 1.0)), (C.num, (true, 1.0)),
                            (D.num, (true, 1.0)), (E.num, (true, 1.0)), (F.num, (true, 1.0)), (G.num, (true, 1.0)), (H.num, (true, 1.0))])
-    @test isequal(find_common_clusters(ref_tree, tree3), expected_dict)
+    @test isequal(MCPhyloTree.find_common_clusters(ref_tree, tree3), expected_dict)
 
     tree4 = parsing_newick_string("((A,(B,(C,(D,E)))),(F,(G,H)))")
     MCPhyloTree.number_nodes!(tree4)
@@ -38,17 +38,17 @@
                           (A.mother.num, (true, 1.0)), (G.mother.num, (true, 1.0)), (F.mother.num, (true, 1.0)),
                           (A.mother.mother.num, (true, 1.0)), (A.num, (true, 1.0)), (B.num, (true, 1.0)), (C.num, (true, 1.0)),
                           (D.num, (true, 1.0)), (E.num, (true, 1.0)), (F.num, (true, 1.0)), (G.num, (true, 1.0)), (H.num, (true, 1.0))])
-    @test isequal(find_common_clusters(ref_tree, tree4), expected_dict)
+    @test isequal(MCPhyloTree.find_common_clusters(ref_tree, tree4), expected_dict)
 
     tree5 = parsing_newick_string("((G,(X,(A,(F,E)))),(B,(D,H)))")
     MCPhyloTree.number_nodes!(tree5)
     MCPhyloTree.set_binary!(tree5)
-    @test_throws ArgumentError find_common_clusters(ref_tree, tree5)
+    @test_throws ArgumentError MCPhyloTree.find_common_clusters(ref_tree, tree5)
 
     tree6 = parsing_newick_string("(X,(G,(C,(A,(F,E)))),(B,(D,H)))))")
     MCPhyloTree.number_nodes!(tree5)
     MCPhyloTree.set_binary!(tree5)
-    @test_throws ArgumentError find_common_clusters(ref_tree, tree6)
+    @test_throws ArgumentError MCPhyloTree.find_common_clusters(ref_tree, tree6)
 end
 
 @testset "one_way_compatible" begin
@@ -57,13 +57,13 @@ end
     expected_tree = parsing_newick_string("(A,C,E,(B,D))")
     MCPhyloTree.number_nodes!.([tree, tree2, expected_tree])
     MCPhyloTree.set_binary!.([tree, tree2, expected_tree])
-    @test newick(one_way_compatible(tree, tree2)) == newick(expected_tree)
+    @test newick(MCPhyloTree.one_way_compatible(tree, tree2)) == newick(expected_tree)
 end
 
 @testset "get_leaf_ranks" begin
     ref_tree = parsing_newick_string("((A,(B,(C,(D,E)))),(F,(G,H)))")
     nodes = post_order(ref_tree)
-    @test get_leaf_ranks(nodes) == Dict([("A", 1), ("B", 2), ("C", 3),
+    @test MCPhyloTree.get_leaf_ranks(nodes) == Dict([("A", 1), ("B", 2), ("C", 3),
                                                  ("D", 4), ("E", 5), ("F", 6),
                                                  ("G", 7), ("H", 8)])
 end
@@ -81,7 +81,7 @@ end
     ordered_tree = parsing_newick_string("(A,((E,D)F,C)G,B)H;")
     MCPhyloTree.number_nodes!(ordered_tree)
     MCPhyloTree.set_binary!(ordered_tree)
-    @test order_tree!(tree, cluster_start_indeces) == [A, E, D, C, B]
+    @test MCPhyloTree.order_tree!(tree, cluster_start_indeces) == [A, E, D, C, B]
     MCPhyloTree.number_nodes!(tree)
     MCPhyloTree.set_binary!(tree)
     @test newick(tree) == newick(ordered_tree)
@@ -94,17 +94,17 @@ end
     leaf_ranks = Dict([("A", 1), ("B", 5), ("C", 2), ("D", 4), ("E", 3)])
 
     @testset "min_leaf_rank" begin
-        @test min_leaf_rank(leaf_ranks, F) == 3
-        @test min_leaf_rank(leaf_ranks, G) == 2
-        @test min_leaf_rank(leaf_ranks, H) == 1
-        @test min_leaf_rank(leaf_ranks, A) == 1
+        @test MCPhyloTree.min_leaf_rank(leaf_ranks, F) == 3
+        @test MCPhyloTree.min_leaf_rank(leaf_ranks, G) == 2
+        @test MCPhyloTree.min_leaf_rank(leaf_ranks, H) == 1
+        @test MCPhyloTree.min_leaf_rank(leaf_ranks, A) == 1
     end
 
     @testset "max_leaf_rank" begin
-        @test max_leaf_rank(leaf_ranks, F) == 4
-        @test max_leaf_rank(leaf_ranks, G) == 4
-        @test max_leaf_rank(leaf_ranks, H) == 5
-        @test max_leaf_rank(leaf_ranks, A) == 1
+        @test MCPhyloTree.max_leaf_rank(leaf_ranks, F) == 4
+        @test MCPhyloTree.max_leaf_rank(leaf_ranks, G) == 4
+        @test MCPhyloTree.max_leaf_rank(leaf_ranks, H) == 5
+        @test MCPhyloTree.max_leaf_rank(leaf_ranks, A) == 1
     end
 end
 
@@ -118,19 +118,19 @@ end
                              find_by_name(tree, "G"), find_by_name(tree, "H")
 
     @testset "x_left" begin
-        @test x_left(A) == (H, [A,H])
-        @test x_left(B) == (B, [B,H])
-        @test x_left(C) == (G, [C,G,H])
-        @test x_left(D) == (F, [D,F,G])
-        @test x_left(E) == (E, [E,F])
+        @test MCPhyloTree.x_left(A) == (H, [A,H])
+        @test MCPhyloTree.x_left(B) == (B, [B,H])
+        @test MCPhyloTree.x_left(C) == (G, [C,G,H])
+        @test MCPhyloTree.x_left(D) == (F, [D,F,G])
+        @test MCPhyloTree.x_left(E) == (E, [E,F])
     end
 
     @testset "x_right" begin
-        @test x_right(A) == (A, [A,H])
-        @test x_right(B) == (B, [B,H])
-        @test x_right(C) == (C, [C,G])
-        @test x_right(D) == (D, [D,F])
-        @test x_right(E) == (H, [E,F,G,H])
+        @test MCPhyloTree.x_right(A) == (A, [A,H])
+        @test MCPhyloTree.x_right(B) == (B, [B,H])
+        @test MCPhyloTree.x_right(C) == (C, [C,G])
+        @test MCPhyloTree.x_right(D) == (D, [D,F])
+        @test MCPhyloTree.x_right(E) == (H, [E,F,G,H])
     end
 end
 
@@ -202,7 +202,7 @@ end
               [0,1,0,1,1], [0,1,1,0,0], [1,1,1,0,0], [0,0,0,1,1], [1,0,0,0,0],
               [0,1,0,0,0], [0,0,1,0,0], [0,0,0,1,0], [0,0,0,0,1]])
     sort!(bit_vec, alg=QuickSort)
-    queue = PriorityQueue{BitVector, Int64}()
+    queue = MCPhyloTree.PriorityQueue{BitVector, Int64}()
     queue[BitArray([0,0,0,0,1])] = -3
     queue[BitArray([0,0,0,1,0])] = -3
     queue[BitArray([0,1,0,0,0])] = -3

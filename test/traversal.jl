@@ -43,9 +43,9 @@
     lvl2 = GeneralNode[]
     lvl3 = GeneralNode[]
 
-    level_traverse(tree,1,lvl1)
-    level_traverse(tree,2,lvl2)
-    level_traverse(tree,3,lvl3)
+    MCPhyloTree.level_traverse(tree,1,lvl1)
+    MCPhyloTree.level_traverse(tree,2,lvl2)
+    MCPhyloTree.level_traverse(tree,3,lvl3)
 
     namelist = []
     for x in lvl1

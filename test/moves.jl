@@ -47,14 +47,14 @@ end
     l2 = tree_length(tr2)
 
     @test l == l2
-    @test RF_int(tree, tr2) == 2
+    @test MCPhyloTree.RF_int(tree, tr2) == 2
 end
 
 @testset "move" begin
     tree = parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
     B = find_by_name(tree,"B")
     A = find_by_name(tree,"A")
-    move!(B,A,0.9)
+    MCPhyloTree.move!(B,A,0.9)
     @test B.inc_length == 9.0
     @test A.inc_length == 1.0
 end
@@ -70,7 +70,7 @@ end
 @testset "reroot" begin
     tree = parsing_newick_string("((B:1,A:1)C:1,(D:1,E:1)F:1)G:1;")
     MCPhyloTree.number_nodes!(tree)
-    newtree = reroot(tree,"C")
+    newtree = MCPhyloTree.reroot(tree,"C")
     @test newick(newtree) == "(B:1.0,A:1.0,((D:1.0,E:1.0)F:1.0)G:1.0)C:1.0;"
 end
 
@@ -80,6 +80,6 @@ end
     MCPhyloTree.set_binary!(tree2)
     subtree = find_by_name(tree2,"F")
     target = find_by_name(tree2,"A")
-    nutree = perform_spr(tree2,subtree,target)
+    nutree = MCPhyloTree.perform_spr(tree2,subtree,target)
     @test newick(nutree) == "(B:1.0,C:1.0,((D:1.0,E:1.0)F:1.0,A:1.0)G:1.0)H:1.0;"
 end

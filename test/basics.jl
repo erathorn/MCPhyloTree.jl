@@ -9,7 +9,7 @@
     @test length(post_order(tree))==8
 
     tree = parsing_newick_string("(A,B,(C,D,E)F)G;")
-    number_nodes!(tree)
+    MCPhyloTree.number_nodes!(tree)
     to_add = parsing_newick_string("no_name;")
     leaf = find_by_name(tree,"D")
     add_child!(leaf,to_add)
@@ -168,14 +168,14 @@ end
     @test get_branchlength_vector(tree) == [5.0, 5.0, 5.0, 5.0, 9.0, 5.0]
     set_branchlength_vector!(tree,[1.0,1.0,1.0,1.0,1.0,1.0])
     @test get_branchlength_vector(tree) == [1.0,1.0,1.0,1.0,1.0,1.0]
-    @test get_sum_seperate_length!(tree) == [2.0, 4.0, 0.0, 0.0]
+    @test MCPhyloTree.get_sum_seperate_length!(tree) == [2.0, 4.0, 0.0, 0.0]
 end
 
 @testset "internal_external" begin
     tree = parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
     MCPhyloTree.number_nodes!(tree)
     MCPhyloTree.set_binary!(tree)
-    map = internal_external_map(tree)
+    map = MCPhyloTree.internal_external_map(tree)
     @test map == [0, 0, 0, 0, 1, 1]
     @test internal_external(tree) == [0, 0, 0, 0, 1, 1]
 end
@@ -281,7 +281,7 @@ end
     tree1 = parsing_newick_string("(((A:5,B:5)F:5,C:5)G:5,(D:5,E:5)H:5)R:5;")
     MCPhyloTree.number_nodes!(tree1)
     MCPhyloTree.set_binary!(tree1)
-    force_ultrametric!(tree1)
+    MCPhyloTree.force_ultrametric!(tree1)
     for x in get_leaves(tree1)
         @test path_length(tree1,x) == 15.0
     end
