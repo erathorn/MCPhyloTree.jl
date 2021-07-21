@@ -1,17 +1,10 @@
-The Tree Module for the MCPhylo.jl package.
+# MCPhyloTree.jl
 
 This package provides the basic tree functionality for the [MCPhylo.jl](https://github.com/erathorn/MCPhylo.jl) package.
 
 ## General Information
 
-In order to use the current version of the package clone the repo and place it into your current working directory.
-
-```julia
-include("./src/MCPhyloTree.jl")
-using .MCPhyloTree
-```
-
-Installation of the package may also work.
+In order to use the current version you can install it directly from its GitHub source.
 
 ```julia
 using Pkg
