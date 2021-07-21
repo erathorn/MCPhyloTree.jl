@@ -1,12 +1,11 @@
-include("../src/MCPhyloTree.jl")
-using Documenter, Example
+using Documenter, MCPhyloTree
 
 makedocs(build   = "build",
     clean   = true,
     doctest = true,
     modules = Module[MCPhyloTree],
     sitename="MCPhyloTree",
-    format = Documenter.HTML(prettyurls = false),
+    format = Documenter.HTML(prettyurls = true),
     pages = [
         "Index" => "index.md",
         "Basics" => "basics.md",
@@ -18,6 +17,8 @@ makedocs(build   = "build",
    )
 
 deploydocs(
-     repo = "github.com/github.com/erathorn/MCPhyloTree.jl.git",
-     target = "build"
+    repo = "github.com/erathorn/MCPhyloTree.jl.git",
+    devurl = "dev",
+    versions = ["stable" => "v^", "v#.#.#"],
+    target = "build"
      )
