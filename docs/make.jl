@@ -5,7 +5,7 @@ makedocs(build   = "build",
     doctest = true,
     modules = Module[MCPhyloTree],
     sitename="MCPhyloTree",
-    format = Documenter.HTML(prettyurls = false),
+    format = Documenter.HTML(prettyurls = true),
     pages = [
         "Index" => "index.md",
         "Basics" => "basics.md",
