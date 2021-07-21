@@ -307,7 +307,7 @@ end # function
 
 
 """
-    function get_mother(node::T)::T  where T<:GeneralNode
+    get_mother(node::T)::T  where T<:GeneralNode
 
 This function gets the mother of `node`. It does so by looking for the respective
 binary representation of the mother node.
@@ -360,7 +360,7 @@ end # fuction number_nodes
 
 
 """
-    function random_node(root::T)::T  where T<:GeneralNode
+    random_node(root::T)::T  where T<:GeneralNode
 
 This function returns a random node from the tree.
 """
