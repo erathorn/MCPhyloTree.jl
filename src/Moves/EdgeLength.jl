@@ -2,7 +2,7 @@
 ### Not altering the tree length ###
 
 """
-slide!(root::T) where T<:GeneralNode
+    slide!(root::T) where T<:GeneralNode
 
 This functin performs a slide move on an intermediate node. The node is moved
 upwards or downwards on the path specified by its mother and one of its
@@ -20,7 +20,7 @@ function slide!(root::T) where {T<:GeneralNode}
         n = rand(available)
         target = find_num(root, n)
     end
-    
+
 
     # proportion of slide move is randomly selected
     proportion::Float64 = rand()
@@ -34,7 +34,7 @@ function slide!(root::T) where {T<:GeneralNode}
 end # function slide!
 
 """
-slide(root::T)::T where T<:GeneralNode
+    slide(root::T)::T where T<:GeneralNode
 
 This functin performs a slide move on an intermediate node. The node is moved
 upwards or downwards on the path specified by its mother and one of its
@@ -52,7 +52,7 @@ end
 
 
 """
-swing!(root::T) where T<:GeneralNode
+    swing!(root::T) where T<:GeneralNode
 
 This function performs a swing node. A random non-leave node is selected and
 moved along the path specified by its two children.
@@ -64,7 +64,7 @@ function swing!(root::T) where {T<:GeneralNode}
     available = [node.num for node in post_order(root)]
     n = rand(available)
     target::T = find_num(root, n)
-    
+
     while target.nchild < 2
         n = rand(available)
         target = find_num(root, n)
@@ -80,7 +80,7 @@ function swing!(root::T) where {T<:GeneralNode}
 end # function swing!
 
 """
-swing(root::T)::T where T<:GeneralNode
+    swing(root::T)::T where T<:GeneralNode
 
 This function performs a swing node. A random non-leave node is selected and
 moved along the path specified by its two children.
@@ -136,5 +136,3 @@ function change_edge_length!(root::T) where {T<:GeneralNode}
     factor = abs(randn())
     target.inc_length *= factor
 end
-
-

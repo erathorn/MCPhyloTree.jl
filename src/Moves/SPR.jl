@@ -1,5 +1,6 @@
 """
     SPR(original_root::GeneralNode)::GeneralNode
+
 Performs SPR on tree. Takes a copy of root of the tree;
 Returns a copy of root of altered tree. Throws error if tree is improperly formatted.
 """
@@ -11,8 +12,9 @@ end #func
 
 """
         SPR!(root::GeneralNode)::GeneralNode
-    Performs SPR on tree in place. Takes reference to root of tree;
-    Returns reference to root of altered tree. Throws error if tree is improperly formatted.
+
+Performs SPR on tree in place. Takes reference to root of tree;
+Returns reference to root of altered tree. Throws error if tree is improperly formatted.
 """
 function SPR!(root::GeneralNode)
     if length(post_order(root)) <= 2
@@ -25,8 +27,9 @@ end #function
 
 """
         risky_SPR(root::GeneralNode)::GeneralNode
-    Performs SPR on tree in place. Takes reference to root of tree
-    Returns copy of root of altered tree. Does not check for correct formatting of tree.
+
+Performs SPR on tree in place. Takes reference to root of tree
+Returns copy of root of altered tree. Does not check for correct formatting of tree.
 """
 function risky_SPR(original_root::GeneralNode)
     root = deepcopy(original_root)
@@ -36,8 +39,8 @@ end #function
 
 """
         risky_SPR!(root::GeneralNode)::GeneralNode
-Performs SPR on tree in place.
 
+Performs SPR on tree in place.
 Returns reference to root of altered tree. Does not check for correct formatting of tree.
 
 * `root` : root node of tree.
@@ -48,8 +51,8 @@ end #func
 
 """
     perform_spr(root::T) where T <: GeneralNode
-performs SPR on binary tree.
 
+performs SPR on binary tree.
 Returns root of tree post-SPR.
 
 * `root` : Node of tree on which to perform SPR.
@@ -87,8 +90,8 @@ end #func
 
 """
     perform_spr(root::T,subtree::T) where T <: GeneralNode
-performs SPR on binary tree.
 
+performs SPR on binary tree.
 Returns root of tree post-SPR.
 
 * `root` : Node of tree on which to perform SPR.
@@ -119,8 +122,8 @@ end #func
 
 """
     perform_spr(root::T,subtree::T,target::T) where T <: GeneralNode
-performs SPR on binary tree.
 
+performs SPR on binary tree.
 Returns root of tree post-SPR.
 
 * `root` : Node of tree on which to perform SPR.
