@@ -3,4 +3,8 @@
 
 The tree Module for the MCPhylo.jl package.
 
-This package provides the basic tree functionality for the MCPhylo.jl package. 
+This package provides the basic tree functionality for the MCPhylo.jl package.  
+
+It implements basic tree functionalities.
+
+The documentation can be found [here](https://erathorn.github.io/MCPhyloTree.jl/).
