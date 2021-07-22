@@ -29,7 +29,6 @@ jobs:
           arch: ${{ matrix.arch }}
       - name: Install dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-      - name: Build and deploy
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
