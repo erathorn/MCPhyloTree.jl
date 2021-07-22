@@ -1,3 +1,4 @@
+# Here starts the MCPhyloTree module
 module MCPhyloTree
 
     # load necessary packages
