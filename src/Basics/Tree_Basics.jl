@@ -66,7 +66,7 @@ The removed node is returned.
 
 * `mother_node` : Node from which to remove a child.
 
-* `child` : specific Node to remove.
+* `child` : specific Node to remove. This node has to be a child of `mother_node`.
 """
 function remove_child!(mother_node::N, child::N)::N where N<:GeneralNode
     ind = findfirst(x->x==child, mother_node.children)
