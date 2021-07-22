@@ -5,7 +5,7 @@ makedocs(build   = "build",
     doctest = true,
     modules = Module[MCPhyloTree],
     sitename="MCPhyloTree",
-    format = Documenter.HTML(prettyurls = true),
+    format = Documenter.HTML(),
     pages = [
         "Index" => "index.md",
         "Basics" => "basics.md",
@@ -18,7 +18,7 @@ makedocs(build   = "build",
 
 deploydocs(
     repo = "github.com/erathorn/MCPhyloTree.jl.git",
-    devurl = "dev",
-    versions = ["stable" => "v^", "v#.#.#"],
-    target = "build"
+    #devurl = "dev",
+    #versions = ["stable" => "v^", "v#.#.#"],
+    #target = "build"
      )
