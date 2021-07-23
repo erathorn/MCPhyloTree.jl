@@ -18,6 +18,4 @@ makedocs(build   = "build",
 
 deploydocs(
     repo = "github.com/erathorn/MCPhyloTree.jl.git",
-    versions = ["v#.#.#"],
-    target = "build"
      )
