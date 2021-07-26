@@ -5,7 +5,9 @@ makedocs(build   = "build",
     doctest = true,
     modules = Module[MCPhyloTree],
     sitename="MCPhyloTree",
-    format = Documenter.HTML(),
+    format = Documenter.HTML(
+        canonical = "https://erathorn.github.io/MCPhyloTree.jl/dev/"
+        ),
     pages = [
         "Index" => "index.md",
         "Basics" => "basics.md",
@@ -18,4 +20,7 @@ makedocs(build   = "build",
 
 deploydocs(
     repo = "github.com/erathorn/MCPhyloTree.jl.git",
+    target = "build",
+    deps = nothing,
+    make = nothing,
      )
