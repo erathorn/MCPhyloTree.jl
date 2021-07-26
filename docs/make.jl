@@ -23,5 +23,6 @@ deploydocs(
     target = "build",
     deps = nothing,
     make = nothing,
-    versions = ["stable" => "v^", "v#.#", devurl => "dev"]
+    devurl = "dev",
+    versions = ["stable" => "v^", "v#.#", devurl => devurl]
      )
