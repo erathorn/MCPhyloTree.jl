@@ -1,13 +1,9 @@
 using Documenter, MCPhyloTree
 
-makedocs(build   = "build",
-    clean   = true,
-    doctest = true,
+makedocs(
     modules = Module[MCPhyloTree],
     sitename="MCPhyloTree",
-    format = Documenter.HTML(
-        canonical = "https://erathorn.github.io/MCPhyloTree.jl/dev/"
-        ),
+    format = Documenter.HTML(),
     pages = [
         "Index" => "index.md",
         "Basics" => "basics.md",
@@ -20,9 +16,8 @@ makedocs(build   = "build",
 
 deploydocs(
     repo = "github.com/erathorn/MCPhyloTree.jl.git",
-    target = "build",
-    deps = nothing,
-    make = nothing,
-    devurl = "dev",
-    versions = ["stable" => "v^", "v#.#", devurl => devurl]
+    #target = "build",
+    #deps = nothing,
+    #make = nothing,
+    #versions = ["stable" => "v^", "v#.#", devurl => devurl]
      )
