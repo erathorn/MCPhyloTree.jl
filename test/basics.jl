@@ -286,3 +286,19 @@ end
         @test path_length(tree1,x) == 15.0
     end
 end
+
+@testset "ascii" begin
+    tree = MCPhyloTree.parsing_newick_string("(A,B)C;")
+    singletree = MCPhyloTree.parsing_newick_string("(((A,B)C)D,(E)F,G)H;")
+    bigtree = MCPhyloTree.parsing_newick_string("((A,B)C,(D,E)F)G;")
+    MCPhyloTree.set_binary!(tree)
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(bigtree)
+    MCPhyloTree.number_nodes!(bigtree)
+    lines = ascii(tree)
+    biglines = ascii(bigtree)
+    singlelines = ascii(singletree)
+    @test lines == ["   /-A", "-C|", "   \\-B"]
+    @test biglines == ["      /-A", "   /C|", "  |   \\-B", "-G|", "  |   /-D", "   \\F|", "      \\-E"]
+    @test singlelines == ["         /-A", "   /D -C|", "  |      \\-B", "-H|", "  |-F --E", "  |", "   \\-G"]
+end
