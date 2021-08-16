@@ -637,16 +637,14 @@ function ascii(root::N,char1="-") where N<:GeneralNode
     end #if
 end #function
 """
-    function print_ascii(root::N,char1="-") where N<:GeneralNode
+    function print_ascii(root::N) where N<:GeneralNode
 
-Returns the ASCII representation of the tree.
+Prints the ASCII representation of the tree.
 Adapted for Julia from the ETE toolkit implementation.
 
 * `root`: Root node of tree to print.
-
-* `char1`: used for recursion, no need to supply on use.
 """
-function print_ascii(root::N,char1="-") where N<:GeneralNode
-    lines,_ = ascii(root,char1)
-    return "\n"*join(lines,"\n")
+function print_ascii(root::N) where N<:GeneralNode
+    lines,_ = ascii(root,"-")
+    println("\n"*join(lines,"\n"))
 end #function
