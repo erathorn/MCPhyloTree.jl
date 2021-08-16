@@ -38,6 +38,7 @@ module MCPhyloTree
 
     # plotting recipes
     include("Plotting/tree_plot.jl")
+    include("Plotting/ascii.jl")
 
     # Export Type
     export
@@ -70,7 +71,8 @@ module MCPhyloTree
         pre_order,
         level_order,
         newick,
-        find_by_name
+        find_by_name,
+        print_ascii
 
     # getters
     export
