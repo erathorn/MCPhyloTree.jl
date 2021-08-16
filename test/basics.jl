@@ -288,18 +288,18 @@ end
 end
 
 @testset "ascii" begin
-    tree = MCPhyloTree.parsing_newick_string("(A,B)C;")
-    singletree = MCPhyloTree.parsing_newick_string("(((A,B)C)D,(E)F,G)H;")
-    bigtree = MCPhyloTree.parsing_newick_string("((A,B)C,(D,E)F)G;")
+    tree = parsing_newick_string("(A,B)C;")
+    singletree = parsing_newick_string("(((A,B)C)D,(E)F,G)H;")
+    bigtree = parsing_newick_string("((A,B)C,(D,E)F)G;")
     MCPhyloTree.set_binary!(tree)
     MCPhyloTree.number_nodes!(tree)
     MCPhyloTree.set_binary!(bigtree)
     MCPhyloTree.number_nodes!(bigtree)
     MCPhyloTree.set_binary!(singletree)
     MCPhyloTree.number_nodes!(singletree)
-    lines,_ = ascii(tree)
-    biglines,_ = ascii(bigtree)
-    singlelines,_ = ascii(singletree)
+    lines,_ = MCPhyloTree.ascii(tree)
+    biglines,_ = MCPhyloTree.ascii(bigtree)
+    singlelines,_ = MCPhyloTree.ascii(singletree)
     @test lines == ["   /-A", "-C|", "   \\-B"]
     @test biglines == ["      /-A", "   /C|", "  |   \\-B", "-G|", "  |   /-D", "   \\F|", "      \\-E"]
     @test singlelines == ["         /-A", "   /D -C|", "  |      \\-B", "-H|", "  |-F --E", "  |", "   \\-G"]
