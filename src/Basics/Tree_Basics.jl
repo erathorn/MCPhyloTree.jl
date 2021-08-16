@@ -563,3 +563,4 @@ function check_leafsets(trees::Vector{T})::Nothing where T<:GeneralNode
         throw(ArgumentError("$count different trees have a different set of leaves than the first tree"))
     end # if
 end # function
+
