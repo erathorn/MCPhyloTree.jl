@@ -295,6 +295,8 @@ end
     MCPhyloTree.number_nodes!(tree)
     MCPhyloTree.set_binary!(bigtree)
     MCPhyloTree.number_nodes!(bigtree)
+    MCPhyloTree.set_binary!(singletree)
+    MCPhyloTree.number_nodes!(singletree)
     lines = ascii(tree)
     biglines = ascii(bigtree)
     singlelines = ascii(singletree)

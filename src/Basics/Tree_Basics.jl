@@ -585,18 +585,13 @@ function ascii(root::N,char1="-") where N<:GeneralNode
             end #ifelse
             clines,mid = ascii(c,char2)
 
-            if node_name == "Richard"
-                println(clines)
-            end #if
+
             push!(mids,mid+length(result))
             for x in clines
                 push!(result,x)
             end #for
             push!(result,"")
         end #for
-        if node_name == "Richard"
-            println(result)
-        end #if
         pop!(result)
         (lo, hi, final) = (mids[1],mids[end],length(result))
         prefixes = []
@@ -633,13 +628,9 @@ function ascii(root::N,char1="-") where N<:GeneralNode
         if !(length(stem) < length(node_name)+2) && isletter(stem[(length(node_name)+2)])
             optional = "-"
         end #if
-        if node_name == "Richard"
-            println(stem)
-        end
+
         result[mid] = stem[1] * node_name * optional * stem[(length(node_name)+2):end]
-        if node_name == "Richard"
-            println(result[mid])
-        end
+
         return result,mid-1
     else
         return [char1 * "-" * node_name], 0
