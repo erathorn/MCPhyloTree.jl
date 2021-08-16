@@ -297,9 +297,9 @@ end
     MCPhyloTree.number_nodes!(bigtree)
     MCPhyloTree.set_binary!(singletree)
     MCPhyloTree.number_nodes!(singletree)
-    lines = ascii(tree)
-    biglines = ascii(bigtree)
-    singlelines = ascii(singletree)
+    lines,_ = ascii(tree)
+    biglines,_ = ascii(bigtree)
+    singlelines,_ = ascii(singletree)
     @test lines == ["   /-A", "-C|", "   \\-B"]
     @test biglines == ["      /-A", "   /C|", "  |   \\-B", "-G|", "  |   /-D", "   \\F|", "      \\-E"]
     @test singlelines == ["         /-A", "   /D -C|", "  |      \\-B", "-H|", "  |-F --E", "  |", "   \\-G"]
