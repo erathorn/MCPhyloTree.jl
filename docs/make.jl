@@ -17,4 +17,8 @@ makedocs(
 deploydocs(
     repo = "github.com/erathorn/MCPhyloTree.jl",
     devbranch="main"
+    target = "build",
+    branch = "gh-pages",
+    devurl = "dev",
+    versions = ["stable" => "v^", "v#.#"],
      )
