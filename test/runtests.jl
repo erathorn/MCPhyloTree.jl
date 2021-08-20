@@ -27,4 +27,7 @@ using MCPhyloTree
 
     include("building.jl")
     println("done building")
+
+    include("distances.jl")
+    println("done distances")
 end

@@ -17,7 +17,8 @@ function RF(tree1::T, tree2::T)::Int64 where T <: GeneralNode
     set_binary!(tree2)
     number_nodes!(tree1)
     number_nodes!(tree2)
-    RF_int(tree1, tree2)[1]
+    r, _ = RF_int(tree1, tree2)
+    return r
 end
 
 function RF_int(tree1::T, tree2::T)::Tuple{Int64, Int64} where T <: GeneralNode

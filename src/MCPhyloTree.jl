@@ -104,6 +104,7 @@ module MCPhyloTree
     # Distance
     export
         RF,
+        RF_weighted,
         BHV_bounds
 
     # Moves

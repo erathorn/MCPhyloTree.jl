@@ -47,7 +47,7 @@ end
     l2 = tree_length(tr2)
 
     @test l == l2
-    @test MCPhyloTree.RF_int(tree, tr2) == 2
+    @test MCPhyloTree.RF_int(tree, tr2)[1] == 2
 end
 
 @testset "move" begin
