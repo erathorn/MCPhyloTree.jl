@@ -1,8 +1,8 @@
 using Documenter, MCPhyloTree
 
 makedocs(
-    modules = Module[MCPhyloTree],
-    sitename="MCPhyloTree",
+    modules = MCPhyloTree,
+    sitename="MCPhyloTree.jl",
     format = Documenter.HTML(),
     pages = [
         "Index" => "index.md",
