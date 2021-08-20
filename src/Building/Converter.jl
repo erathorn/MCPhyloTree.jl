@@ -16,15 +16,15 @@ function to_df(root::GeneralNode)::Tuple{Array{Float64}, Vector{String}}
     temp_ar = zeros(Float64, (length(post_order_iteration), length(post_order_iteration)))
     for i in post_order_iteration
         if i.nchild != 0
-            ind = findfirst(i.num, num_list)
+            ind = findfirst(isequal(i.num), num_list)
             for j in i.children
-                ind2 = findfirst(j.num, num_list)
+                ind2 = findfirst(isequal(j.num), num_list)
                 temp_ar[ind[1], ind2[1]] = j.inc_length
             end # end for
         end # end if
     end # end for
 
-    return df, name_list
+    return temp_ar, name_list
 end # end function to_df
 
 

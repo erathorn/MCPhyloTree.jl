@@ -38,3 +38,37 @@ end
     ladder = ladderize_tree(tree,true)
     @test newick(ladder) == "((D:5.0,E:5.0)F:5.0,(B:5.0,A:5.0,X:1.0,Y:1.0,Z:1.0)C:9.0)G:5.0;"
 end
+
+@testset "to_df" begin
+    tree = parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.set_binary!(tree)
+    MCPhyloTree.number_nodes!(tree)
+    target_arr = [ 0.0  0.0  0.0  0.0  0.0  0.0  0.0;
+        0.0  0.0  0.0  0.0  0.0  0.0  0.0;
+        5.0  5.0  0.0  0.0  0.0  0.0  0.0;
+        0.0  0.0  0.0  0.0  0.0  0.0  0.0;
+        0.0  0.0  0.0  0.0  0.0  0.0  0.0;
+        0.0  0.0  0.0  5.0  5.0  0.0  0.0;
+        0.0  0.0  9.0  0.0  0.0  5.0  0.0]
+    target_names = ["B", "A", "C", "D", "E", "F", "G"]
+    res_arr, res_names = to_df(tree)
+    @test all(target_arr .== res_arr)
+    @test all(target_names .== res_names)
+end
+
+
+@testset "from_df" begin
+    tree = parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    MCPhyloTree.set_binary!(tree)
+    MCPhyloTree.number_nodes!(tree)
+    target_arr = [ 0.0  0.0  0.0  0.0  0.0  0.0  0.0;
+        0.0  0.0  0.0  0.0  0.0  0.0  0.0;
+        5.0  5.0  0.0  0.0  0.0  0.0  0.0;
+        0.0  0.0  0.0  0.0  0.0  0.0  0.0;
+        0.0  0.0  0.0  0.0  0.0  0.0  0.0;
+        0.0  0.0  0.0  5.0  5.0  0.0  0.0;
+        0.0  0.0  9.0  0.0  0.0  5.0  0.0]
+    target_names = ["B", "A", "C", "D", "E", "F", "G"]
+    res_tree = from_df(target_arr, target_names)
+    @test RF(res_tree, tree) == 0
+end
