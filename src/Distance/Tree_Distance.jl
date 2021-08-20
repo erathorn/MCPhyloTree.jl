@@ -17,15 +17,36 @@ function RF(tree1::T, tree2::T)::Int64 where T <: GeneralNode
     set_binary!(tree2)
     number_nodes!(tree1)
     number_nodes!(tree2)
-    RF_int(tree1, tree2)
+    RF_int(tree1, tree2)[1]
 end
 
-function RF_int(tree1::T, tree2::T)::Int64 where T <: GeneralNode
+function RF_int(tree1::T, tree2::T)::Tuple{Int64, Int64} where T <: GeneralNode
     bt3 = get_bipartitions(tree1)
     bt4 = get_bipartitions(tree2)
-    length(bt3)+length(bt4) - 2* length(intersect(bt3, bt4))
+    length(bt3)+length(bt4) - 2* length(intersect(bt3, bt4)), length(bt3)+length(bt4)
 end
 
+"""
+    RF_weighted(tree1::T, tree2::T)::Float64 where T <:GeneralNode
+
+Calculate the weighted Robinson-Foulds distance between the two trees.
+The raw Robinson-Foulds distance is weighted by the maximum distance between the trees.
+In its current form the function assumes the trees have identical leave sets.
+
+Returns result of algorithm as integer.
+
+* `tree1` : tree used to determine RF distance.
+
+* `tree2` : tree used to determine RF distance.
+"""
+function RF_weighted(tree1::T, tree2::T)::Float64 where T <: GeneralNode
+    set_binary!(tree1)
+    set_binary!(tree2)
+    number_nodes!(tree1)
+    number_nodes!(tree2)
+    rf, l1 = RF_int(tree1, tree2)
+    rf / l1
+end
 
 """
     get_bipartitions(tree::T)::Vector{Tuple} where T <:GeneralNode
