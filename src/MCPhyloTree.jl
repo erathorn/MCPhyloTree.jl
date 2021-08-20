@@ -89,6 +89,7 @@ module MCPhyloTree
         to_covariance,
         to_covariance_ultra,
         to_df,
+        from_df,
         to_distance_matrix,
         ParseNewick,
         parsing_newick_string,
@@ -103,6 +104,7 @@ module MCPhyloTree
     # Distance
     export
         RF,
+        RF_weighted,
         BHV_bounds
 
     # Moves
