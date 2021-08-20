@@ -15,7 +15,7 @@ makedocs(
    )
 
 deploydocs(
-    repo = "github.com/erathorn/MCPhyloTree.jl.git",
+    repo = "github.com/erathorn/MCPhyloTree.jl",
     devbranch="main",
     #target = "build",
     #deps = nothing,
