@@ -1,41 +1,27 @@
 
 #################### Safe searches ####################
 
-#"""
-# proper Markdown comments are not possible
-#
-#This part creates functions which enable the search for different nodes in the
-#tree. It is possible to look for a node via its name, its binary representation
-#or to find the root.
-#This functionality can be extended by adding more fields to the nodes and the
-#meta programmming part here.
+"""
+    find_by_binary(tree::GeneralNode, bin::String)
 
-# These functions are safe, in the sense that they properly exit if the node is
-# not found.
-#"""
-for (sym, my_type) in [(:binary, :String), (:name, :AbstractString), (:root ,:Bool), (:num, :Int64)]
-    # extend the list to look for more fields in the node
-    @eval function $(Symbol(string("find_by_$sym")))(tree::T, identifier::$my_type)::T  where T<:GeneralNode
-        # create each function and make it so it only accepts the correct type
-        if $sym == "name"
-            return find_name(tree, identifier)
-        elseif $sym == "num"
-            return find_num(tree, identifier)
-        elseif $sym == "root"
-            return find_root(tree)
-        else 
-            local all_nodes = post_order(tree) # make sure all_nodes only belongs to this function
-            for node in all_nodes
-                if node.$sym == identifier
-                    # return the node if it is found
-                    return node
-                end # if
-            end # for
-            # the node is not found. Therefore throw an error!
-            throw("The node identified by $identifier is not in the tree.")
-        end # if/else
-    end # function
-end # for
+Alias for `find_binary`.
+"""
+find_by_binary(tree::GeneralNode, bin::String) = find_binary(tree, bin)
+
+"""
+    find_by_name(tree::GeneralNode, name::AbstractString)
+
+Alias for `find_name`.
+"""
+find_by_name(tree::GeneralNode, name::AbstractString) = find_name(tree, name)
+
+"""
+    find_by_num(tree::GeneralNode, num::Int64)
+
+Alias for `find_num`.
+"""
+find_by_num(tree::GeneralNode, num::Int64) = find_num(tree, num)
+
 
 
 
