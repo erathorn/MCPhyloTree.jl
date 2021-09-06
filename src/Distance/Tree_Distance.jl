@@ -79,23 +79,44 @@ Billera-Holmes-Vogtman space.
 Returns tuple of floats.
 """
 function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:GeneralNode
-    res_upper_1 = 0.0
-    res_upper_2 = 0.0
-    res_upper_3 = 0.0
-    po::Vector{T} = post_order(tree1)
-    for node in po[1:end-1]
-        nom = find_num(tree2, node.num)
-        if get_mother(node).num == get_mother(nom).num
-            res_upper_3 += (node.inc_length-nom.inc_length)^2
-        else
-            res_upper_2  += nom.inc_length^2
-            res_upper_1 += node.inc_length^2
-        end # if
-
-    end # for
+    bp_t1 = get_bipartitions(tree1)
+    bp_t2 = get_bipartitions(tree2)
     
-    res_low::Float64 = res_upper_1+res_upper_2+res_upper_3
-    res_high::Float64 = (sqrt(res_upper_2)+sqrt(res_upper_1))^2+res_upper_3
+    T1minusT2 = 0.0
+    T2minusT1 = 0.0
+    T1andT2 = 0.0
+    
+    for bp in bp_t1
+        found1 = find_lca(tree1, String.(split(bp[1], ",")))
+        if found1.root
+            found1 = find_lca(tree1, String.(split(bp[2], ",")))
+        end
+        
+        ind = findfirst(isequal(bp), bp_t2)
+        if !isnothing(ind)
+            found2 = find_lca(tree2, String.(split(bp[1], ",")))
+            if found2.root
+                found2 = find_lca(tree2, String.(split(bp[2], ",")))
+            end
+            T1andT2 += (found1.inc_length - found2.inc_length)^2
+            deleteat!(bp_t2, ind)
+        else
+            T1minusT2 += found1.inc_length^2
+        end
+    end
+    
+    # only nodes which are present in the second tree are left in bp_t2
+    for bp in bp_t2
+        found2 = find_lca(tree2, String.(split(bp[1], ",")))
+        if found2.root
+            found2 = find_lca(tree2, String.(split(bp[2], ",")))
+        end
+        T2minusT1 += found2.inc_length^2
+    end
+    
+    
+    res_low::Float64 = T1minusT2+T2minusT1+T1andT2
+    res_high::Float64 = (sqrt(T1minusT2)+sqrt(T2minusT1))^2+T1andT2
 
     sqrt(res_low), sqrt(res_high)
 end

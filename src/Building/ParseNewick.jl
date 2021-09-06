@@ -138,7 +138,7 @@ Returns an Array of Nodes; each Node is the root of the tree represented by a ne
 """
 function ParseNewick(filename::String)::Array{GeneralNode,1}
     
-    content = open(filename, "r") do file
+    list_of_trees = open(filename, "r") do file
         readlines(file)
     end
     
