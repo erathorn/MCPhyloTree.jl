@@ -55,6 +55,7 @@ module MCPhyloTree
         tree_height,
         tree_length,
         node_height,
+        node_age,
         node_depth,
         node_distance,
         path_length,
