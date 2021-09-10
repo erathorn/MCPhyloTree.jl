@@ -251,6 +251,23 @@ function node_height_vec(root::T)::Vector{Float64} where T<:GeneralNode
 end # function node_height
 
 """
+    function node_age(node::FNode)::Float64
+
+Calculates the age of a node. If the tree is ultrametric then the node age is identical 
+to the node height. It is calculated by subtracting the path length between the node & 
+the root from the height of the root. This represents the age of the node, assuming the 
+leaf farthest from the root has a node age of 0, and the root node is the 'oldest' node.
+"""
+function node_age(node::FNode)::Float64
+    depth::Float64 = 0
+    while !node.root
+        depth += node.inc_length
+        node = node.mother
+    end
+    return node.height - depth
+end # function node_age
+
+"""
     node_depth(node::T)::Int64 where T<:GeneralNode
 
 Calculate the depth of a node.
