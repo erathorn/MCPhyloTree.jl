@@ -98,6 +98,21 @@ end
     @test tree.height == 14.0
 end
 
+@testset "node_age" begin
+    tree = parsing_newick_string("(((A:8,B:5)F:2,C:10)G:1,(D:12,E:4)H:3)R:1;")
+    MCPhyloTree.tree_height(tree)
+    MCPhyloTree.tree_length(tree)
+    MCPhyloTree.number_nodes!(tree)
+    MCPhyloTree.set_binary!(tree)
+    leaf = find_by_name(tree, "A")
+    internal_node = find_by_name(tree, "F")
+    furthest_leaf = find_by_name(tree, "D")
+    @test node_age(furthest_leaf) == 0.0
+    @test node_age(leaf) == 4.0
+    @test node_age(internal_node) == 12.0
+    @test node_age(tree) == 15.0
+end 
+
 @testset "node_depth" begin
     tree = parsing_newick_string("((A:5,B:5)C:9,(D:5,E:5)F:5)G:5;")
     MCPhyloTree.number_nodes!(tree)
