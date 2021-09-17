@@ -1,5 +1,8 @@
 # Moves
 
+There are several operations to change the topology or any of the branch lengths of a tree. 
+The different functions which are avialable in MCPhyloTree are listed here.
+
 ## Edge Length
 
 ```@autodocs

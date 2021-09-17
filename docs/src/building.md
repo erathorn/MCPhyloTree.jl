@@ -14,25 +14,26 @@ Modules = [MCPhyloTree]
 Pages = ["Building/ParseNewick.jl"]
 ```
 
-## Tree Building
+## Build Trees from Matrices
 
-```@autodocs
-Modules = [MCPhyloTree]
-Pages = ["Building/Tree_Building.jl"]
+```@docs
+MCPhyloTree.from_df
+MCPhyloTree.create_tree_from_leaves
 ```
 
-## Tree Clustering
+## Tree Estimation from Matrices
 
-```@autodocs
-Modules = [MCPhyloTree]
-Pages = ["Building/Tree_Clustering.jl"]
+```@docs
+MCPhyloTree.neighbor_joining
+MCPhyloTree.upgma
 ```
 
-## Tree Consensus
+## Consensus Tree computation
 
-```@autodocs
-Modules = [MCPhyloTree]
-Pages = ["Building/Tree_Consensus.jl"]
+```@docs
+MCPhyloTree.majority_consensus_tree
+MCPhyloTree.loose_consensus_tree
+MCPhyloTree.greedy_consensus_tree
 ```
 
 ## Tree Ladderizing
