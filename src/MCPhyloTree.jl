@@ -20,6 +20,7 @@ module MCPhyloTree
 
     # Tree Building
     include("Building/Tree2Matrix.jl")
+    include("Building/Tree_Building.jl")
     include("Building/Tree_Clustering.jl")
     include("Building/Tree_Consensus.jl")
     include("Building/Tree_Ladderizing.jl")
