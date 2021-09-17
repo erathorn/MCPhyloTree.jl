@@ -1,10 +1,10 @@
-# Building
+# Tree Building & Transformations
 
-## Converter
+## Matrix Representation
 
 ```@autodocs
 Modules = [MCPhyloTree]
-Pages = ["Building/Converter.jl"]
+Pages = ["Building/Tree2Matrix.jl"]
 ```
 
 ## Newick Parsing

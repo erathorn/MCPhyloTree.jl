@@ -26,3 +26,10 @@ Pages = ["Basics/Tree_Search.jl"]
 Modules = [MCPhyloTree]
 Pages = ["Basics/Tree_Traversal.jl"]
 ```
+
+## Tree Representations
+
+```@autodocs
+Modules = [MCPhyloTree]
+Pages = ["Basics/Representations.jl"]
+```

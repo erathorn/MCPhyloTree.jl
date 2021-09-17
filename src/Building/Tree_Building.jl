@@ -66,3 +66,45 @@ function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)
 
     return root
 end # function create_tree_from_leaves
+
+
+
+"""
+    from_df(df::Array{Float64,2}, name_list::Vector{String})::GeneralNode
+
+This function takes an adjacency matrix and a vector of names
+and turns it into a tree. No checks are performed.
+
+Returns the root node of the tree.
+
+* `df` : matrix with edge weights
+* `name_list` : a list of names such that they match the column indices of the matrix
+"""
+function from_df(df::Array{Float64,2}, name_list::Vector{String})::FNode
+
+    node_list::Vector{FNode} = [Node(String(i)) for i in name_list]
+
+    for (col_index, col) in enumerate(eachcol(df))
+        for (row_index, entry) in enumerate(col)
+            if entry != 0
+                # there is a branch connecting these nodes
+                node_list[col_index].inc_length = entry
+                add_child!(node_list[row_index], node_list[col_index])
+            end # end if
+        end # end for
+    end # end for
+    i::Int = 0
+    # find the root
+    for (ind, n) in enumerate(node_list)
+        if n.root == true
+            i = ind
+            break
+        end # end if
+    end # for
+    node::FNode = node_list[i]
+
+    # do some bookeeping here and set the binary representation of the nodes
+    set_binary!(node)
+    number_nodes!(node)
+    return node
+end # function from_df
