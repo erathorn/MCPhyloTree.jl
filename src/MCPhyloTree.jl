@@ -16,9 +16,10 @@ module MCPhyloTree
     include("Basics/Tree_Traversal.jl")
     include("Basics/Tree_Pruning.jl")
     include("Basics/Tree_Search.jl")
+    include("Basics/Represenations.jl")
 
     # Tree Building
-    include("Building/Converter.jl")
+    include("Building/Tree2Matrix.jl")
     include("Building/Tree_Clustering.jl")
     include("Building/Tree_Consensus.jl")
     include("Building/Tree_Ladderizing.jl")
@@ -90,6 +91,7 @@ module MCPhyloTree
         to_covariance_ultra,
         to_df,
         from_df,
+        leave_incidence_matrix,
         to_distance_matrix,
         ParseNewick,
         parsing_newick_string,
