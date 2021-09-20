@@ -1,5 +1,9 @@
 # Basics
 
+This section provides an overview over the basic functionlities offered.
+
+## Basic Tree Functionalities
+
 ```@autodocs
 Modules = [MCPhyloTree]
 Pages   = ["Basics/Tree_Basics.jl"]
@@ -29,7 +33,6 @@ Pages = ["Basics/Tree_Traversal.jl"]
 
 ## Tree Representations
 
-```@autodocs
-Modules = [MCPhyloTree]
-Pages = ["Basics/Representations.jl"]
+```@docs
+newick(root::T) where T<:GeneralNode
 ```

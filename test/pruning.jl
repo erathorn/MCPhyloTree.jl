@@ -4,8 +4,18 @@ MCPhyloTree.number_nodes!(tree)
 
 @testset "Pruning leaf" begin
     node_list = ["C"]
-    prune_tree = MCPhyloTree.prune_tree(tree, node_list)
-    @test newick(prune_tree) == newick(parsing_newick_string("(A,B,((D,E)F)G)H;"))
+    pt = prune_tree(tree, node_list)
+    @test newick(pt) == newick(parsing_newick_string("(A,B,((D,E)F)G)H;"))
+
+    node_list = ["C", "C"]
+    @test_throws ArgumentError prune_tree(tree, node_list)
+
+    node_list = ["K", "L"]
+    @test_throws ArgumentError prune_tree(tree, node_list)
+
+    node_list = ["L", "C"]
+    pt = prune_tree(tree, node_list)
+    @test newick(pt) == newick(parsing_newick_string("(A,B,((D,E)F)G)H;"))
 end
 
 @testset "Pruning root" begin

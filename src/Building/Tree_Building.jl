@@ -70,7 +70,7 @@ end # function create_tree_from_leaves
 
 
 """
-    from_df(df::Array{Float64,2}, name_list::Vector{String})::GeneralNode
+    from_df(df::Array{Float64,2}, name_list::Vector{String})::FNode
 
 This function takes an adjacency matrix and a vector of names
 and turns it into a tree. No checks are performed.

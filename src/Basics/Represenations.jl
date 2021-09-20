@@ -20,7 +20,7 @@ end
 """
     newick(root::T, newickstring::AbstractString) where T<:GeneralNode
 
-Do the newick recursion. It is meant as the internal iterator function.
+Do the newick recursion. This is meant as the internal iterator function.
 """
 function newick(root::T, newickstring::AbstractString) where T<:GeneralNode
     if root.nchild != 0
