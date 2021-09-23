@@ -13,7 +13,7 @@ function is_valid_newick_string(newick::String) # TODO: possibly not necessary; 
             if letter == '('
                 bracket_level += 1
             elseif letter == ')'
-                    bracket_level -= 1
+                bracket_level -= 1
             end # elseif
         end # for
         if bracket_level != 0
@@ -123,26 +123,40 @@ function Sibling_parse(childrenstring::String) # returns list of children of a n
     return child_list
 end # function
 
-
 """
-    ParseNewick(filename::String)::Array{GeneralNode, 1}
+    ParseNewick(s::String)::Union{GeneralNode, Array{GeneralNode, 1}}
 
-This function takes a filename as a String, and returns an array of trees(represented as Node objects).
-The file should solely consist of newick tree representations, separated by line.
-The function checks for proper newick formatting, and will return an error if the file is
-incorrectly formatted.
+This function takes a string - either a filename or a newick string - and reads the file /
+string to return an array of trees (represented as Node objects). The file should solely 
+consist of newick tree representations, separated by line. The function checks for proper 
+newick formatting, and will return an error if the string / file is incorrectly formatted.
 
-Returns an Array of Nodes; each Node is the root of the tree represented by a newick string in the file.
+Mewick string input: Returns the root of the tree represented by the newick string.
+Filename input: Returns an Array of Nodes; each Node is the root of the tree represented by
+a newick string in the file.
 
-* `filename` : name of file containing newick strings to parse.
+* `s` : newick string or name of file containing newick strings to parse.
 """
-function ParseNewick(filename::String)::Array{GeneralNode,1}
+function ParseNewick(s::String)::Union{FNode, Array{FNode,1}}
     
-    list_of_trees = open(filename, "r") do file
-        readlines(file)
-    end
+    # check if the input string is a newick string & parse + return it if so
+    if is_valid_newick_string(s) 
+        tree::FNode = parsing_newick_string(s)
+        set_binary!(tree)
+        number_nodes!(tree)
+        return tree
+    end # if
     
-    list_of_newicks = GeneralNode[]
+    list_of_trees::Vector{String} = []
+    try
+        list_of_trees = open(s, "r") do file
+            readlines(file)
+        end # do
+    catch
+        throw(ErrorException("Input must be valid newick string or file name. Check path to file & check validity of newick string by running is_valid_newick_string(string)"))
+    end # try/catch
+        
+    list_of_newicks = FNode[]
     for content in list_of_trees
         if content == ""
             continue
@@ -156,4 +170,4 @@ function ParseNewick(filename::String)::Array{GeneralNode,1}
         push!(list_of_newicks, tree)
     end # for
     list_of_newicks
-end
+end # ParseNewick
