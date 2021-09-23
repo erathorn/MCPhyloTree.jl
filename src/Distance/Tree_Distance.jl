@@ -93,9 +93,50 @@ function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:Gener
         end # if
 
     end # for
-    
+
     res_low::Float64 = res_upper_1+res_upper_2+res_upper_3
     res_high::Float64 = (sqrt(res_upper_2)+sqrt(res_upper_1))^2+res_upper_3
 
     sqrt(res_low), sqrt(res_high)
+end
+
+"""
+helper function produces vector of tuples summarizing tree; tuple[1] = node number,
+    tuple[2] = node name, tuple[3] = branchlength vector[num],
+    tuple[4] = reference to leaf nodes under a given node
+"""
+function tree_summary(tree::T) where T <:GeneralNode
+    blv = get_branchlength_vector(tree)
+    ret = Vector{Tuple}(undef,length(blv))
+
+    for i=1:length(blv)
+        cur_node = find_num(tree,i)
+        ret[i]=(i,cur_node.name,blv[i],get_leaves(cur_node))
+    end #for
+    ret
+end
+"""
+helper function produces vector of common edges as well as their associated length;
+each element is a tuple, containing reference to a node from tree1, a node from tree2,
+and the length associated.
+"""
+function common_edges(tree1::T,tree2::T) where T<:GeneralNode
+    ret = []
+    po::Vector{T} = post_order(tree1)
+    for node in po[1:end-1]
+        nom = find_num(tree2, node.num)
+        if get_mother(node).num == get_mother(nom).num
+            push!(ret,((node,nom,abs(node.inc_length-nom.inc_length))))
+        end #if
+    end #for
+    ret
+end
+"""
+returns list of references to non-common edges
+"""
+function non_common_edges(tree1::T,tree2::T) where T<:GeneralNode
+    edgenumbers = [x=x[1].num for x in common_edges(tree1,tree2)]
+    po_list = MCPhyloTree.post_order(tree1)
+    nocommonlist = [x for x in po_list if !(x.num in edgenumbers)]
+    return nocommonlist
 end
