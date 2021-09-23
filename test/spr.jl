@@ -1,11 +1,11 @@
 @testset "spr" begin
-    binary_tree = parsing_newick_string("((raccoon:19.19959,bear:6.80041):0.84600,((sea_lion:11.99700,seal:12.00300):7.52973,((monkey:100.85930,cat:47.14069):20.59201,weasel:18.87953):2.09460):3.87382);")
+    binary_tree = ParseNewick("((raccoon:19.19959,bear:6.80041):0.84600,((sea_lion:11.99700,seal:12.00300):7.52973,((monkey:100.85930,cat:47.14069):20.59201,weasel:18.87953):2.09460):3.87382);")
     MCPhyloTree.number_nodes!(binary_tree)
     MCPhyloTree.set_binary!(binary_tree)
 
-    error_tree = parsing_newick_string("(raccoon:19.19959):0.84600;")
-    error_tree_not_binary = parsing_newick_string("((raccoon:19.19959,bear:6.80041):0.84600,((sea_lion:11.99700,seal:12.00300,lizard:5.03):7.52973,((monkey:100.85930,cat:47.14069):20.59201,weasel:18.87953):2.09460):3.87382);")
-    tree_binary_two = parsing_newick_string("((raccoon:19.19959,bear:6.80041)50:0.84600,((sea_lion:11.99700,seal:12.00300)100:7.52973,((monkey:100.85930,cat:47.14069)80:20.59201,weasel:18.87953)75:2.09460)50:3.87382,dog:25.46154);")
+    error_tree = ParseNewick("(raccoon:19.19959):0.84600;")
+    error_tree_not_binary = ParseNewick("((raccoon:19.19959,bear:6.80041):0.84600,((sea_lion:11.99700,seal:12.00300,lizard:5.03):7.52973,((monkey:100.85930,cat:47.14069):20.59201,weasel:18.87953):2.09460):3.87382);")
+    tree_binary_two = ParseNewick("((raccoon:19.19959,bear:6.80041)50:0.84600,((sea_lion:11.99700,seal:12.00300)100:7.52973,((monkey:100.85930,cat:47.14069)80:20.59201,weasel:18.87953)75:2.09460)50:3.87382,dog:25.46154);")
 
     @test false == check_binary(error_tree)
     @test false == check_binary(error_tree_not_binary)

@@ -1,6 +1,6 @@
 
 @testset "swing" begin
-    tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,((O,P)D,E)F)G)H;")
+    tree = ParseNewick("((I,J)A,(K,(M,N)L)B,(C,((O,P)D,E)F)G)H;")
     MCPhyloTree.set_binary!(tree)
 
     MCPhyloTree.number_nodes!(tree)
@@ -17,7 +17,7 @@
 end
 
 @testset "slide" begin
-    tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,((O,P)D,E)F)G)H;")
+    tree = ParseNewick("((I,J)A,(K,(M,N)L)B,(C,((O,P)D,E)F)G)H;")
     MCPhyloTree.set_binary!(tree)
 
     MCPhyloTree.number_nodes!(tree)
@@ -35,7 +35,7 @@ end
 end
 
 @testset "NNI" begin
-    tree = parsing_newick_string("((I,J)A,(K,(M,N)L)B,(C,(O,P)E)G)H;")
+    tree = ParseNewick("((I,J)A,(K,(M,N)L)B,(C,(O,P)E)G)H;")
     MCPhyloTree.set_binary!(tree)
 
     MCPhyloTree.number_nodes!(tree)
@@ -51,7 +51,7 @@ end
 end
 
 @testset "move" begin
-    tree = parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    tree = ParseNewick("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
     B = find_by_name(tree,"B")
     A = find_by_name(tree,"A")
     MCPhyloTree.move!(B,A,0.9)
@@ -60,7 +60,7 @@ end
 end
 
 @testset "change_edge_length" begin
-    tree = parsing_newick_string("((B:1,A:1)C:1,(D:1,E:1)F:1)G:1;")
+    tree = ParseNewick("((B:1,A:1)C:1,(D:1,E:1)F:1)G:1;")
     MCPhyloTree.number_nodes!(tree)
     change_edge_length!(tree)
     po_list = [x.inc_length for x in post_order(tree)]
@@ -68,14 +68,14 @@ end
 end
 
 @testset "reroot" begin
-    tree = parsing_newick_string("((B:1,A:1)C:1,(D:1,E:1)F:1)G:1;")
+    tree = ParseNewick("((B:1,A:1)C:1,(D:1,E:1)F:1)G:1;")
     MCPhyloTree.number_nodes!(tree)
     newtree = MCPhyloTree.reroot(tree,"C")
     @test newick(newtree) == "(B:1.0,A:1.0,((D:1.0,E:1.0)F:1.0)G:1.0)C:1.0;"
 end
 
 @testset "SPR" begin
-    tree2 = parsing_newick_string("(A,B,(C,(D,E)F)G)H;")
+    tree2 = ParseNewick("(A,B,(C,(D,E)F)G)H;")
     MCPhyloTree.number_nodes!(tree2)
     MCPhyloTree.set_binary!(tree2)
     subtree = find_by_name(tree2,"F")

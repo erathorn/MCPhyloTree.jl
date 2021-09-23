@@ -1,5 +1,5 @@
 @testset "search" begin
-    tree = parsing_newick_string("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    tree = ParseNewick("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
     MCPhyloTree.number_nodes!(tree)
     MCPhyloTree.set_binary!(tree)
     result = find_num(tree,1)

@@ -1,8 +1,8 @@
 
 @testset "ladderize" begin
-    start_tree = parsing_newick_string("((A,(B,(C,(D,E)))),(F,(G,H)))")
-    descending_tree = parsing_newick_string("(((((D,E),C),B),A),((G,H),F))")
-    ascending_tree = parsing_newick_string("((F,(G,H)),(A,(B,(C,(D,E)))))")
+    start_tree = ParseNewick("((A,(B,(C,(D,E)))),(F,(G,H)));")
+    descending_tree = ParseNewick("(((((D,E),C),B),A),((G,H),F));")
+    ascending_tree = ParseNewick("((F,(G,H)),(A,(B,(C,(D,E)))));")
 
     start_newick = newick(start_tree)
     desc_newick = newick(descending_tree)
@@ -17,7 +17,7 @@
     ladderize_tree!(start_tree)
     @test newick(start_tree) == asc_newick
 
-    start_tree = parsing_newick_string("((A,(B,(C,(D,E)))),(F,(G,H)))")
+    start_tree = ParseNewick("((A,(B,(C,(D,E)))),(F,(G,H)));")
     ladderize_tree!(start_tree, false)
     @test newick(start_tree) == desc_newick
 end
