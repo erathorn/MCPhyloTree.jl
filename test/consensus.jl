@@ -2,8 +2,7 @@
 @testset "find_common_clusters" begin
     ref_tree = ParseNewick("((A,(B,(C,(D,E)))),(F,(G,H)));")
     tree2 = ParseNewick("((G,(C,(A,(F,E)))),(B,(D,H)));")
-    MCPhyloTree.number_nodes!.([ref_tree, tree2])
-    MCPhyloTree.set_binary!.([ref_tree, tree2])
+
     A, B, C, D, E, F, G, H = find_by_name(tree2, "A"), find_by_name(tree2, "B"),
                              find_by_name(tree2, "C"), find_by_name(tree2, "D"),
                              find_by_name(tree2, "E"), find_by_name(tree2, "F"),
@@ -15,8 +14,7 @@
     @test isequal(MCPhyloTree.find_common_clusters(ref_tree, tree2) , expected_dict)
 
     tree3 = ParseNewick("((A,(C,(D,(B,E)))),(G,(F,H)));")
-    MCPhyloTree.number_nodes!(tree3)
-    MCPhyloTree.set_binary!(tree3)
+    
     A, B, C, D, E, F, G, H = find_by_name(tree3, "A"), find_by_name(tree3, "B"),
                              find_by_name(tree3, "C"), find_by_name(tree3, "D"),
                              find_by_name(tree3, "E"), find_by_name(tree3, "F"),
@@ -28,8 +26,7 @@
     @test isequal(MCPhyloTree.find_common_clusters(ref_tree, tree3), expected_dict)
 
     tree4 = ParseNewick("((A,(B,(C,(D,E)))),(F,(G,H)));")
-    MCPhyloTree.number_nodes!(tree4)
-    MCPhyloTree.set_binary!(tree4)
+    
     A, B, C, D, E, F, G, H = find_by_name(tree4, "A"), find_by_name(tree4, "B"),
                              find_by_name(tree4, "C"), find_by_name(tree4, "D"),
                              find_by_name(tree4, "E"), find_by_name(tree4, "F"),
@@ -41,13 +38,11 @@
     @test isequal(MCPhyloTree.find_common_clusters(ref_tree, tree4), expected_dict)
 
     tree5 = ParseNewick("((G,(X,(A,(F,E)))),(B,(D,H)));")
-    MCPhyloTree.number_nodes!(tree5)
-    MCPhyloTree.set_binary!(tree5)
+    
     @test_throws ArgumentError MCPhyloTree.find_common_clusters(ref_tree, tree5)
 
     tree6 = ParseNewick("(X,(G,(C,(A,(F,E)))),(B,(D,H)));")
-    MCPhyloTree.number_nodes!(tree5)
-    MCPhyloTree.set_binary!(tree5)
+ 
     @test_throws ArgumentError MCPhyloTree.find_common_clusters(ref_tree, tree6)
 end
 
@@ -55,8 +50,7 @@ end
     tree = ParseNewick("((A,C,E),(B,D));")
     tree2 = ParseNewick("((A,C),(B,D,E));")
     expected_tree = ParseNewick("(A,C,E,(B,D));")
-    MCPhyloTree.number_nodes!.([tree, tree2, expected_tree])
-    MCPhyloTree.set_binary!.([tree, tree2, expected_tree])
+  
     @test newick(MCPhyloTree.one_way_compatible(tree, tree2)) == newick(expected_tree)
 end
 
@@ -70,8 +64,7 @@ end
 
 @testset "order_tree!" begin
     tree = ParseNewick("(A,B,(C,(D,E)F)G)H;")
-    MCPhyloTree.number_nodes!(tree)
-    MCPhyloTree.set_binary!(tree)
+    
     A, B, C, D, E, F, G, H = find_by_name(tree, "A"), find_by_name(tree, "B"),
                              find_by_name(tree, "C"), find_by_name(tree, "D"),
                              find_by_name(tree, "E"), find_by_name(tree, "F"),
@@ -79,11 +72,7 @@ end
     cluster_start_indeces = Dict([(A, 3), (B, 7), (C, 2), (D, 8),
                                   (E, 5), (F, 1), (G, 4), (H, 6)])
     ordered_tree = ParseNewick("(A,((E,D)F,C)G,B)H;")
-    MCPhyloTree.number_nodes!(ordered_tree)
-    MCPhyloTree.set_binary!(ordered_tree)
     @test MCPhyloTree.order_tree!(tree, cluster_start_indeces) == [A, E, D, C, B]
-    MCPhyloTree.number_nodes!(tree)
-    MCPhyloTree.set_binary!(tree)
     @test newick(tree) == newick(ordered_tree)
 end
 
@@ -110,8 +99,7 @@ end
 
 @testset "x_left_right" begin
     tree = ParseNewick("(A,B,(C,(D,E)F)G)H;")
-    MCPhyloTree.set_binary!(tree)
-    MCPhyloTree.number_nodes!(tree)
+    
     A, B, C, D, E, F, G, H = find_by_name(tree, "A"), find_by_name(tree, "B"),
                              find_by_name(tree, "C"), find_by_name(tree, "D"),
                              find_by_name(tree, "E"), find_by_name(tree, "F"),
@@ -139,8 +127,7 @@ end
     tree2 = ParseNewick("((A,C),(B,D,E));")
     tree3 = ParseNewick("(((B,C),A),D,E);")
     trees = [tree1, tree2, tree3]
-    MCPhyloTree.number_nodes!.(trees)
-    MCPhyloTree.set_binary!.(trees)
+    
     result = newick(ParseNewick("((A,B,C),D,E);"))
     @test newick(majority_consensus_tree(trees)) == result
 
@@ -152,8 +139,7 @@ end
     tree2 = ParseNewick("((A,C)AC,(B,D,E)BDE)no_name;")
     tree3 = ParseNewick("(((B,C)BC,A)BCA,D,E)no_name;")
     trees = [tree1, tree2, tree3]
-    MCPhyloTree.number_nodes!.(trees)
-    MCPhyloTree.set_binary!.(trees)
+    
     result = newick(ParseNewick("((A,B,C),D,E);"))
     @test newick(majority_consensus_tree(trees)) == result
 end
@@ -163,8 +149,7 @@ end
     tree2 = ParseNewick("((A,C),(B,D,E));")
     tree3 = ParseNewick("(((B,C),A),D,E);")
     trees = [tree1, tree2, tree3]
-    MCPhyloTree.number_nodes!.(trees)
-    MCPhyloTree.set_binary!.(trees)
+    
     result = newick(ParseNewick("(A,B,C,(D,E));"))
     @test newick(loose_consensus_tree(trees)) == result
 
@@ -175,8 +160,7 @@ end
     tree2 = ParseNewick("((A,C)AC,(B,D,E)BDE)no_name;")
     tree3 = ParseNewick("(((B,C)BC,A)BCA,D,E)no_name;")
     trees = [tree1, tree2, tree3]
-    MCPhyloTree.number_nodes!.(trees)
-    MCPhyloTree.set_binary!.(trees)
+    
     result = newick(ParseNewick("(A,B,C,(D,E)no_name);"))
     @test newick(loose_consensus_tree(trees)) == result
 end
@@ -186,8 +170,7 @@ end
     tree2 = ParseNewick("((A,C),(B,D,E));")
     tree3 = ParseNewick("(((B,C),A),D,E);")
     trees = [tree1, tree2, tree3]
-    MCPhyloTree.number_nodes!.(trees)
-    MCPhyloTree.set_binary!.(trees)
+    
     result = newick(ParseNewick("(((A,B),C),(D,E));"))
     # result = newick(ParseNewick("(((A,C),B),(D,E));"))
     # result = newick(ParseNewick("(((B,C),A),(D,E));"))

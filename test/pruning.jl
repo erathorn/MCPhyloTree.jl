@@ -1,6 +1,4 @@
-
 tree = ParseNewick("(A,B,(C,(D,E)F)G)H;")
-MCPhyloTree.number_nodes!(tree)
 
 @testset "Pruning leaf" begin
     node_list = ["C"]
