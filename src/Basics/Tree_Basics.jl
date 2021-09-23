@@ -374,11 +374,28 @@ function number_nodes!(root::T)::Nothing  where T<:GeneralNode
     end # for
 end # function number_nodes
 
+"""
+    initialize_tree!(root::FNode; height::Bool=true)
+
+This function initializes a tree, i.e. numbers its nodes ansd sets the binary + height 
+fields of its nodes.
+"""
 function initialize_tree!(root::FNode; height::Bool=true)
     set_binary!(root)
     number_nodes!(root)
     height && tree_height(root)
 end # initialize_tree
+
+"""
+    update_tree!(root::FNode)
+
+This function can be used to recompute the tree's binary and height values. 
+This might be necessary after adding/moving/removing nodes.
+"""
+function update_tree!(root::FNode)
+    set_binary!(root)
+    tree_height(root)
+end # update_tree
 
 """
     random_node(root::T)::T  where T<:GeneralNode
