@@ -4,7 +4,7 @@
 """
     slide!(root::T) where T<:GeneralNode
 
-This functin performs a slide move on an intermediate node. The node is moved
+This function performs a slide move on an intermediate node. The node is moved
 upwards or downwards on the path specified by its mother and one of its
 daughters.
 
@@ -36,7 +36,7 @@ end # function slide!
 """
     slide(root::T)::T where T<:GeneralNode
 
-This functin performs a slide move on an intermediate node. The node is moved
+This function performs a slide move on an intermediate node. The node is moved
 upwards or downwards on the path specified by its mother and one of its
 daughters.
 
@@ -101,11 +101,11 @@ end
 Change the incoming length of node1 and node2 while keeping their combined length
 constant.
 
-* `node1` : Node whose inc_length will be modified; this node's inc_length will be the total inc_length of both nodes, times proportion.
+* `node1` : Node whose inc\\_length will be modified; this node's inc\\_length will be the total inc\\_length of both nodes, times proportion.
 
-* `node2` : Node whose inc_length will be modified; this node's inc_length will be the remainder of total - the new inc_length value of node1.
+* `node2` : Node whose inc\\_length will be modified; this node's inc\\_length will be the remainder of total - the new inc\\_length value of node1.
 
-* `proportion` : Float64, determines proportion of the inc_length of both nodes assigned to node1.
+* `proportion` : Float64, determines proportion of the inc\\_length of both nodes assigned to node1.
 """
 function move!(node1::T, node2::T, proportion::Float64) where {T<:GeneralNode}
     total::Float64 = node1.inc_length + node2.inc_length
