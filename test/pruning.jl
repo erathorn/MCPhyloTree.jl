@@ -1,11 +1,9 @@
-
-tree = parsing_newick_string("(A,B,(C,(D,E)F)G)H;")
-MCPhyloTree.number_nodes!(tree)
+tree = ParseNewick("(A,B,(C,(D,E)F)G)H;")
 
 @testset "Pruning leaf" begin
     node_list = ["C"]
     pt = prune_tree(tree, node_list)
-    @test newick(pt) == newick(parsing_newick_string("(A,B,((D,E)F)G)H;"))
+    @test newick(pt) == newick(ParseNewick("(A,B,((D,E)F)G)H;"))
 
     node_list = ["C", "C"]
     @test_throws ArgumentError prune_tree(tree, node_list)
@@ -15,7 +13,7 @@ MCPhyloTree.number_nodes!(tree)
 
     node_list = ["L", "C"]
     pt = prune_tree(tree, node_list)
-    @test newick(pt) == newick(parsing_newick_string("(A,B,((D,E)F)G)H;"))
+    @test newick(pt) == newick(ParseNewick("(A,B,((D,E)F)G)H;"))
 end
 
 @testset "Pruning root" begin
@@ -32,13 +30,13 @@ end
     prune_tree2 = prune_tree(tree, node_list2)
     prune_tree3 = prune_tree(tree, node_list3)
 
-    @test newick(prune_tree1) == newick(parsing_newick_string("(A,((D,E)F)G)H;"))
-    @test newick(prune_tree2) == newick(parsing_newick_string("(A,B,(C)G)H;"))
-    @test newick(prune_tree3) == newick(parsing_newick_string("(B)H;"))
+    @test newick(prune_tree1) == newick(ParseNewick("(A,((D,E)F)G)H;"))
+    @test newick(prune_tree2) == newick(ParseNewick("(A,B,(C)G)H;"))
+    @test newick(prune_tree3) == newick(ParseNewick("(B)H;"))
 end
 
 @testset "Pruning inplace" begin
     node_list1 = ["B", "C"]
     prune_tree!(tree, node_list1)
-    @test newick(tree) ==  newick(parsing_newick_string("(A,((D,E)F)G)H;"))
+    @test newick(tree) ==  newick(ParseNewick("(A,((D,E)F)G)H;"))
 end

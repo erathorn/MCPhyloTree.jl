@@ -61,8 +61,7 @@ function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)
     add_child!(root, rchild)
     add_child!(root, mchild)
 
-    set_binary!(root)
-    number_nodes!(root)
+    initialize_tree!(root)
 
     return root
 end # function create_tree_from_leaves
@@ -104,7 +103,6 @@ function from_df(df::Array{Float64,2}, name_list::Vector{String})::FNode
     node::FNode = node_list[i]
 
     # do some bookeeping here and set the binary representation of the nodes
-    set_binary!(node)
-    number_nodes!(node)
+    initialize_tree!(node)
     return node
 end # function from_df
