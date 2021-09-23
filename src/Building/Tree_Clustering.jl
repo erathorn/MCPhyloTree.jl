@@ -81,8 +81,7 @@ function upgma_int(
         # return (root) node when algorithm is finished
         n -= 1
         if n == 1
-            set_binary!(new_cluster)
-            number_nodes!(new_cluster)
+            initialize_tree!(new_cluster)
             return new_cluster
         end
         # initalize cluster weights
@@ -234,8 +233,7 @@ function neighbor_joining_int(dm::Array{Float64,2}, leaves::Vector{FNode})
             final_leaf.inc_length = dm[1, 2]
             # add third child to new node created previously
             add_child!(new_node, final_leaf)
-            set_binary!(new_node)
-            number_nodes!(new_node)
+            initialize_tree!(new_node, height=false)
             return new_node
         end # end if
     end # end while

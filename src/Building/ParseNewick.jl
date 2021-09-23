@@ -142,8 +142,7 @@ function ParseNewick(s::String)::Union{FNode, Array{FNode,1}}
     # check if the input string is a newick string & parse + return it if so
     if is_valid_newick_string(s) 
         tree::FNode = parsing_newick_string(s)
-        set_binary!(tree)
-        number_nodes!(tree)
+        initialize_tree!(tree)
         return tree
     end # if
     
@@ -165,8 +164,7 @@ function ParseNewick(s::String)::Union{FNode, Array{FNode,1}}
             throw("$content is not correctly formatted!")
         end # if
         tree = parsing_newick_string(string(content))
-        set_binary!(tree)
-        number_nodes!(tree)
+        initialize_tree!(tree)
         push!(list_of_newicks, tree)
     end # for
     list_of_newicks

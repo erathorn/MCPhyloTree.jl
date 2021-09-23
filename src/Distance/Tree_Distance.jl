@@ -13,10 +13,8 @@ Returns result of algorithm as integer.
 * `tree2` : tree used to determine RF distance.
 """
 function RF(tree1::T, tree2::T)::Int64 where T <: GeneralNode
-    set_binary!(tree1)
-    set_binary!(tree2)
-    number_nodes!(tree1)
-    number_nodes!(tree2)
+    initialize_tree!(tree1, height=false)
+    initialize_tree!(tree2, height=false)
     r, _ = RF_int(tree1, tree2)
     return r
 end
@@ -41,10 +39,8 @@ Returns result of algorithm as integer.
 * `tree2` : tree used to determine RF distance.
 """
 function RF_weighted(tree1::T, tree2::T)::Float64 where T <: GeneralNode
-    set_binary!(tree1)
-    set_binary!(tree2)
-    number_nodes!(tree1)
-    number_nodes!(tree2)
+    initialize_tree!(tree1, height=false)
+    initialize_tree!(tree2, height=false)
     rf, l1 = RF_int(tree1, tree2)
     rf / l1
 end

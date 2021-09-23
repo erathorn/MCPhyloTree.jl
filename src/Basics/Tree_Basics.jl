@@ -308,7 +308,7 @@ function path_length(ancestor::T, descendant::T)::Float64  where T<:GeneralNode
         descendant = get_mother(descendant)
     end # while
     return l
-end #function path_length
+end # function path_length
 
 
 """
@@ -372,9 +372,13 @@ function number_nodes!(root::T)::Nothing  where T<:GeneralNode
             running += 1
         end
     end # for
-end # fuction number_nodes
+end # function number_nodes
 
-
+function initialize_tree!(root::FNode; height::Bool=true)
+    set_binary!(root)
+    number_nodes!(root)
+    height && tree_height(root)
+end # initialize_tree
 
 """
     random_node(root::T)::T  where T<:GeneralNode

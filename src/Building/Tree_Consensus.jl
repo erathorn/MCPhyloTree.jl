@@ -25,7 +25,9 @@ Jesper Jansson, Chuanqi Shen, and Wing-Kin Sung. 2016. Improved algorithms
 for constructing consensustrees. J. ACM 63, 3, Article 28 (June 2016), 24 pages
 https://dl.acm.org/doi/pdf/10.1145/2925985
 """
-function majority_consensus_tree(trees::Vector{T}, percentage::Float64=0.5)::T where T<:GeneralNode
+function majority_consensus_tree(trees::Vector{T}, percentage::Float64=0.5
+         )::T where T<:GeneralNode
+
     merged_tree = deepcopy(trees[1])
     check_leafsets(trees)
     nodes = post_order(merged_tree)
@@ -48,8 +50,7 @@ function majority_consensus_tree(trees::Vector{T}, percentage::Float64=0.5)::T w
                 end # if
             end # else
         end # for
-        set_binary!(merged_tree)
-        number_nodes!(merged_tree)
+        initialize_tree!(merged_tree, height=false)
         compatible_tree = one_way_compatible(tree, merged_tree)
         inserted_nodes = merge_trees!(compatible_tree, merged_tree)
         # intialize counts for the new nodes
@@ -182,9 +183,11 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
                 num[node] = [sum([num[child][1] for child in node.children])]
                 n_leaves = 0
                 for child in node.children
-                        n_leaves += num[child][2]
+                    length(num[child]) != 2 && show(num)
+                    n_leaves += num[child][2]
                 end # for
                 push!(num[node], n_leaves)
+                length(num[node]) != 2 && show(num)
                 children = Vector{T}()
                 if num[node][1] == cluster_length
                     insert = true
@@ -396,8 +399,7 @@ function one_way_compatible(ref_tree::T, tree::T)::T where T <: GeneralNode
             delete_node!(node)
         end # if
     end # for
-    set_binary!(ref_tree_copy)
-    number_nodes!(ref_tree_copy)
+    initialize_tree!(ref_tree_copy, height=false)
     return ref_tree_copy
 end # function one_way_compatible
 
@@ -589,8 +591,8 @@ end # get_leaf_ranks
 Helper function to order a tree based on cluster indeces and return the leaves
 of the ordered tree
 """
-function order_tree!(root::T, cluster_start_indeces::Dict{T, Int64},
-                     leaves=Vector{T}())::Vector{T} where T<:GeneralNode
+function order_tree!(root::T, cluster_start_indeces::Dict{T, Int64}, leaves=Vector{T}()
+                    )::Vector{T} where T<:GeneralNode
 
     sort!(root.children, by = child -> cluster_start_indeces[child],
           alg=InsertionSort)
