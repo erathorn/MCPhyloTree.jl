@@ -386,7 +386,7 @@ function one_way_compatible(ref_tree::T, tree::T)::T where T <: GeneralNode
     ref_tree_copy = deepcopy(ref_tree)
     ref_nodes = post_order(ref_tree_copy)
     cluster_start_indeces = get_cluster_start_indeces(ref_nodes, tree)
-    leaves::Vector{T} = order_tree!(tree, cluster_start_indeces)
+    leaves::Vector{T} = order_tree!(tree, cluster_start_indeces; height=false)
     leaf_ranks_reverse = Dict(node.name => ind for (ind, node) in enumerate(leaves))
     xleft_dict, xright_dict = depth_dicts(leaves)
     marked_nodes = Dict{Int64, Bool}()
@@ -421,7 +421,7 @@ of nodes that were added.
 function merge_trees!(ref_tree::T, tree::T)::Vector{T} where T<:GeneralNode
     ref_nodes = post_order(ref_tree)
     cluster_start_indeces = get_cluster_start_indeces(ref_nodes, tree)
-    leaves::Vector{T} = order_tree!(tree, cluster_start_indeces)
+    leaves::Vector{T} = order_tree!(tree, cluster_start_indeces; height=false)
     leaf_ranks_reverse = Dict(node.name => ind for (ind, node) in enumerate(leaves))
     xleft_dict, xright_dict = depth_dicts(leaves)
     inserted_nodes = Vector{T}()
@@ -584,15 +584,15 @@ end # get_leaf_ranks
 
 
 """
-    order_tree!(root::T, cluster_start_indeces::Dict{T, Int64}, leaves=Vector{T}())
-        ::Vector{T} where T<:GeneralNode
+    order_tree!(root::T, cluster_start_indeces::Dict{T, Int64}, leaves=Vector{T}();
+                height=true)::Vector{T} where T<:GeneralNode
 
 --- INTERNAL ---
 Helper function to order a tree based on cluster indeces and return the leaves
 of the ordered tree
 """
-function order_tree!(root::T, cluster_start_indeces::Dict{T, Int64}, leaves=Vector{T}()
-                    )::Vector{T} where T<:GeneralNode
+function order_tree!(root::T, cluster_start_indeces::Dict{T, Int64}, leaves=Vector{T}();
+                     height=true)::Vector{T} where T<:GeneralNode
 
     sort!(root.children, by = child -> cluster_start_indeces[child],
           alg=InsertionSort)
@@ -600,10 +600,10 @@ function order_tree!(root::T, cluster_start_indeces::Dict{T, Int64}, leaves=Vect
         if child.nchild == 0
             push!(leaves, child)
         else
-            order_tree!(child, cluster_start_indeces, leaves)
+            order_tree!(child, cluster_start_indeces, leaves; height=false)
         end # if/else
     end # for
-    set_binary!(root)
+    update_tree!(root; height=height)
     return leaves
 end # order_tree!
 

@@ -1,6 +1,5 @@
 """
-    ladderize_tree!(root::T, ascending::Bool=true)
-        ::Nothing where T<:GeneralNode
+    ladderize_tree!(root::T, ascending::Bool=true) where T<:GeneralNode
 
 This function ladderizes a tree inplace, i.e. sorts the nodes on all levels by the count
 of their descendants.
@@ -22,6 +21,7 @@ function ladderize_tree!(root::T, ascending::Bool=true) where T<:GeneralNode
     for child in root.children
         ladderize_tree!(child, ascending)
     end
+    set_binary!(root)
 end
 
 
