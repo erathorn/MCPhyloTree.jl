@@ -121,6 +121,7 @@ end
 helper function produces vector of tuples summarizing tree; tuple[1] = node number,
     tuple[2] = node name, tuple[3] = branchlength vector[num],
     tuple[4] = reference to leaf nodes under a given node
+    comparable to input on line 250 of polymain.java in gtp_170317\source code\polyAlg\PolyMain.java
 """
 function tree_summary(tree::T) where T <:GeneralNode
     blv = get_branchlength_vector(tree)
@@ -136,6 +137,7 @@ end
 helper function produces vector of common edges as well as their associated length;
 each element is a tuple, containing reference to a node from tree1, a node from tree2,
 and the length associated.
+comparable to line 306 of gtp_170317\source code\polyAlg\PolyMain.java
 """
 function common_edges(tree1::T,tree2::T) where T<:GeneralNode
     ret = []
@@ -150,6 +152,7 @@ function common_edges(tree1::T,tree2::T) where T<:GeneralNode
 end
 """
 returns list of references to non-common edges
+comparable to lines 298-303 of PolyMain.java
 """
 function non_common_edges(tree1::T,tree2::T) where T<:GeneralNode
     edgenumbers = [x=x[1].num for x in common_edges(tree1,tree2)]
