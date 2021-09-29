@@ -160,3 +160,35 @@ function non_common_edges(tree1::T,tree2::T) where T<:GeneralNode
     nocommonlist = [x for x in po_list if !(x.num in edgenumbers)]
     return nocommonlist
 end
+
+mutable struct Geodesic
+    ratioSequence::Vector{Float64}
+    eLeafAttribs::Vector{Float64}
+    fLeafAttribs::Vector{Float64}
+    leafContributionSquared::Float64
+    commonEdges::Vector{Tuple{FNode,FNode,Float64}}
+
+    Geodesic(rs::Vector{Float64}, eLengths::Vector{Float64}, fLengths::Vector{Float64}, lcs) = 
+        new(rs, eLengths, fLengths, 0.0, Tuple{FNode,FNode,Float64}[])
+end # struct
+
+
+function geodesic(tree1::FNode, tree2::FNode)
+    leafContributionSquared::Float64 = 0.0
+    t1LeafEdgeAttribs::Vector{Float64} = get_branchlength_vector(tree1) 
+    t2LeafEdgeAttribs::Vector{Float64} = get_branchlength_vector(tree2)
+    leaves1::Vector{FNode} = get_leaves(tree1)
+    leaves2::Vector{FNode} = get_leaves(tree2)
+    leafVector1::Vector{String} = sort!([leaf.name for leaf in leaves1])
+    leafVector2::Vector{String} = sort!([leaf.name for leaf in leaves2])
+    leafVector1 != leafVector2 && 
+        throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
+    for (leaf1, leaf2) in zip(leaves1, leaves2)
+        abs(leaf1.inc_length - leaf2.inc_length) ^ 2
+    end # for
+
+    
+    
+    geo = Geodesic(RatioSequence(), t1LeafEdgeAttribs, t2LeafEdgeAttribs, 
+                   leafContributionSquared, commonEdges)
+end # geodesic
