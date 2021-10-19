@@ -104,7 +104,7 @@ end
 helper function produces vector of tuples summarizing tree; tuple[1] = node number,
     tuple[2] = node name, tuple[3] = branchlength vector[num],
     tuple[4] = reference to leaf nodes under a given node
-    comparable to input on line 250 of polymain.java in gtp_170317\source code\polyAlg\PolyMain.java
+    comparable to input on line 250 of polymain.java
 """
 function tree_summary(tree::T) where T <:GeneralNode
     blv = get_branchlength_vector(tree)
@@ -120,7 +120,7 @@ end
 helper function produces vector of common edges as well as their associated length;
 each element is a tuple, containing reference to a node from tree1, a node from tree2,
 and the length associated.
-comparable to line 306 of gtp_170317\source code\polyAlg\PolyMain.java
+comparable to line 306 in PolyMain.java
 """
 function common_edges(tree1::T,tree2::T) where T<:GeneralNode
     ret = []
@@ -162,6 +162,8 @@ function geodesic(tree1::FNode, tree2::FNode)
     t2LeafEdgeAttribs::Vector{Float64} = get_branchlength_vector(tree2)
     leaves1::Vector{FNode} = get_leaves(tree1)
     leaves2::Vector{FNode} = get_leaves(tree2)
+    numEdges1::Int64 = length(t1LeafEdgeAttribs) - length(leaves1)
+    numEdges2::Int64 = length(t2LeafEdgeAttribs) - length(leaves2)
     leafVector1::Vector{String} = sort!([leaf.name for leaf in leaves1])
     leafVector2::Vector{String} = sort!([leaf.name for leaf in leaves2])
     leafVector1 != leafVector2 && 
@@ -171,7 +173,66 @@ function geodesic(tree1::FNode, tree2::FNode)
     end # for
 
     
-    
+   """ 
     geo = Geodesic(RatioSequence(), t1LeafEdgeAttribs, t2LeafEdgeAttribs, 
                    leafContributionSquared, commonEdges)
+    """
 end # geodesic
+
+
+function splitOnCommonEdge(tree1::FNode, tree2::FNode, numEdges1::Int64, numEdges2::Int64)
+    numEdges1 == numEdges2 && return
+    commonEdges::Vector{FNode} = getCommonEdges(tree1, tree2)
+end # splitOnCommonEdge
+    
+
+function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{FNode}
+    commonEdges::Vector{Tuple{FNode, ???}} = []
+    # TODO maybe need to check leaves again; skipping for now 
+    tree_splits::Vector{Tuple{String, String}} = get_bipartitions(tree2)
+    for node in post_order(tree1)
+        node.nchild == 0 && continue
+        # get the cluster of the current node as a String (e.g. "A,B,C")
+        split = join(sort([leaf.name for leaf in get_leaves(node)]), ",")
+        if split in collect(Iterators.flatten(tree_splits))
+            # commonAttrib::Vector{???} = node.??? - find_lca(["A,B,C"]).???
+            push!(commonEdges, (node, commonAttrib))
+        elseif isCompatibleWith(split, tree_splits)
+            # commonAttrib::Vector{???} = node.???
+            push!(commonEdges, (node, commonAttrib))
+        end # elseif
+    end # for
+
+    tree_splits::Vector{Tuple{String, String}} = get_bipartitions(tree1)
+    for node in post_order(tree2)
+        node.nchild == 0 && continue
+        split = join(sort([leaf.name for leaf in get_leaves(node)]), ",")
+        if isCompatibleWith(split, tree_splits) && 
+           !(split in collect(Iterators.flatten(tree_splits)))
+            # commonAttrib::Vector{???} = node.???
+            push!(commonEdges, (node, commonAttrib))
+        end # if
+end # getCommonEdges
+
+
+function isCompatibleWith(node_split::Vector{String}, 
+                          bipartitions::Vector{Tuple{String, String}})::Bool
+
+    node_split = split(node_split, ",")
+    for bipartition in bipartitions
+        bipartition = split.(bipartition, ",")
+        crosses(bipartition, node) && return false
+        end # if
+    end # for
+    true
+end # isCompatibleWith
+
+
+function crosses(bp::Tuple, node_split::Vector{AbstractString})::Bool
+    size1 = max(length(bp[1]), length(node_split))
+    size2 = max(length(bp[2]), length(node_split))
+    disjoint::Bool = length(intersect(t, x[1])) == 0 && length(intersect(t, x[2])) == 0
+    contains1::Bool = length(union(bp[1], node_split)) == size1
+    contains2::Bool = length(union(bp[2], node_split)) == size2
+    return !(disjoint || contains1 || contains2)    
+end # crosses
