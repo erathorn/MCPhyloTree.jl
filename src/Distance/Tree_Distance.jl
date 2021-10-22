@@ -67,6 +67,44 @@ function get_bipartitions(tree::T)::Vector{Tuple} where T <:GeneralNode
 end
 
 """
+    get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:GeneralNode
+
+Get all bipartions of `tree`.
+
+Returns a vector containing BitVectors representing the splits.
+"""
+function get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:GeneralNode
+    po_vect= post_order(tree)[1:end-1]
+    bt = Vector{BitVector}(undef, length(po_vect))
+    all_leaves::Vector{String} = sort!([n.name for n in get_leaves(tree)])
+    l::Int64 = length(all_leaves)
+    for (ind, node) in enumerate(po_vect)
+        bit_vector::BitVector = falses(l)
+        for leaf in get_leaves(node)
+            bit_vector[leaf.num] = 1
+        end # for
+        @inbounds bt[ind] = bit_vector
+    end # for
+    bt
+end
+
+"""
+    get_split(node::T, l::Int64)::BitVector where T<:GeneralNode
+
+Get the split that you get by splitting the tree at `node`. Needs the number of tree leaves
+as 2nd argument.
+
+Returns a BitVector that represents the split.
+"""
+function get_split(node::T, l::Int64)::BitVector where T<:GeneralNode
+    split::BitVector = falses(l)
+    for leaf in get_leaves(node)
+        split[leaf.num] = 1
+    end # for
+    split 
+end
+
+"""
     BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:GeneralNode
 
 This function calculates the lower and upper bounds of the geodesic in the
@@ -206,12 +244,13 @@ end # splitOnCommonEdge
 function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{FNode}
     commonEdges::Vector{Tuple{FNode, ???}} = []
     # TODO maybe need to check leaves again; skipping for now 
-    tree_splits::Vector{Tuple{String, String}} = get_bipartitions(tree2)
+    tree_splits::Vector{Tuple{String, String}} = get_bipartitions_as_bitvectors(tree2)
+    l = length(get_leaves(tree1))
     for node in post_order(tree1)
         node.nchild == 0 && continue
         # get the cluster of the current node as a String (e.g. "A,B,C")
-        split = join(sort([leaf.name for leaf in get_leaves(node)]), ",")
-        if split in collect(Iterators.flatten(tree_splits))
+        split::BitVector = get_split(node, l)
+        if split in tree_splits
             # commonAttrib::Vector{???} = node.??? - find_lca(["A,B,C"]).???
             push!(commonEdges, (node, commonAttrib))
         elseif isCompatibleWith(split, tree_splits)
@@ -220,36 +259,42 @@ function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{FNode}
         end # elseif
     end # for
 
-    tree_splits::Vector{Tuple{String, String}} = get_bipartitions(tree1)
+    tree_splits::Vector{Tuple{String, String}} = get_bipartitions_as_bitvectors(tree1)
     for node in post_order(tree2)
         node.nchild == 0 && continue
-        split = join(sort([leaf.name for leaf in get_leaves(node)]), ",")
-        if isCompatibleWith(split, tree_splits) && 
-           !(split in collect(Iterators.flatten(tree_splits)))
+        split::BitVector = get_split(node, l)
+        if isCompatibleWith(split, tree_splits) && !(split in tree_splits)
             # commonAttrib::Vector{???} = node.???
             push!(commonEdges, (node, commonAttrib))
         end # if
 end # getCommonEdges
 
+"""
+    isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector})::Bool
 
-function isCompatibleWith(node_split::Vector{String}, 
-                          bipartitions::Vector{Tuple{String, String}})::Bool
+--- INTERNAL ---
+Check if a split is compatible with a vector of splits.
 
-    node_split = split(node_split, ",")
+Returns true if `node_split` is compatible with all splits in `bipartitions`.
+"""
+function isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector})::Bool
     for bipartition in bipartitions
-        bipartition = split.(bipartition, ",")
-        crosses(bipartition, node) && return false
-        end # if
+        crosses(node_split, bipartition) && return false
     end # for
     true
 end # isCompatibleWith
 
+"""
+    crosses(b1::BitVector, b2::BitVector)::Bool
 
-function crosses(bp::Tuple, node_split::Vector{AbstractString})::Bool
-    size1 = max(length(bp[1]), length(node_split))
-    size2 = max(length(bp[2]), length(node_split))
-    disjoint::Bool = length(intersect(t, x[1])) == 0 && length(intersect(t, x[2])) == 0
-    contains1::Bool = length(union(bp[1], node_split)) == size1
-    contains2::Bool = length(union(bp[2], node_split)) == size2
+--- INTERNAL ---
+Check if two splits are compatible.
+
+Returns true if `b1` & `b2` - the bit vectors representing the two splits - are compatible.
+"""
+function crosses(b1::BitVector, b2::BitVector)::Bool
+    disjoint = all(b1 .⊻ b2)
+    contains1::Bool = all((b1 .| (.!b1 .& .!b2)))
+    contains2::Bool = all((b2 .| (.!b1 .& .!b2)))
     return !(disjoint || contains1 || contains2)    
 end # crosses
