@@ -262,22 +262,23 @@ Returns true if `node_split` is compatible with all splits in `bipartitions`.
 """
 function isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector})::Bool
     for bipartition in bipartitions
-        crosses(node_split, bipartition) && return false
+        !isCompatibleWith(node_split, bipartition) && return false
     end # for
     true
 end # isCompatibleWith
 
 """
-    crosses(b1::BitVector, b2::BitVector)::Bool
+    isCompatibleWith(b1::BitVector, b2::BitVector)::Bool
 
 --- INTERNAL ---
 Check if two splits are compatible.
 
 Returns true if `b1` & `b2` - the bit vectors representing the two splits - are compatible.
 """
-function crosses(b1::BitVector, b2::BitVector)::Bool
-    disjoint = all(b1 .⊻ b2)
-    contains1::Bool = all((b1 .| (.!b1 .& .!b2)))
-    contains2::Bool = all((b2 .| (.!b1 .& .!b2)))
-    return !(disjoint || contains1 || contains2)    
-end # crosses
+function isCompatibleWith(b1::BitVector, b2::BitVector)::Bool
+    empty_intersect1::Bool = all(.!(b1 .& b2))
+    empty_intersect2::Bool = all(.!(b1 .& .!b2))
+    empty_intersect3::Bool = all(.!(.!b1 .& b2))
+    empty_intersect4::Bool = all(b1 .| b2)
+    return empty_intersect1 || empty_intersect2 || empty_intersect3 || empty_intersect4   
+end # isCompatibleWith
