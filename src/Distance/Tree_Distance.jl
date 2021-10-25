@@ -224,32 +224,38 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, numEdges1::Int64, numEdge
 end # splitOnCommonEdge
     
 
-function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{FNode}
-    commonEdges::Vector{Tuple{FNode, ???}} = []
+function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
+    commonEdges::Vector{Tuple{FNode, Float64}} = []
     # TODO maybe need to check leaves again; skipping for now 
-    tree_splits::Vector{Tuple{String, String}} = get_bipartitions_as_bitvectors(tree2)
+    tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
     l = length(get_leaves(tree1))
+    leaves2 = get_leaves(tree2)
     for node in post_order(tree1)
-        node.nchild == 0 && continue
-        # get the cluster of the current node as a String (e.g. "A,B,C")
+        (node.nchild == 0 || node.root) && continue
+        # get the split of the current node represented as a BitVector
         split::BitVector = get_split(node, l)
+        length_diff::Float64 = 0.0
         if split in tree_splits
-            # commonAttrib::Vector{???} = node.??? - find_lca(["A,B,C"]).???
-            push!(commonEdges, (node, commonAttrib))
+            leaf_cluster = leaves2[split]
+            length_diff = node.inc_length - 
+                                   find_lca(tree2, leaf_cluster).inc_length
+            push!(commonEdges, (node, length_diff))
         elseif isCompatibleWith(split, tree_splits)
-            # commonAttrib::Vector{???} = node.???
-            push!(commonEdges, (node, commonAttrib))
+            length_diff = node.inc_length
+            push!(commonEdges, (node, length_diff))
         end # elseif
     end # for
 
-    tree_splits::Vector{Tuple{String, String}} = get_bipartitions_as_bitvectors(tree1)
+    tree_splits = get_bipartitions_as_bitvectors(tree1)
     for node in post_order(tree2)
-        node.nchild == 0 && continue
+        (node.nchild == 0 || node.root) && continue
         split::BitVector = get_split(node, l)
         if isCompatibleWith(split, tree_splits) && !(split in tree_splits)
-            # commonAttrib::Vector{???} = node.???
-            push!(commonEdges, (node, commonAttrib))
+            length_diff::Float64 = node.inc_length 
+            push!(commonEdges, (node, length_diff))
         end # if
+    end # for
+    return commonEdges
 end # getCommonEdges
 
 """
