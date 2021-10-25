@@ -196,31 +196,95 @@ end # struct
 
 function geodesic(tree1::FNode, tree2::FNode)
     leafContributionSquared::Float64 = 0.0
+    leaves1::Vector{FNode} = get_leaves(tree1)
+    leaves2::Vector{FNode} = get_leaves(tree2)
+    l::Int64 = length(leaves1)
+    leafVector1::Vector{String} = sort!([leaf.name for leaf in leaves1])
+    leafVector2::Vector{String} = sort!([leaf.name for leaf in leaves2])
+    leafVector1 != leafVector2 && 
+        throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
+    for (leaf1, leaf2) in zip(leaves1, leaves2)
+        leafContributionSquared += abs(leaf1.inc_length - leaf2.inc_length) ^ 2
+    end # for
+    
+    """
+    geo = Geodesic(RatioSequence(), t1LeafEdgeAttribs, t2LeafEdgeAttribs, 
+                   leafContributionSquared, commonEdges)
+    """
+    splitOnCommonEdge(t1,t2, l, leaves1)
+end # geodesic
+
+
+function splitOnCommonEdge(tree1::FNode, tree2::FNode, l::Int64, leaves::Vector{FNode}; 
+                           non_common_edges::Vector{Tuple{FNode, FNode}}=Vector{Tuple{FNode, FNode}}()
+                          )::Vector{Tuple{FNode, FNode}}
+
     t1LeafEdgeAttribs::Vector{Float64} = get_branchlength_vector(tree1) 
     t2LeafEdgeAttribs::Vector{Float64} = get_branchlength_vector(tree2)
     leaves1::Vector{FNode} = get_leaves(tree1)
     leaves2::Vector{FNode} = get_leaves(tree2)
     numEdges1::Int64 = length(t1LeafEdgeAttribs) - length(leaves1)
     numEdges2::Int64 = length(t2LeafEdgeAttribs) - length(leaves2)
-    leafVector1::Vector{String} = sort!([leaf.name for leaf in leaves1])
-    leafVector2::Vector{String} = sort!([leaf.name for leaf in leaves2])
-    leafVector1 != leafVector2 && 
-        throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
-    for (leaf1, leaf2) in zip(leaves1, leaves2)
-        abs(leaf1.inc_length - leaf2.inc_length) ^ 2
+    (numEdges1 == 0 || numEdges2 == 0) && return
+    
+    common_edges::Vector{Tuple{FNode, Float64}} = getCommonEdges(tree1, tree2)
+
+    if isempty(common_edges)
+        non_common_edges = [(tree1, tree2)]
+        return non_common_edges
+    end # if
+
+    common_edge = common_edges[1]
+    
+    split = get_leaves(common_edge[1])
+    """
+	edgesA1 = FNode
+	edgesA2 = FNode
+	edgesB1 = Vector{FNode}()
+	edgesB2 = Vector{FNode}()
+
+    for node in post_order(tree1)
+        node.nchild == 0 && continue
+        # TODO (?): maybe add information to identify from which tree a commonNode orginated
+        # to avoid always having to call get_lca
+        common_node = get_lca(tree1, leaves[split])
+        common_node == node && continue
+        if lcp(common_node.binary, node.binary) == common_node.binary
+            push!(edgesA1, node)
+        else
+            push!(edgesB1, node)
+        end # if/else
     end # for
 
-    
-   """ 
-    geo = Geodesic(RatioSequence(), t1LeafEdgeAttribs, t2LeafEdgeAttribs, 
-                   leafContributionSquared, commonEdges)
+    for node in post_order(tree2)
+        node.nchild == 0 && continue
+        common_node = get_lca(tree2, leaves[split])
+        common_node == node && continue
+        if lcp(common_node.binary, node.binary) == common_node.binary
+            push!(edgesA2, node)
+        else
+            push!(edgesB2, node)
+        end # if/else
+    end # for
     """
-end # geodesic
 
+    common_node1 = find_lca(tree1, split)
+    common_node2 = find_lca(tree2, split)
+    
+    tree1_copy = deepcopy(tree1)
+    tree2_copy = deepcopy(tree2)
 
-function splitOnCommonEdge(tree1::FNode, tree2::FNode, numEdges1::Int64, numEdges2::Int64)
-    numEdges1 == numEdges2 && return
-    commonEdges::Vector{FNode} = getCommonEdges(tree1, tree2)
+    remove_child!(find_by_num(tree1_copy, common_node1.mother.num), 
+                  find_by_num(tree1_copy, common_node1.num))
+
+    remove_child!(find_by_num(tree2_copy, common_node2.mother.num), 
+                  find_by_num(tree2_copy, common_node2.num)) 
+                  
+    append!(non_common_edges, splitOnCommonEdge(common_node1, common_node2, l, leaves; 
+                                                non_common_edges=non_common_edges))
+    append!(non_common_edges, splitOnCommonEdge(tree1_copy, tree2_copy, l, leaves; 
+                                                non_common_edges=non_common_edges))
+    return non_common_edges
 end # splitOnCommonEdge
     
 
