@@ -76,8 +76,7 @@ Returns a vector containing BitVectors representing the splits.
 function get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:GeneralNode
     po_vect= post_order(tree)[1:end-1]
     bt = Vector{BitVector}(undef, length(po_vect))
-    all_leaves::Vector{String} = sort!([n.name for n in get_leaves(tree)])
-    l::Int64 = length(all_leaves)
+    l::Int64 = length(get_leaves(tree))
     for (ind, node) in enumerate(po_vect)
         bit_vector::BitVector = falses(l)
         for leaf in get_leaves(node)
