@@ -216,13 +216,13 @@ end # geodesic
 
 function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; non_common_edges=[])
 
-    t1LeafEdgeAttribs::Vector{Float64} = get_branchlength_vector(tree1) 
-    t2LeafEdgeAttribs::Vector{Float64} = get_branchlength_vector(tree2)
+    numNodes1::Int64 = length(post_order(tree1))
+    numNodes2::Int64 = length(post_order(tree2))
     leaves1::Vector{FNode} = sort!(get_leaves(tree1), by=x->x.num)
     leaves2::Vector{FNode} = sort!(get_leaves(tree2), by=x->x.num)
-    numEdges1::Int64 = length(t1LeafEdgeAttribs) - length(leaves1)
-    numEdges2::Int64 = length(t2LeafEdgeAttribs) - length(leaves2)
-    (numEdges1 == 0 || numEdges2 == 0) && return
+    numEdges1::Int64 = numNodes1 - length(leaves1) - 1
+    numEdges2::Int64 = numNodes2 - length(leaves2) - 1
+    (numEdges1 <= 0 || numEdges2 <= 0) && return
     
     common_edges::Vector{Tuple{FNode, Float64}} = getCommonEdges(tree1, tree2)
     
@@ -234,6 +234,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     common_edge::Tuple{FNode, Float64} = common_edges[1]
     bit_split::BitVector = get_split(common_edge[1], length(leaves1))
     bit_split_reverse::BitVector = (!).(bit_split)
+    
     split::Vector{String} = [leaf.name for leaf in get_leaves(common_edge[1])]
     """
 	edgesA1 = FNode
@@ -276,29 +277,25 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     common_node2 = find_lca(tree2, split)
 
     if common_node2.root
-        reverse = !reverse
+        reverse = !reverse 
         common_node2 = find_lca(tree2, leaves2[bit_split_reverse])
     end # if
     
     mother::FNode = common_node1.mother
-    
     remove_child!(mother, common_node1)
-    if mother.nchild == 1
-        child = mother.children[1]
-        mother.children[1].inc_length = child.inc_length + mother.inc_length
-        ind = findfirst(x->x==mother, mother.mother.children)
-        mother.mother.children[ind] = child
-        child.mother = mother.mother
-    end # if
-    mother =  common_node2.mother
-    remove_child!(mother, common_node2) 
-    if mother.nchild == 1
-        child = mother.children[1]
-        mother.children[1].inc_length = child.inc_length + mother.inc_length
-        ind = findfirst(x->x==mother, mother.mother.children)
-        mother.mother.children[ind] = child
-        child.mother = mother.mother
-    end # if
+    while(mother.nchild == 0 && !mother.root)
+        temp_mother = mother.mother
+        remove_child!(temp_mother, mother)
+        mother = temp_mother
+    end # while
+
+    mother = common_node2.mother
+    remove_child!(mother, common_node2)
+    while(mother.nchild == 0 && !mother.root)
+        temp_mother = mother.mother
+        remove_child!(temp_mother, mother)
+        mother = temp_mother
+    end # while
 
     common_node1.root = true
     common_node2.root = true
@@ -310,10 +307,18 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     number_nodes!(common_node2)
     number_nodes!(tree1)
     number_nodes!(tree2)
-    # println(newick(tree1))
-    # println(newick(common_node2))
-    # println(newick(tree2))
-    # println(newick(common_node1))
+    fIO =  open("example.txt","a")
+    write(fIO, newick(common_node1))
+    write(fIO, "\n")
+    write(fIO, newick(common_node2))
+    write(fIO, "\n")
+    write(fIO, newick(tree1))
+    write(fIO, "\n")
+    write(fIO, newick(tree2))
+    write(fIO, "\n")
+    write(fIO, "\n")
+    write(fIO, "\n")
+    close(fIO)
     println(length(get_leaves(common_node1)))
     println(length(get_leaves(common_node2)))
     println(length(get_leaves(tree1)))
