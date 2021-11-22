@@ -253,36 +253,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     bit_split_reverse::BitVector = (!).(bit_split)
     
     split::Vector{String} = [leaf.name for leaf in get_leaves(common_edge[1])]
-    """
-	edgesA1 = FNode
-	edgesA2 = FNode
-	edgesB1 = Vector{FNode}()
-	edgesB2 = Vector{FNode}()
-
-    for node in post_order(tree1)
-        node.nchild == 0 && continue
-        # TODO (?): maybe add information to identify from which tree a commonNode orginated
-        # to avoid always having to call get_lca
-        common_node = get_lca(tree1, leaves[split])
-        common_node == node && continue
-        if lcp(common_node.binary, node.binary) == common_node.binary
-            push!(edgesA1, node)
-        else
-            push!(edgesB1, node)
-        end # if/else
-    end # for
-
-    for node in post_order(tree2)
-        node.nchild == 0 && continue
-        common_node = get_lca(tree2, leaves[split])
-        common_node == node && continue
-        if lcp(common_node.binary, node.binary) == common_node.binary
-            push!(edgesA2, node)
-        else
-            push!(edgesB2, node)
-        end # if/else
-    end # for
-    """
+    
     reverse::Bool = false
     common_node1 = find_lca(tree1, split)
     # if the found node is the root, instead look for the lca of the other side of the split
@@ -300,19 +271,23 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     
     mother::FNode = common_node1.mother
     remove_child!(mother, common_node1)
-    while(mother.nchild == 0 && !mother.root)
-        temp_mother = mother.mother
-        remove_child!(temp_mother, mother)
-        mother = temp_mother
-    end # while
+    if mother.nchild == 0
+        remove_child!(mother.mother, mother)
+    end # if
+    if mother.nchild == 1 && !mother.root
+        child = remove_child!(mother, mother.children[1])
+        add_child!(mother.mother, child)
+    end # if
 
     mother = common_node2.mother
     remove_child!(mother, common_node2)
-    while(mother.nchild == 0 && !mother.root)
-        temp_mother = mother.mother
-        remove_child!(temp_mother, mother)
-        mother = temp_mother
-    end # while
+    if mother.nchild == 0
+        remove_child!(mother.mother, mother)
+    end # if
+    if mother.nchild == 1 && !mother.root
+        child = remove_child!(mother, mother.children[1])
+        add_child!(mother.mother, child)
+    end # if
 
     common_node1.root = true
     common_node2.root = true
