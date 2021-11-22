@@ -271,22 +271,35 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     
     mother::FNode = common_node1.mother
     remove_child!(mother, common_node1)
-    if mother.nchild == 0
+    if mother.nchild == 0 && !mother.root
         remove_child!(mother.mother, mother)
     end # if
-    if mother.nchild == 1 && !mother.root
+    if mother.nchild == 1
         child = remove_child!(mother, mother.children[1])
+        if mother.root
+            child.root = true
+            tree1 = child
+        else
         add_child!(mother.mother, child)
+            remove_child!(mother.mother, mother)
+        end #else/if
     end # if
 
     mother = common_node2.mother
     remove_child!(mother, common_node2)
-    if mother.nchild == 0
+    if mother.nchild == 0 && !mother.root
         remove_child!(mother.mother, mother)
     end # if
-    if mother.nchild == 1 && !mother.root
+
+    if mother.nchild == 1
         child = remove_child!(mother, mother.children[1])
+        if mother.root
+            child.root = true
+            tree2 = child
+        else
         add_child!(mother.mother, child)
+            remove_child!(mother.mother, mother)
+        end #else/if
     end # if
 
     common_node1.root = true
