@@ -208,10 +208,33 @@ function geodesic(tree1::FNode, tree2::FNode)
     geo = Geodesic(RatioSequence(), t1LeafEdgeAttribs, t2LeafEdgeAttribs, 
                    leafContributionSquared, commonEdges)
     """
-    splitOnCommonEdge(t1,t2, leaves1)
+    non_common_edges::Vector{Tuple{FNode, FNode}} = splitOnCommonEdge(deepycopy(tree1), 
+                                                                      deepcopy(tree2))
 
-
+    common_edges::Vector{Tuple{FNode, Float64}} = getCommonEdges(tree1, tree2)
+    c_e_lengths::Vector{Tuple{Float64, Float64}} = get_common_edge_lengths([tree1, tree2], 
+                                                                           common_edges, 
+                                                                           length(leaves1))
 end # geodesic
+
+function get_common_edge_lengths(trees::Vector{FNode}, 
+                                 common_edges::Vector{Tuple{FNode, Float64}}, l::Int64
+                                 )::Tuple{Vector{Float64}, Vector{Float64}}
+
+    common_edge_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
+    post_orders = post_order.(trees)
+    bps = get_bipartitions_as_bitvectors.(trees)
+    for common_edge in common_edges 
+        split = get_split(common_edge[1], l)
+        for i in [1,2]
+            ind = findfirst(x -> x == split, bps[i])
+            inc_length::Float64 = isnothing(ind) ? 0.0 : post_orders[i][ind].inc_length
+            println(i)
+            push!(common_edge_lengths[i], inc_length)
+        end # for
+    end # for
+    common_edge_lengths
+end # get_common_edge_lengths
 
 
 """
@@ -253,7 +276,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     common_edge::Tuple{FNode, Float64} = common_edges[1]
     split::BitVector = get_split(common_edge[1], length(leaves1))
     
-    
+
     # find the common node in each tree
     common_node1, rev1 = get_node_from_split(tree1, split, leaves1)
     common_node2, rev2 = get_node_from_split(tree2, split, leaves2)
@@ -261,11 +284,11 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     # tracks if we have to swap the tree pairs after using the reversed split for one of 
     # the common nodes 
     reverse::Bool = rev1 ⊻ rev2
-
+    
     # split the trees at the common nodes
     tree1 = split_tree!(common_node1, tree1)
     tree2 = split_tree!(common_node2, tree2)
-
+    
     # TODO: after rebase, maybe use new initialize method
     # set the nodes where we split the tree as the roots of the subtree
     common_node1.root = true
@@ -306,7 +329,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     end # if/else
     return non_common_edges
 end # splitOnCommonEdge
-    
+ 
 
 """
     get_node_from_split(tree::FNode, split::BitVector, leaves::Vector{FNode}
