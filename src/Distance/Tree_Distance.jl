@@ -340,9 +340,87 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
 end # splitOnCommonEdge
     
 
+"""
+    get_node_from_split(tree::FNode, split::BitVector, leaves::Vector{FNode}
+                       )::Tuple{FNode, Bool}
+
+--- INTERNAL ---
+This function finds the node in a tree that corresponds to the input split or the reverse of
+the input split (in case the found node for the original split would have been the root).
+
+Returns a Vector of all pairs of subtrees that share no common edges.
+
+* `tree` : root node of the tree.
+
+* `split` : A bit vector representing the split
+
+* `leaves` : vector of the leaves of the tree
+"""
+function get_node_from_split(tree::FNode, split::BitVector, leaves::Vector{FNode}=[]
+                            )::Tuple{FNode, Bool}
+
+    if isempty(leaves)
+        leaves = get_leaves(tree)
+    end # if
+    common_node::FNode = find_lca(tree, leaves[split])
+    reverse::Bool = false
+    # if the found node is the root, instead look for the lca of the other side of the split
+    if common_node.root
+        reverse = true
+        # get the reversed bitsplit of the common edge, in case the common edge is the root
+        common_node = find_lca(tree, leaves[(!).(split)])
+    end # if
+    (common_node, reverse)
+end # get_node_from_split
+
+
+"""
+    split_tree!(split_node::FNode, tree::FNode)::FNode
+
+This function splits a input tree at a node, and makes sure that internal nodes with 0 or 1
+children after the split, are either deleted or fused with another node.
+
+Returns the (potentially changed) root node of the subtree that is not headed by the node
+where the tree was split.
+
+* `split_node : The node where the tree will be split
+
+* `tree` : root node of the tree
+"""
+function split_tree!(split_node::FNode, tree::FNode)::FNode
+    mother::FNode = split_node.mother
+    remove_child!(mother, split_node)
+    if mother.nchild == 0 && !mother.root
+        remove_child!(mother.mother, mother)
+    end # if
+    if mother.nchild == 1
+        child = remove_child!(mother, mother.children[1])
+        if mother.root
+            child.root = true
+            tree = child
+        else
+        add_child!(mother.mother, child)
+        remove_child!(mother.mother, mother)
+        end # if/else
+    end # if
+    tree
+end # split_tree!
+
+
+"""
+    getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
+
+This function returns all the common edges of two trees with the same leafset. It also
+calculates the length difference of each pair of common edges. 
+
+* `tree1` : root node of the first tree
+
+* `tree2` : root node of the second tree
+"""
 function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
     commonEdges::Vector{Tuple{FNode, Float64}} = []
     # TODO maybe need to check leaves again; skipping for now 
+    # TODO maybe return a split instead of a node
     tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
     l = length(get_leaves(tree1))
     leaves2 = get_leaves(tree2)
@@ -373,6 +451,7 @@ function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64
     return commonEdges
 end # getCommonEdges
 
+
 """
     isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector})::Bool
 
@@ -387,6 +466,7 @@ function isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector}
     end # for
     true
 end # isCompatibleWith
+
 
 """
     isCompatibleWith(b1::BitVector, b2::BitVector)::Bool
