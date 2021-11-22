@@ -214,7 +214,24 @@ function geodesic(tree1::FNode, tree2::FNode)
 end # geodesic
 
 
-function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; non_common_edges=[])
+"""
+    splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[])
+        ::Vector{Tuple{FNode, FNode}}
+
+This function finds the common edges of two trees, and splits them at the first common edge
+it finds. Then it recursively splits the resulting subtrees aswell. 
+
+Returns a Vector of all pairs of subtrees that share no common edges.
+
+* `tree1` : root node of the first tree
+
+* `tree2` : root node of the second tree
+
+* `non_common_edges` : vector of non common edges. It is initialized empty and appended to 
+                       at each recursion
+"""
+function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
+                          )::Vector{Tuple{FNode, FNode}}
 
     numNodes1::Int64 = length(post_order(tree1))
     numNodes2::Int64 = length(post_order(tree2))
@@ -222,69 +239,35 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     leaves2::Vector{FNode} = sort!(get_leaves(tree2), by=x->x.num)
     numEdges1::Int64 = numNodes1 - length(leaves1) - 1
     numEdges2::Int64 = numNodes2 - length(leaves2) - 1
-    (numEdges1 <= 0 || numEdges2 <= 0) && return
+    (numEdges1 <= 0 || numEdges2 <= 0) && return []
     
     common_edges::Vector{Tuple{FNode, Float64}} = getCommonEdges(tree1, tree2)
     
+    # if there are no common edges, add the trees to the array of subtrees that share no 
+    # common edges
     if isempty(common_edges)
-        push!(non_common_edges, [(tree1, tree2)])
+        push!(non_common_edges, (tree1, tree2))
         return non_common_edges
     end # if
 
     common_edge::Tuple{FNode, Float64} = common_edges[1]
-    bit_split::BitVector = get_split(common_edge[1], length(leaves1))
-    bit_split_reverse::BitVector = (!).(bit_split)
+    split::BitVector = get_split(common_edge[1], length(leaves1))
     
-    split::Vector{String} = [leaf.name for leaf in get_leaves(common_edge[1])]
     
-    reverse::Bool = false
-    common_node1 = find_lca(tree1, split)
-    # if the found node is the root, instead look for the lca of the other side of the split
-    if common_node1.root
-        reverse = !reverse
-        common_node1 = find_lca(tree1, leaves1[bit_split_reverse])
-    end # if
+    # find the common node in each tree
+    common_node1, rev1 = get_node_from_split(tree1, split, leaves1)
+    common_node2, rev2 = get_node_from_split(tree2, split, leaves2)
 
-    common_node2 = find_lca(tree2, split)
+    # tracks if we have to swap the tree pairs after using the reversed split for one of 
+    # the common nodes 
+    reverse::Bool = rev1 ⊻ rev2
 
-    if common_node2.root
-        reverse = !reverse 
-        common_node2 = find_lca(tree2, leaves2[bit_split_reverse])
-    end # if
-    
-    mother::FNode = common_node1.mother
-    remove_child!(mother, common_node1)
-    if mother.nchild == 0 && !mother.root
-        remove_child!(mother.mother, mother)
-    end # if
-    if mother.nchild == 1
-        child = remove_child!(mother, mother.children[1])
-        if mother.root
-            child.root = true
-            tree1 = child
-        else
-        add_child!(mother.mother, child)
-            remove_child!(mother.mother, mother)
-        end #else/if
-    end # if
+    # split the trees at the common nodes
+    tree1 = split_tree!(common_node1, tree1)
+    tree2 = split_tree!(common_node2, tree2)
 
-    mother = common_node2.mother
-    remove_child!(mother, common_node2)
-    if mother.nchild == 0 && !mother.root
-        remove_child!(mother.mother, mother)
-    end # if
-
-    if mother.nchild == 1
-        child = remove_child!(mother, mother.children[1])
-        if mother.root
-            child.root = true
-            tree2 = child
-        else
-        add_child!(mother.mother, child)
-            remove_child!(mother.mother, mother)
-        end #else/if
-    end # if
-
+    # TODO: after rebase, maybe use new initialize method
+    # set the nodes where we split the tree as the roots of the subtree
     common_node1.root = true
     common_node2.root = true
     set_binary!(common_node1)
@@ -295,6 +278,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     number_nodes!(common_node2)
     number_nodes!(tree1)
     number_nodes!(tree2)
+
     fIO =  open("example.txt","a")
     write(fIO, newick(common_node1))
     write(fIO, "\n")
@@ -312,12 +296,13 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode, leaves::Vector{FNode}; no
     println(length(get_leaves(tree1)))
     println(length(get_leaves(tree2)))
 
+    # recursively split new subtrees as well
     if reverse
-        splitOnCommonEdge(tree1, common_node2, leaves; non_common_edges)
-        splitOnCommonEdge(tree2, common_node1, leaves; non_common_edges)
+        splitOnCommonEdge(tree1, common_node2; non_common_edges)
+        splitOnCommonEdge(tree2, common_node1; non_common_edges)
     else
-        splitOnCommonEdge(common_node1, common_node2, leaves; non_common_edges)
-        splitOnCommonEdge(tree1, tree2, leaves; non_common_edges)
+        splitOnCommonEdge(common_node1, common_node2; non_common_edges)
+        splitOnCommonEdge(tree1, tree2; non_common_edges)
     end # if/else
     return non_common_edges
 end # splitOnCommonEdge
