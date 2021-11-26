@@ -20,7 +20,10 @@ status of the child is set to `False`.
 
 * `child_position` : index at which to add the new child node; optional.
 """
-function add_child!(mother_node::N, child::N, child_position::Union{Int64, Missing}=missing) where N <: GeneralNode
+function add_child!(mother_node::N, child::N, child_position::Union{Int64, Missing}=missing
+                   ) where N <: GeneralNode
+
+    # TODO: maybe need to specify return type so false is not returned
     if ismissing(child_position)
         push!(mother_node.children, child)
     else
