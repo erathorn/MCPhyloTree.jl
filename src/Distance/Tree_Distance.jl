@@ -166,8 +166,8 @@ function common_edges(tree1::T,tree2::T) where T<:GeneralNode
         nom = find_num(tree2, node.num)
         if get_mother(node).num == get_mother(nom).num
             push!(ret,((node,nom,abs(node.inc_length-nom.inc_length))))
-        end #if
-    end #for
+        end # if
+    end # for
     ret
 end
 """
@@ -286,13 +286,82 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     reverse::Bool = rev1 ⊻ rev2
     
     # split the trees at the common nodes
-    tree1 = split_tree!(common_node1, tree1)
-    tree2 = split_tree!(common_node2, tree2)
+    # tree1 = split_tree!(common_node1, tree1)
+    # tree2 = split_tree!(common_node2, tree2)
+
+
+
+    mother1 = common_node1.mother
+    mother2 = common_node2.mother
+    remove_child!(mother1, common_node1)
+    remove_child!(mother2, common_node2)
+    common_node1.root = true
+    common_node2.root = true
+    println([leaf.name for leaf in get_leaves(mother1)])
+    println([leaf.name for leaf in get_leaves(mother2)])
+    
+    if mother1.root 
+        if mother1.nchild == 1
+            tree1 = remove_child!(mother1, mother1.children[1])
+            tree1.root = true
+        end # if
+    else
+        tree1 = MCPhyloTree.reroot(tree1, mother1)
+        for child in tree1.children
+            if child.nchild == 1
+                inc_l = child.inc_length
+                new_child = remove_child!(child, child.children[1])
+                remove_child!(tree1, child)
+                add_child!(tree1, new_child)
+                new_child.inc_length += inc_l
+            end # if /else
+        end # for
+        for leaf in get_leaves(tree1)
+            if leaf.mother.nchild == 1 && !leaf.mother.root
+                grandma = leaf.mother.mother
+                inc_l = leaf.mother.inc_length
+                remove_child!(grandma, leaf.mother)
+                remove_child!(leaf.mother, leaf)
+                add_child!(grandma, leaf)
+                leaf.inc_length += inc_l
+            end # if
+        end # for
+    end # if / else
+    if mother2.root 
+        if mother2.nchild == 1
+            tree2 = remove_child!(mother2, mother2.children[1])
+            tree2.root = true
+        end # if 
+    else
+        tree2 = MCPhyloTree.reroot(tree2, mother2)
+        for child in tree2.children
+            if child.nchild == 1
+                inc_l = child.inc_length
+                new_child = remove_child!(child, child.children[1])
+                new_child.inc_length += inc_l
+                remove_child!(tree2, child)
+                add_child!(tree2, new_child)
+            end # if /else
+        end # for
+        for leaf in get_leaves(tree2)
+            if leaf.mother.nchild == 1 && !leaf.mother.root
+                grandma = leaf.mother.mother
+                inc_l = leaf.mother.inc_length
+                remove_child!(grandma, leaf.mother)
+                remove_child!(leaf.mother, leaf)
+                add_child!(grandma, leaf)
+                leaf.inc_length += inc_l
+            end # if
+        end # for
+    end # if / else
+    # tree1 = mother1.root ? tree1 : MCPhyloTree.reroot(tree1, mother1) 
+    # tree2 = mother2.root ? tree2 : MCPhyloTree.reroot(tree2, mother2) 
+      
     
     # TODO: after rebase, maybe use new initialize method
     # set the nodes where we split the tree as the roots of the subtree
-    common_node1.root = true
-    common_node2.root = true
+    # common_node1.root = true
+    # common_node2.root = true
     set_binary!(common_node1)
     set_binary!(common_node2)
     set_binary!(tree1)
@@ -303,16 +372,26 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     number_nodes!(tree2)
 
     fIO =  open("example.txt","a")
-    write(fIO, newick(common_node1))
-    write(fIO, "\n")
-    write(fIO, newick(common_node2))
-    write(fIO, "\n")
-    write(fIO, newick(tree1))
-    write(fIO, "\n")
-    write(fIO, newick(tree2))
-    write(fIO, "\n")
-    write(fIO, "\n")
-    write(fIO, "\n")
+    if reverse
+        write(fIO, newick(tree1))
+        write(fIO, "\n")
+        write(fIO, newick(common_node2))
+        write(fIO, "\n")
+        write(fIO, newick(tree2))
+        write(fIO, "\n")
+        write(fIO, newick(common_node1))
+        write(fIO, "\n\n")
+    else
+        write(fIO, newick(tree1))
+        write(fIO, "\n")
+        write(fIO, newick(tree2))
+        write(fIO, "\n")
+        write(fIO, newick(common_node1))
+        write(fIO, "\n")
+        write(fIO, newick(common_node2))
+        write(fIO, "\n\n")
+    end # if / else
+
     close(fIO)
     println(length(get_leaves(common_node1)))
     println(length(get_leaves(common_node2)))
