@@ -275,8 +275,8 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
 
     numNodes1::Int64 = length(post_order(tree1))
     numNodes2::Int64 = length(post_order(tree2))
-    leaves1::Vector{FNode} = sort!(get_leaves(tree1), by=x->x.num)
-    leaves2::Vector{FNode} = sort!(get_leaves(tree2), by=x->x.num)
+    leaves1::Vector{FNode} = sort!(get_leaves(tree1), by=x->x.name)
+    leaves2::Vector{FNode} = sort!(get_leaves(tree2), by=x->x.name)
     numEdges1::Int64 = numNodes1 - length(leaves1) - 1
     numEdges2::Int64 = numNodes2 - length(leaves2) - 1
     (numEdges1 <= 0 || numEdges2 <= 0) && return []
@@ -289,7 +289,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
         push!(non_common_edges, (tree1, tree2))
         return non_common_edges
     end # if
-
+    
     common_edge::Tuple{FNode, Float64} = common_edges[1]
     split::BitVector = get_split(common_edge[1], length(leaves1))
     
@@ -314,67 +314,25 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     remove_child!(mother2, common_node2)
     common_node1.root = true
     common_node2.root = true
-    println([leaf.name for leaf in get_leaves(mother1)])
-    println([leaf.name for leaf in get_leaves(mother2)])
+    # println([leaf.name for leaf in get_leaves(mother1)])
+    # println([leaf.name for leaf in get_leaves(mother2)])
     
-    if mother1.root 
-        if mother1.nchild == 1
-            tree1 = remove_child!(mother1, mother1.children[1])
-            tree1.root = true
+    add_child!(mother1, Node(join([leaf.name for leaf in get_leaves(common_node1)], " ")))
+    add_child!(mother2, Node(join([leaf.name for leaf in get_leaves(common_node1)], " ")))
+    """
+    tree1 = mother1.root ? tree1 : MCPhyloTree.reroot(tree1, mother1) 
+    tree2 = mother2.root ? tree2 : MCPhyloTree.reroot(tree2, mother2) 
+    for child in tree1.children
+        if child.name == "no_name" && child.nchild == 0 
+            remove_child!(tree1, child)
+        end #if
+    end # for 
+    for child in tree2.children
+        if child.name == "no_name" && child.nchild == 0 
+            remove_child!(tree2, child)
         end # if
-    else
-        tree1 = MCPhyloTree.reroot(tree1, mother1)
-        for child in tree1.children
-            if child.nchild == 1
-                inc_l = child.inc_length
-                new_child = remove_child!(child, child.children[1])
-                remove_child!(tree1, child)
-                add_child!(tree1, new_child)
-                new_child.inc_length += inc_l
-            end # if /else
-        end # for
-        for leaf in get_leaves(tree1)
-            if leaf.mother.nchild == 1 && !leaf.mother.root
-                grandma = leaf.mother.mother
-                inc_l = leaf.mother.inc_length
-                remove_child!(grandma, leaf.mother)
-                remove_child!(leaf.mother, leaf)
-                add_child!(grandma, leaf)
-                leaf.inc_length += inc_l
-            end # if
-        end # for
-    end # if / else
-    if mother2.root 
-        if mother2.nchild == 1
-            tree2 = remove_child!(mother2, mother2.children[1])
-            tree2.root = true
-        end # if 
-    else
-        tree2 = MCPhyloTree.reroot(tree2, mother2)
-        for child in tree2.children
-            if child.nchild == 1
-                inc_l = child.inc_length
-                new_child = remove_child!(child, child.children[1])
-                new_child.inc_length += inc_l
-                remove_child!(tree2, child)
-                add_child!(tree2, new_child)
-            end # if /else
-        end # for
-        for leaf in get_leaves(tree2)
-            if leaf.mother.nchild == 1 && !leaf.mother.root
-                grandma = leaf.mother.mother
-                inc_l = leaf.mother.inc_length
-                remove_child!(grandma, leaf.mother)
-                remove_child!(leaf.mother, leaf)
-                add_child!(grandma, leaf)
-                leaf.inc_length += inc_l
-            end # if
-        end # for
-    end # if / else
-    # tree1 = mother1.root ? tree1 : MCPhyloTree.reroot(tree1, mother1) 
-    # tree2 = mother2.root ? tree2 : MCPhyloTree.reroot(tree2, mother2) 
-      
-    
+    end # for
+    """
     # TODO: after rebase, maybe use new initialize method
     # set the nodes where we split the tree as the roots of the subtree
     # common_node1.root = true
@@ -520,10 +478,14 @@ function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64
             leaf_cluster = leaves2[split]
             length_diff = node.inc_length - find_lca(tree2, leaf_cluster).inc_length
             push!(commonEdges, (node, length_diff))
+        end
+        """
         elseif isCompatibleWith(split, tree_splits)
+            println([leaf.name for leaf in get_leaves(node)])
             length_diff = node.inc_length
             push!(commonEdges, (node, length_diff))
         end # elseif
+        """
     end # for
 
     tree_splits = get_bipartitions_as_bitvectors(tree1)
