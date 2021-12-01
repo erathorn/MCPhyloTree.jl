@@ -471,6 +471,7 @@ function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64
         """
     end # for
 
+    """
     tree_splits = get_bipartitions_as_bitvectors(tree1)
     for node in post_order(tree2)
         (node.nchild == 0 || node.root) && continue
@@ -480,6 +481,7 @@ function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64
             push!(commonEdges, (node, length_diff))
         end # if
     end # for
+    """
     return commonEdges
 end # getCommonEdges
 
