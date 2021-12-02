@@ -420,35 +420,19 @@ end # get_node_from_split
 
 
 """
-    split_tree!(split_node::FNode, tree::FNode)::FNode
+    split_tree!(node::FNode)::FNode
 
-This function splits a input tree at a node, and makes sure that internal nodes with 0 or 1
-children after the split, are either deleted or fused with another node.
+This function splits a tree at the input node. The input node acts as the root of one of the
+resulting subtrees. The tree headed by the original root, receives a new node where the
+split node used to be. It represents all the leaves that were below the split node.
 
-Returns the (potentially changed) root node of the subtree that is not headed by the node
-where the tree was split.
-
-* `split_node : The node where the tree will be split
-
-* `tree` : root node of the tree
+* `node`: The node where the tree will be split.
 """
-function split_tree!(split_node::FNode, tree::FNode)::FNode
-    mother::FNode = split_node.mother
-    remove_child!(mother, split_node)
-    if mother.nchild == 0 && !mother.root
-        remove_child!(mother.mother, mother)
-    end # if
-    if mother.nchild == 1
-        child = remove_child!(mother, mother.children[1])
-        if mother.root
-            child.root = true
-            tree = child
-        else
-        add_child!(mother.mother, child)
-        remove_child!(mother.mother, mother)
-        end # if/else
-    end # if
-    tree
+function split_tree!(node::FNode)::Nothing
+    mother = node.mother
+    remove_child!(mother, node)
+    node.root = true
+    add_child!(mother, Node(join(sort!([leaf.name for leaf in get_leaves(node)]), " ")))
 end # split_tree!
 
 
