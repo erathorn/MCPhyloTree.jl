@@ -87,6 +87,7 @@ function get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:Gen
     bt
 end
 
+
 """
     get_split(node::T, l::Int64)::BitVector where T<:GeneralNode
 
@@ -102,6 +103,7 @@ function get_split(node::T, l::Int64)::BitVector where T<:GeneralNode
     end # for
     split 
 end
+
 
 """
     BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:GeneralNode
@@ -154,49 +156,6 @@ function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:Gener
     sqrt(res_low), sqrt(res_high)
 end
 
-"""
-helper function produces vector of tuples summarizing tree; tuple[1] = node number,
-    tuple[2] = node name, tuple[3] = branchlength vector[num],
-    tuple[4] = reference to leaf nodes under a given node
-    comparable to input on line 250 of polymain.java
-"""
-function tree_summary(tree::T) where T <:GeneralNode
-    blv = get_branchlength_vector(tree)
-    ret = Vector{Tuple}(undef,length(blv))
-
-    for i=1:length(blv)
-        cur_node = find_num(tree,i)
-        ret[i]=(i,cur_node.name,blv[i],get_leaves(cur_node))
-    end #for
-    ret
-end
-"""
-helper function produces vector of common edges as well as their associated length;
-each element is a tuple, containing reference to a node from tree1, a node from tree2,
-and the length associated.
-comparable to line 306 in PolyMain.java
-"""
-function common_edges(tree1::T,tree2::T) where T<:GeneralNode
-    ret = []
-    po::Vector{T} = post_order(tree1)
-    for node in po[1:end-1]
-        nom = find_num(tree2, node.num)
-        if get_mother(node).num == get_mother(nom).num
-            push!(ret,((node,nom,abs(node.inc_length-nom.inc_length))))
-        end # if
-    end # for
-    ret
-end
-"""
-returns list of references to non-common edges
-comparable to lines 298-303 of PolyMain.java
-"""
-function non_common_edges(tree1::T,tree2::T) where T<:GeneralNode
-    edgenumbers = [x=x[1].num for x in common_edges(tree1,tree2)]
-    po_list = MCPhyloTree.post_order(tree1)
-    nocommonlist = [x for x in po_list if !(x.num in edgenumbers)]
-    return nocommonlist
-end
 
 mutable struct Geodesic
     ratioSequence::Vector{Float64}
@@ -407,6 +366,38 @@ end # splitOnCommonEdge
  
 
 """
+    getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
+
+This function returns all the common edges of two trees with the same leafset. It also
+calculates the length difference of each pair of common edges. 
+
+* `tree1` : root node of the first tree
+
+* `tree2` : root node of the second tree
+"""
+function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
+    commonEdges::Vector{Tuple{FNode, Float64}} = []
+    # TODO maybe need to check leaves again; skipping for now 
+    # TODO maybe return a split instead of a node
+    tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
+    l = length(get_leaves(tree1))
+    leaves2 = get_leaves(tree2)
+    for node in post_order(tree1)
+        (node.nchild == 0 || node.root) && continue
+        # get the split of the current node represented as a BitVector
+        split::BitVector = get_split(node, l)
+        length_diff::Float64 = 0.0
+        if split in tree_splits
+            leaf_cluster = leaves2[split]
+            length_diff = node.inc_length - find_lca(tree2, leaf_cluster).inc_length
+            push!(commonEdges, (node, length_diff))
+        end
+    end # for
+    return commonEdges
+end # getCommonEdges
+
+
+"""
     get_node_from_split(tree::FNode, split::BitVector, leaves::Vector{FNode}
                        )::Tuple{FNode, Bool}
 
@@ -458,38 +449,6 @@ function split_tree!(node::FNode)::Nothing
     add_child!(mother, Node(join(sort!([leaf.name for leaf in get_leaves(node)]), " ")))
     return
 end # split_tree!
-
-
-"""
-    getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
-
-This function returns all the common edges of two trees with the same leafset. It also
-calculates the length difference of each pair of common edges. 
-
-* `tree1` : root node of the first tree
-
-* `tree2` : root node of the second tree
-"""
-function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
-    commonEdges::Vector{Tuple{FNode, Float64}} = []
-    # TODO maybe need to check leaves again; skipping for now 
-    # TODO maybe return a split instead of a node
-    tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
-    l = length(get_leaves(tree1))
-    leaves2 = get_leaves(tree2)
-    for node in post_order(tree1)
-        (node.nchild == 0 || node.root) && continue
-        # get the split of the current node represented as a BitVector
-        split::BitVector = get_split(node, l)
-        length_diff::Float64 = 0.0
-        if split in tree_splits
-            leaf_cluster = leaves2[split]
-            length_diff = node.inc_length - find_lca(tree2, leaf_cluster).inc_length
-            push!(commonEdges, (node, length_diff))
-        end
-    end # for
-    return commonEdges
-end # getCommonEdges
 
 
 #=
