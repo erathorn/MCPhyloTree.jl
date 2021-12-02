@@ -388,39 +388,12 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     split_tree!(common_node1)
     split_tree!(common_node2)
 
-    # TODO: after rebase, maybe use new initialize method
-    set_binary!(common_node1)
-    set_binary!(common_node2)
-    set_binary!(tree1)
-    set_binary!(tree2)
-    number_nodes!(common_node1)
-    number_nodes!(common_node2)
-    number_nodes!(tree1)
-    number_nodes!(tree2)
-
-    fIO =  open("example.txt","a")
-    if reverse
-        write(fIO, newick(tree1))
-        write(fIO, "\n")
-        write(fIO, newick(common_node2))
-        write(fIO, "\n")
-        write(fIO, newick(tree2))
-        write(fIO, "\n")
-        write(fIO, newick(common_node1))
-        write(fIO, "\n\n")
-    else
-        write(fIO, newick(tree1))
-        write(fIO, "\n")
-        write(fIO, newick(tree2))
-        write(fIO, "\n")
-        write(fIO, newick(common_node1))
-        write(fIO, "\n")
-        write(fIO, newick(common_node2))
-        write(fIO, "\n\n")
-    end # if / else
-
-    close(fIO)
-
+    # initialize the new subtrees
+    initialize_tree!(common_node1)
+    initialize_tree!(common_node2)
+    initialize_tree!(tree1)
+    initialize_tree!(tree2)
+    
     println(length(get_leaves(common_node1)))
     println(length(get_leaves(common_node2)))
     println(length(get_leaves(tree1)))
