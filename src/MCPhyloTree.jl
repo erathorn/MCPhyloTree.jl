@@ -28,6 +28,7 @@ module MCPhyloTree
 
     # Tree Distance
     include("Distance/Tree_Distance.jl")
+    include("Distance/Geodesic.jl")
 
     # Tree Moves
     include("Moves/NNI.jl")
