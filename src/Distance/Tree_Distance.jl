@@ -394,11 +394,6 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     initialize_tree!(tree1)
     initialize_tree!(tree2)
     
-    println(length(get_leaves(common_node1)))
-    println(length(get_leaves(common_node2)))
-    println(length(get_leaves(tree1)))
-    println(length(get_leaves(tree2)))
-
     # recursively split new subtrees as well
     if reverse
         splitOnCommonEdge(tree1, common_node2; non_common_edges)
@@ -492,26 +487,7 @@ function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64
             length_diff = node.inc_length - find_lca(tree2, leaf_cluster).inc_length
             push!(commonEdges, (node, length_diff))
         end
-        """
-        elseif isCompatibleWith(split, tree_splits)
-            println([leaf.name for leaf in get_leaves(node)])
-            length_diff = node.inc_length
-            push!(commonEdges, (node, length_diff))
-        end # elseif
-        """
     end # for
-
-    """
-    tree_splits = get_bipartitions_as_bitvectors(tree1)
-    for node in post_order(tree2)
-        (node.nchild == 0 || node.root) && continue
-        split::BitVector = get_split(node, l)
-        if isCompatibleWith(split, tree_splits) && !(split in tree_splits)
-            length_diff::Float64 = node.inc_length 
-            push!(commonEdges, (node, length_diff))
-        end # if
-    end # for
-    """
     return commonEdges
 end # getCommonEdges
 
