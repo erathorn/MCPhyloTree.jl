@@ -212,6 +212,38 @@ function split_tree!(node::FNode)::Nothing
 end # split_tree!
 
 
+"""
+    function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
+"""
+function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
+    numNodes1::Int64 = length(post_order(tree1))
+    numNodes2::Int64 = length(post_order(tree2))
+    numEdges1::Int64 = numNodes1 - length(leaves1) - 1
+    numEdges2::Int64 = numNodes2 - length(leaves2) - 1
+    rs::Vector{Tuple{Vector{FNode}, Vector{FNode}}} = []
+    aVertices::Vector{Int64} = []
+    bVertices::Vector{Int64} = []
+    queue::Vector{Ratio} = Vector{Ratio}()
+    ratio::Tuple{Vector{FNode}, Vector{FNode}} = ([],[])
+    cover::Array{Int64} =[[]]
+
+    commonedges = getCommonEdges(tree1, tree2)
+    # doublecheck to make sure the trees have no common edges
+    length(commonedges) == 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
+    
+    if numEdges1 == 0 || numEdges2 == 0
+        throw(ArgumentError("Exiting: Can't compute the geodesic for trees with no edges"))
+    end # if
+
+    if numEdges1 == 1 || numEdges2 == 1
+        internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end 1])
+        internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+		push(rs, (internal_nodes1, internal_nodes2))
+		return Geodesic(rs)
+	end # if
+end # get_geodesic_nocommonedges
+
+
 #=
 ### might need these function at some point, probably not though
 
