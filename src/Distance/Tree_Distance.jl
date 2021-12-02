@@ -492,7 +492,9 @@ function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64
 end # getCommonEdges
 
 
-"""
+#=
+### might need these function at some point, probably not though
+
     isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector})::Bool
 
 --- INTERNAL ---
@@ -523,3 +525,4 @@ function isCompatibleWith(b1::BitVector, b2::BitVector)::Bool
     empty_intersect4::Bool = all(b1 .| b2)
     return empty_intersect1 || empty_intersect2 || empty_intersect3 || empty_intersect4   
 end # isCompatibleWith
+=#
