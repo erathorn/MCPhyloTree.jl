@@ -212,12 +212,12 @@ function geodesic(tree1::FNode, tree2::FNode)
                                                                       deepcopy(tree2))
 
     common_edges::Vector{Tuple{FNode, Float64}} = getCommonEdges(tree1, tree2)
-    c_e_lengths::Vector{Tuple{Float64, Float64}} = get_common_edge_lengths([tree1, tree2], 
+    c_e_lengths::Vector{Tuple{Float64, Float64}} = get_commonedge_lengths([tree1, tree2], 
                                                                            common_edges, 
                                                                            length(leaves1))
 end # geodesic
 
-function get_common_edge_lengths(trees::Vector{FNode}, 
+function get_commonedge_lengths(trees::Vector{FNode}, 
                                  common_edges::Vector{Tuple{FNode, Float64}}, l::Int64
                                  )::Tuple{Vector{Float64}, Vector{Float64}}
 
@@ -273,53 +273,24 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
         return non_common_edges
     end # if
     
+    # get the first common edge that was found
     common_edge::Tuple{FNode, Float64} = common_edges[1]
+    # get a bit vector representing the split of the common edge 
     split::BitVector = get_split(common_edge[1], length(leaves1))
     
-
-    # find the common node in each tree
+    # find the common node in each tree by using its split
     common_node1, rev1 = get_node_from_split(tree1, split, leaves1)
     common_node2, rev2 = get_node_from_split(tree2, split, leaves2)
 
-    # tracks if we have to swap the tree pairs after using the reversed split for one of 
+    # track if we have to swap the tree pairs after using the reversed split for one of 
     # the common nodes 
     reverse::Bool = rev1 ⊻ rev2
     
     # split the trees at the common nodes
-    # tree1 = split_tree!(common_node1, tree1)
-    # tree2 = split_tree!(common_node2, tree2)
+    split_tree!(common_node1)
+    split_tree!(common_node2)
 
-
-
-    mother1 = common_node1.mother
-    mother2 = common_node2.mother
-    remove_child!(mother1, common_node1)
-    remove_child!(mother2, common_node2)
-    common_node1.root = true
-    common_node2.root = true
-    # println([leaf.name for leaf in get_leaves(mother1)])
-    # println([leaf.name for leaf in get_leaves(mother2)])
-    
-    add_child!(mother1, Node(join([leaf.name for leaf in get_leaves(common_node1)], " ")))
-    add_child!(mother2, Node(join([leaf.name for leaf in get_leaves(common_node1)], " ")))
-    """
-    tree1 = mother1.root ? tree1 : MCPhyloTree.reroot(tree1, mother1) 
-    tree2 = mother2.root ? tree2 : MCPhyloTree.reroot(tree2, mother2) 
-    for child in tree1.children
-        if child.name == "no_name" && child.nchild == 0 
-            remove_child!(tree1, child)
-        end #if
-    end # for 
-    for child in tree2.children
-        if child.name == "no_name" && child.nchild == 0 
-            remove_child!(tree2, child)
-        end # if
-    end # for
-    """
     # TODO: after rebase, maybe use new initialize method
-    # set the nodes where we split the tree as the roots of the subtree
-    # common_node1.root = true
-    # common_node2.root = true
     set_binary!(common_node1)
     set_binary!(common_node2)
     set_binary!(tree1)
@@ -351,6 +322,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     end # if / else
 
     close(fIO)
+
     println(length(get_leaves(common_node1)))
     println(length(get_leaves(common_node2)))
     println(length(get_leaves(tree1)))
@@ -413,9 +385,12 @@ split node used to be. It represents all the leaves that were below the split no
 """
 function split_tree!(node::FNode)::Nothing
     mother = node.mother
+    # remove the split node from the tree
     remove_child!(mother, node)
     node.root = true
+    # add node representing the leaves below the split node
     add_child!(mother, Node(join(sort!([leaf.name for leaf in get_leaves(node)]), " ")))
+    return
 end # split_tree!
 
 
