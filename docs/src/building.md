@@ -1,7 +1,7 @@
 # Tree Building & Transformations
 
 The tree building methods listed here ensure that the nodes of the tree(s) they build are
-fully initialized, i.e. they have a unique number, binary representation and a height. 
+fully initialized, i.e. they have a unique number, binary representation and a height.
 Therefore there is no need to run *initialize_tree!* or *update_tree!* after running them.
 
 ## Matrix Representation
