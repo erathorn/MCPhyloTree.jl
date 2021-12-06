@@ -39,6 +39,9 @@ function Node(name::String)::FNode
         FNode(name, missing, FNode[], 0, true, 1.0, "0", 1, 1.0, Int64[], Float64[], Dict{String, Float64}())
 end
 
+function Node(name::String, inc_len::Float64)::FNode
+    FNode(name, missing, FNode[], 0, true, inc_len, "0", 1, 1.0, Int64[], Float64[], Dict{String, Float64}())
+end
 
 #################### Base functionality ####################
 
