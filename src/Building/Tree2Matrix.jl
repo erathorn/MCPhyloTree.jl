@@ -78,25 +78,24 @@ Returns an Array of Real numbers.
 
 """
 function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:GeneralNode,T<:Real}
-    leaves::Vector{N} = get_leaves(tree)
+    leaves::Vector{N} = sort(get_leaves(tree), by = x->x.num)
     ll = length(leaves)
     covmat = zeros(T, ll, ll)
-    #@inbounds for ((ind,itm),(jnd,jtm)) in Iterators.product(enumerate(leaves), enumerate(leaves))
+    
     @inbounds for ind = 1:ll, jnd = 1:ind
         itm = leaves[ind]
         if ind == jnd
-            covmat[ind, jnd] = covmat[ind, jnd] + reduce(+, @view blv[get_path(tree, itm)])
+            covmat[ind,jnd] =  reduce(+, @view blv[get_path(tree, itm)])
         else
-
             lca = find_lca(tree, itm, leaves[jnd])
             if !lca.root
                 tmp = reduce(+, @view blv[get_path(tree, lca)])
-                covmat[ind, jnd] = covmat[ind, jnd] + tmp
-                covmat[jnd, ind] = covmat[jnd, ind] + tmp
+                covmat[ind,jnd] = covmat[jnd,ind] = tmp    
             end # if
         end # if
 
     end # for
+    
     covmat
 end# function to_covariance
 
