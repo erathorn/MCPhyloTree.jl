@@ -103,7 +103,8 @@ module MCPhyloTree
         loose_consensus_tree,
         greedy_consensus_tree,
         ladderize_tree, ladderize_tree!,
-        create_tree_from_leaves
+        create_tree_from_leaves,
+        cov2tree
 
     # Distance
     export
