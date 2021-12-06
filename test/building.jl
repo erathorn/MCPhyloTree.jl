@@ -87,3 +87,14 @@ end
     ]
     @test all(lm .== target)
 end
+
+
+@testset "cov2tree" begin
+    tree = ParseNewick("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
+    
+    covm = [14.0 9.0 0.0 0.0; 9.0 14.0 0.0 0.0; 0.0 0.0 10.0 5.0; 0.0 0.0 5.0 10.0]
+    nt = cov2tree(covm, ["A", "B", "D", "E"], [1, 2, 3, 4])
+
+    @test RF(tree, nt) == 0
+
+end
