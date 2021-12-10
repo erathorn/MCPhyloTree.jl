@@ -119,7 +119,7 @@ module MCPhyloTree
         slide, slide!,
         swing, swing!,
         change_edge_length!,
-        NNI, NNI!
+        NNI, NNI!,
         randomize, randomize!,
         reroot,
         SPR, SPR!
