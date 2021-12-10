@@ -49,17 +49,25 @@ Returns the root node of the new tree.
 function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)::FNode
     
     my_node_list, temp_name = rooted ? tree_from_leaves(leaf_nodes, 2) : tree_from_leaves(leaf_nodes, 3)
-    
     root::FNode = Node(string(temp_name))
-    lchild = pop!(my_node_list)
-    lchild.inc_length = rand()
-    mchild = pop!(my_node_list)
-    mchild.inc_length = rand()
-    rchild = pop!(my_node_list)
-    rchild.inc_length = rand()
-    add_child!(root, lchild)
-    add_child!(root, rchild)
-    add_child!(root, mchild)
+    if rooted
+        lchild = pop!(my_node_list)
+        lchild.inc_length = rand()
+        rchild = pop!(my_node_list)
+        rchild.inc_length = rand()
+        add_child!(root, lchild)
+        add_child!(root, rchild)
+    else 
+        lchild = pop!(my_node_list)
+        lchild.inc_length = rand()
+        mchild = pop!(my_node_list)
+        mchild.inc_length = rand()
+        rchild = pop!(my_node_list)
+        rchild.inc_length = rand()
+        add_child!(root, lchild)
+        add_child!(root, rchild)
+        add_child!(root, mchild)
+    end
 
     initialize_tree!(root)
 
