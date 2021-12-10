@@ -5,6 +5,7 @@ module MCPhyloTree
     using Statistics
     using DataStructures
     using RecipesBase
+    using Random
 
     ### Get Files
 
