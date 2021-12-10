@@ -45,6 +45,7 @@ module MCPhyloTree
 
     # Export Type
     export
+        AbstractNode,
         GeneralNode,
         Node,
         FNode
