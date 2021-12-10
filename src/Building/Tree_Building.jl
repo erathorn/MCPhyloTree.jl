@@ -218,3 +218,54 @@ function cov2tree_int(covmat::Array{R, 2}, names::Vector{<:AbstractString}, numb
     add_child!(n, n2)
     return n
 end
+
+
+
+"""
+      parsimony(tree::N, char::Dict{String,String}; gap::String="-")::Float64 where N<: GeneralNode
+
+Do parsimony reconstruction for a tree and a set of characters. The characters are
+supplied as the char dictionary with the key being the name of a leave and the value
+string representation of the character.
+
+Returns cost of the most parsimonius reconstruction.
+
+* `tree` : root node of the tree
+* `char` : characters for the reconstruction
+* `gap` : optional identifier for gaps
+"""
+function parsimony(tree::N, char::Dict{String,String}; gap::String="-")::Float64 where N<: GeneralNode
+      po = post_order(tree)
+      states = filter(x -> x != "-", unique(collect(values(char))))
+      nStates = length(states)
+      if nStates == 0
+            return 0.0
+      end
+      nNodes = length(po)
+      costMatrix = zeros(nNodes, nStates) .- 1
+      for node in po
+            if node.nchild == 0
+                  # i am a leave node
+                  s = char[node.name]
+                  costMatrix[node.num, :] .= s == gap ? 0 : abs.(log.(states .== s))
+            else
+                  # i am an internal node
+                  daughters = node.children
+                  localCosts = zeros(nStates, nStates, length(daughters))
+                  for (j, s1) in enumerate(states),
+                        (k, s2) in enumerate(states),
+                        (l, d) in enumerate(daughters)
+
+                        localCosts[j, k, l] = costMatrix[d.num, k] + Int(s1 != s2)
+                  end
+                  costMatrix[i, :] = vec(
+                        mapslices(
+                              sum,
+                              mapslices(minimum, localCosts, dims = 2),
+                              dims = 3,
+                        ),
+                  )
+            end
+      end
+      minimum(costMatrix[tree.num, :])
+end
