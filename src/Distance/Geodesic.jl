@@ -1,18 +1,57 @@
 const Ratio = Tuple{Vector{FNode}, Vector{FNode}}
 const RatioSequence = Vector{Ratio}
 
+
 mutable struct Geodesic
     ratioSequence::RatioSequence
     eLeafAttribs::Vector{Float64}
     fLeafAttribs::Vector{Float64}
     leafContributionSquared::Float64
     commonEdges::Vector{Tuple{FNode,FNode,Float64}}
+
     Geodesic(rs::RatioSequence, eLengths::Vector{Float64}, fLengths::Vector{Float64}) = 
         new(rs, eLengths, fLengths, 0.0, Tuple{FNode,FNode,Float64}[])
 
     Geodesic(rs::RatioSequence) = 
         new(rs, [], [], 0.0, Tuple{FNode,FNode,Float64}[])
 end # Geodesic
+
+
+mutable struct Vertex
+    label::Float64
+    weight::Float64
+    residual::Float64
+    pred::Int64
+
+    Vertex(weight::Float64) = new(0.0, weight*weight, 0.0, 0)
+end # Vertex
+
+
+mutable struct BipartiteGraph
+    incidence_matrix::BitMatrix
+	numbers::Vector{Int64}
+	verteces_a::Vector{Vertex}
+    verteces_b::Vector{Vertex}
+	debug::Bool
+end # BipartiteGraph
+
+
+function build_bipartite_graph(incidence_matrix::BitMatrix, a_weight::Vector{Float64}, 
+                               b_weight::Vector{Float64})::BipartiteGraph
+
+    a::Int64 = length(a_weight)
+    b::Int64 = length(b_weight)
+    n::Int64 = max(a, b)
+    verteces_a::Vector{Vertex} = fill(Vertex(0.0), n)
+    verteces_b::Vector{Vertex} = fill(Vertex(0.0), n)
+    for i in 1:a
+        verteces_a[i]= Vertex(a_weight[i])
+    end # for 
+    for i in 1:b
+        verteces_b[i]= Vertex(b_weight[i])
+    end # for
+    return BipartiteGraph(incidence_matrix, [a, b, n, 0, 0], verteces_a, verteces_b, false)
+end
 
 
 function geodesic(tree1::FNode, tree2::FNode)
@@ -40,7 +79,10 @@ function geodesic(tree1::FNode, tree2::FNode)
                                                                            length(leaves1))
 end # geodesic
 
-
+"""
+    get_commonedge_lengths(trees::Vector{FNode}, common_edges::Vector{Tuple{FNode, Float64}}, 
+        l::Int64)::Tuple{Vector{Float64}, Vector{Float64}}
+"""
 function get_commonedge_lengths(trees::Vector{FNode}, 
                                 common_edges::Vector{Tuple{FNode, Float64}}, l::Int64
                                 )::Tuple{Vector{Float64}, Vector{Float64}}
@@ -250,11 +292,13 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
 
     leaves::Vector{FNode} = get_leaves(tree1)
     leaf_dict::Dict{String, Int64} = Dict(leaf.name => leaf.num for leaf in leaves)
-    internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
-    internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
-    incidence_matrix::BitMatrix =  get_incidence_matrix(internal_nodes1, internal_nodes2, 
-                                                        leaf_dict)
+    int_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+    int2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+    incidence_matrix::BitMatrix =  get_incidence_matrix(int_nodes1, int_nodes2, leaf_dict)
 
+    graph::BipartiteGraph = BipartiteGraph(incidence_matrix, 
+                                           [n.inc_length for n in int_nodes1], 
+                                           [n.inc_length for n in int_nodes2])
     
 end # get_geodesic_nocommonedges
 
