@@ -36,7 +36,7 @@ function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tupl
 end
 
 """
-    function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false<:GeneralNode    
+    function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false<:AbstractNode    
     
 Build a random tree from a list of leaf names. The tree is unrooted by default.
 
@@ -46,7 +46,7 @@ Returns the root node of the new tree.
 
 * `rooted` : Boolean indicating if the tree should be rooted
 """
-function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)<:GeneralNode
+function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)<:AbstractNode
     
     my_node_list, temp_name = rooted ? tree_from_leaves(leaf_nodes, 2) : tree_from_leaves(leaf_nodes, 3)
     root = Node(string(temp_name))

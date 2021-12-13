@@ -1,19 +1,19 @@
 
 """
-function print_ascii(root::N) where N<:GeneralNode
+function print_ascii(root::N) where N<:AbstractNode
 
 Prints the ASCII representation of the tree.
 Adapted for Julia from the ETE toolkit implementation.
 
 * `root`: Root node of tree to print.
 """
-function print_ascii(root::N) where N<:GeneralNode
+function print_ascii(root::N) where N<:AbstractNode
 lines,_ = ascii(root,"-")
 println("\n"*join(lines,"\n"))
 end #function
 
 
-function ascii(root::N,char1="-") where N<:GeneralNode
+function ascii(root::N,char1="-") where N<:AbstractNode
     node_name = root.name
     LEN = max(3,length(node_name))
     PAD = " "^LEN

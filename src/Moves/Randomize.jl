@@ -1,7 +1,7 @@
 
 
 """
-    randomize!(root::T, num::Int64=100)::Nothing where T <:GeneralNode
+    randomize!(root::T, num::Int64=100)::Nothing where T <:AbstractNode
 
 This function randomizes the tree by performing a number of nearest
 neighbour interchange (NNI) moves and a randomization of the branch lengths.
@@ -11,7 +11,7 @@ The number of NNI moves is specified in the parameter num.
 
 * `num` : amount of NNI moves to perform.
 """
-function randomize!(root::T, num::Int64=100)::Nothing where T <:GeneralNode
+function randomize!(root::T, num::Int64=100)::Nothing where T <:AbstractNode
     n_nodes = size(root)[1]
     i = 0
     while i < num
@@ -24,7 +24,7 @@ function randomize!(root::T, num::Int64=100)::Nothing where T <:GeneralNode
 end
 
 """
-    randomize(root::T, num::Int64=100)::T where T <:GeneralNode
+    randomize(root::T, num::Int64=100)::T where T <:AbstractNode
 
 This function returns a randomized copy of the tree by performing a number of nearest
 neighbour interchange (NNI) moves and a randomization of the branch lengths.
@@ -34,7 +34,7 @@ The number of NNI moves is specified in the parameter num.
 
 * `num` : amount of NNI moves to perform.
 """
-function randomize(root::T, num::Int64=100)::T where T <:GeneralNode
+function randomize(root::T, num::Int64=100)::T where T <:AbstractNode
     R = deepcopy(root)
     randomize!(R, num)
     R

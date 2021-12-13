@@ -42,5 +42,5 @@ Pages = ["Basics/Tree_Traversal.jl"]
 ## Tree Representations
 
 ```@docs
-newick(root::T) where T<:GeneralNode
+newick(root::T) where T<:AbstractNode
 ```

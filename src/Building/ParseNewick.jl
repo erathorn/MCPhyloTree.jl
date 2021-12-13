@@ -61,7 +61,7 @@ end # function
 In this function main parsing process happens, it uses recursive method to parse newick formated string
 """
 
-function parsing_newick_string(newick::String)::GeneralNode
+function parsing_newick_string(newick::String)::GeneralNode{Float64, Int64}
     newick = replace(newick, " " => "")
 
     if newick[end] == ';' # no need for semicolon

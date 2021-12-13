@@ -44,9 +44,9 @@ end
 
 #################### Base functionality ####################
 
-Base.:(==)(x::T, y::T) where T<:GeneralNode = x.num == y.num
-Base.size(x::T) where T<:GeneralNode = size(post_order(x))
-Base.length(x::T) where T<:GeneralNode = x.nchild
+Base.:(==)(x::T, y::T) where T<:AbstractNode = x.num == y.num
+Base.size(x::T) where T<:AbstractNode = size(post_order(x))
+Base.length(x::T) where T<:AbstractNode = x.nchild
 
 function Base.summary(io::IO, d::N) where N <: GeneralNode
     summary(io, d.name)
