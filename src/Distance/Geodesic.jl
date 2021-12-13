@@ -42,8 +42,8 @@ end # geodesic
 
 
 function get_commonedge_lengths(trees::Vector{FNode}, 
-                                 common_edges::Vector{Tuple{FNode, Float64}}, l::Int64
-                                 )::Tuple{Vector{Float64}, Vector{Float64}}
+                                common_edges::Vector{Tuple{FNode, Float64}}, l::Int64
+                                )::Tuple{Vector{Float64}, Vector{Float64}}
 
     common_edge_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
     post_orders = post_order.(trees)
@@ -247,7 +247,66 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
 		push(rs, (internal_nodes1, internal_nodes2))
 		return Geodesic(rs)
 	end # if
+
+    leaves::Vector{FNode} = get_leaves(tree1)
+    leaf_dict::Dict{String, Int64} = Dict(leaf.name => leaf.num for leaf in leaves)
+    internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+    internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+    incidence_matrix::BitMatrix =  get_incidence_matrix(internal_nodes1, internal_nodes2, 
+                                                        leaf_dict)
+
+    
 end # get_geodesic_nocommonedges
+
+
+"""
+    get_incidence_matrix(edges1::Vector{FNode}, edges2::Vector{FNode}, 
+        leaf_dict::Dict{String,Int64})::BitMatrix
+
+--- INTERNAL ---
+This function computes the incidence_matrix of two trees. A field of the matrix contains a 1
+if the corresponding subtrees of our input trees are not compatible.
+
+Returns the incidence_matrix.
+
+* `edges1` : edges of the first tree
+
+* `edges2` : edges of the second tree
+
+* `leaf_dict` : Dictionary that links each leaf to a unique number
+"""
+function get_incidence_matrix(edges1::Vector{FNode}, edges2::Vector{FNode}, 
+                              leaf_dict::Dict{String,Int64})::BitMatrix
+
+    incidence_matrix::BitMatrix = trues((length(edges1), length(edges2)))   
+    for i in 1:length(edges1)
+        for j in 1:length(edges2)
+            if crosses(get_split(edges1[i], leaf_dict), get_split(edges2[j], leaf_dict))
+                incidence_matrix[i,j] = true
+            else
+                incidence_matrix[i,j] = false
+            end # if/else
+        end # for
+    end # for
+    return incidence_matrix
+end # get_incidence_matrix
+
+
+"""
+    crosses(b1::BitVector, b2::BitVector)::Bool
+
+--- INTERNAL ---
+Check if two splits cross.
+
+Returns true if `b1` & `b2` - the bit vectors representing the two splits - are neither
+disjoint nor does either one contain the other.
+"""
+function crosses(b1::BitVector, b2::BitVector)::Bool
+    disjoint::Bool = all(.!(b1 .& b2))
+    contains1::Bool = all(b1 .>= b2)
+    contains2::Bool = all(b2 .>= b1)
+    return !(disjoint || contains1 || contains2)   
+end # isCompatibleWith
 
 
 #=
@@ -265,22 +324,5 @@ function isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector}
         !isCompatibleWith(node_split, bipartition) && return false
     end # for
     true
-end # isCompatibleWith
-
-
-"""
-    isCompatibleWith(b1::BitVector, b2::BitVector)::Bool
-
---- INTERNAL ---
-Check if two splits are compatible.
-
-Returns true if `b1` & `b2` - the bit vectors representing the two splits - are compatible.
-"""
-function isCompatibleWith(b1::BitVector, b2::BitVector)::Bool
-    empty_intersect1::Bool = all(.!(b1 .& b2))
-    empty_intersect2::Bool = all(.!(b1 .& .!b2))
-    empty_intersect3::Bool = all(.!(.!b1 .& b2))
-    empty_intersect4::Bool = all(b1 .| b2)
-    return empty_intersect1 || empty_intersect2 || empty_intersect3 || empty_intersect4   
 end # isCompatibleWith
 =#
