@@ -1,6 +1,6 @@
 
-function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tuple{Vector{FNode}, Int}
-    my_node_list::Array{FNode,1} = []
+function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tuple{Vector{GeneralNode}, Int}
+    my_node_list::Array{GeneralNode,1} = []
 
     # first create a list of leaf nodes
     for node_name in leaf_nodes
@@ -19,11 +19,11 @@ function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tupl
         # get two nodes
         # create a new mother node to which the two first nodes are added as children
         # add the new mother node to the list and reshuffle
-        first_child::FNode = pop!(my_node_list)
+        first_child::GeneralNode = pop!(my_node_list)
         first_child.inc_length = rand()#*0.1
-        second_child::FNode = pop!(my_node_list)
+        second_child::GeneralNode = pop!(my_node_list)
         second_child.inc_length = rand()
-        curr_node::FNode = Node(string(temp_name))
+        curr_node::GeneralNode = Node(string(temp_name))
 
         add_child!(curr_node, first_child)
         add_child!(curr_node, second_child)
@@ -36,7 +36,7 @@ function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tupl
 end
 
 """
-    function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)::FNode    
+    function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false<:GeneralNode    
     
 Build a random tree from a list of leaf names. The tree is unrooted by default.
 
@@ -46,10 +46,10 @@ Returns the root node of the new tree.
 
 * `rooted` : Boolean indicating if the tree should be rooted
 """
-function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)::FNode
+function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)<:GeneralNode
     
     my_node_list, temp_name = rooted ? tree_from_leaves(leaf_nodes, 2) : tree_from_leaves(leaf_nodes, 3)
-    root::FNode = Node(string(temp_name))
+    root = Node(string(temp_name))
     if rooted
         lchild = pop!(my_node_list)
         lchild.inc_length = rand()
@@ -77,7 +77,7 @@ end # function create_tree_from_leaves
 
 
 """
-    from_df(df::Array{Float64,2}, name_list::Vector{String})::FNode
+    function from_df(df::Array{T,2}, name_list::Vector{String})::GeneralNode{T, Int64} where T<:Real
 
 This function takes an adjacency matrix and a vector of names
 and turns it into a tree. No checks are performed.
@@ -87,9 +87,9 @@ Returns the root node of the tree.
 * `df` : matrix with edge weights
 * `name_list` : a list of names such that they match the column indices of the matrix
 """
-function from_df(df::Array{Float64,2}, name_list::Vector{String})::FNode
+function from_df(df::Array{T,2}, name_list::Vector{String})::GeneralNode{T, Int64} where T<:Real
 
-    node_list::Vector{FNode} = [Node(String(i)) for i in name_list]
+    node_list::Vector{GeneralNode} = [Node(String(i)) for i in name_list]
 
     for (col_index, col) in enumerate(eachcol(df))
         for (row_index, entry) in enumerate(col)
@@ -108,7 +108,7 @@ function from_df(df::Array{Float64,2}, name_list::Vector{String})::FNode
             break
         end # end if
     end # for
-    node::FNode = node_list[i]
+    node = node_list[i]
 
     # do some bookeeping here and set the binary representation of the nodes
     initialize_tree!(node)
@@ -152,7 +152,7 @@ end
 
 
 """
-    function cov2tree(covmat::Array{<:Real, 2}, names::Vector{<:AbstractString}, numbers::Vector{Int64}; tol::Real=1e-7)::FNode
+    function cov2tree(covmat::Array{<:T, 2}, names::Vector{<:AbstractString}, numbers::Vector{Int64}; tol::Real=1e-7)::GeneralNode{T, Int64} where T<:Real
 
 This function reconstructs a tree from a covariance matrix. It takes a covariance matrix, 
 a vector of leaf names and a vector of node numbers as mandatory arguments. The order of the two vectors must
@@ -166,7 +166,7 @@ Returns the root node of the tree corresponding to the supplied covariance matri
 * `numbers` : a list of Integers such that they match the column/row indices of the matrix
 * `tol` : cut off value below which all values are treated as zero
 """
-function cov2tree(covmat::Array{<:Real, 2}, names::Vector{<:AbstractString}, numbers::Vector{Int64}; tol::Real=1e-7)::FNode
+function cov2tree(covmat::Array{<:T, 2}, names::Vector{<:AbstractString}, numbers::Vector{Int64}; tol::Real=1e-7)::GeneralNode{T, Int64} where T<:Real
 
     if all(covmat .> tol)
         covmat = covmat .- minimum(covmat)
