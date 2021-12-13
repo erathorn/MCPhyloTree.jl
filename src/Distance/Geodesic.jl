@@ -1,12 +1,18 @@
+const Ratio = Tuple{Vector{FNode}, Vector{FNode}}
+const RatioSequence = Vector{Ratio}
+
 mutable struct Geodesic
-    ratioSequence::Vector{Float64}
+    ratioSequence::RatioSequence
     eLeafAttribs::Vector{Float64}
     fLeafAttribs::Vector{Float64}
     leafContributionSquared::Float64
     commonEdges::Vector{Tuple{FNode,FNode,Float64}}
-    Geodesic(rs::Vector{Float64}, eLengths::Vector{Float64}, fLengths::Vector{Float64}, lcs) = 
+    Geodesic(rs::RatioSequence, eLengths::Vector{Float64}, fLengths::Vector{Float64}) = 
         new(rs, eLengths, fLengths, 0.0, Tuple{FNode,FNode,Float64}[])
-end # struct
+
+    Geodesic(rs::RatioSequence) = 
+        new(rs, [], [], 0.0, Tuple{FNode,FNode,Float64}[])
+end # Geodesic
 
 
 function geodesic(tree1::FNode, tree2::FNode)
@@ -199,7 +205,7 @@ This function splits a tree at the input node. The input node acts as the root o
 resulting subtrees. The tree headed by the original root, receives a new node where the
 split node used to be. It represents all the leaves that were below the split node.
 
-* `node`: The node where the tree will be split.
+* `node`: the node where the tree will be split.
 """
 function split_tree!(node::FNode)::Nothing
     mother = node.mother
@@ -213,18 +219,18 @@ end # split_tree!
 
 
 """
-    function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
+    get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
 """
 function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
     numNodes1::Int64 = length(post_order(tree1))
     numNodes2::Int64 = length(post_order(tree2))
     numEdges1::Int64 = numNodes1 - length(leaves1) - 1
     numEdges2::Int64 = numNodes2 - length(leaves2) - 1
-    rs::Vector{Tuple{Vector{FNode}, Vector{FNode}}} = []
+    rs::RatioSequence = []
     aVertices::Vector{Int64} = []
     bVertices::Vector{Int64} = []
     queue::Vector{Ratio} = Vector{Ratio}()
-    ratio::Tuple{Vector{FNode}, Vector{FNode}} = ([],[])
+    ratio::Ratio = ([],[])
     cover::Array{Int64} =[[]]
 
     commonedges = getCommonEdges(tree1, tree2)
