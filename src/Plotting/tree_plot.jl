@@ -21,7 +21,7 @@ Recipe that handles plotting of MCPhylo Trees. Takes the root node as input.
 """
 @recipe function f(root::T; treetype=:dendrogram, marker_group=nothing,
                    line_group=nothing, showtips=true, tipfont=(7,)
-                   ) where T<:GeneralNode
+                   ) where T<:AbstractNode
 
     linecolor --> :black
     grid --> false
@@ -201,10 +201,10 @@ function _extend(tmp, x)
 end
 
 
-function _findxy(root::T)::Tuple{Dict{T, Float64}, Dict{T, Float64}, Vector{String}} where T<:GeneralNode
+function _findxy(root::T)::Tuple{Dict{T, Float64}, Dict{T, Float64}, Vector{String}} where T<:AbstractNode
 
     # two convenience recursive functions using captured variables
-    function findheights!(node::T) where T<:GeneralNode
+    function findheights!(node::T) where T<:AbstractNode
         if !in(node, keys(height))
             for child in node.children
                 findheights!(child)
@@ -216,7 +216,7 @@ function _findxy(root::T)::Tuple{Dict{T, Float64}, Dict{T, Float64}, Vector{Stri
         end
     end
 
-    function finddepths!(node::T, parentdepth::Float64 = 0.0) where T<:GeneralNode
+    function finddepths!(node::T, parentdepth::Float64 = 0.0) where T<:AbstractNode
         mydepth = parentdepth
         push!(names, node.name)
         mydepth += node.inc_length

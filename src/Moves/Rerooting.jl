@@ -1,5 +1,5 @@
 
-function reroot(root::T, new_root::String)::T where T<:GeneralNode
+function reroot(root::T, new_root::String)::T where T<:AbstractNode
 
     new_tree = deepcopy(root)
     root_node = find_by_name(new_tree, new_root)

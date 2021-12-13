@@ -1,5 +1,5 @@
 """
-    prune_tree(root::T, node_names::Vector{String})::T where T<:GeneralNode
+    prune_tree(root::T, node_names::Vector{String})::T where T<:AbstractNode
 
 This function removes specific nodes, including their descendants, from a tree.
 
@@ -7,7 +7,7 @@ This function removes specific nodes, including their descendants, from a tree.
 
 * `node_names` : vector of strings, used to specify nodes to remove.
 """
-function prune_tree(root::T, node_names::Vector{String})::T where T<:GeneralNode
+function prune_tree(root::T, node_names::Vector{String})::T where T<:AbstractNode
     # copy the tree and call the inplace version of the function on the copy
     if root.name in node_names
         throw(ArgumentError("trying to prune root, please set root to nothing instead"))
@@ -19,7 +19,7 @@ end
 
 
 """
-    prune_tree!(root::T, node_names::Vector{String})::Nothing where T<:GeneralNode
+    prune_tree!(root::T, node_names::Vector{String})::Nothing where T<:AbstractNode
 
 In-place version of prune_tree.
 
@@ -27,7 +27,7 @@ In-place version of prune_tree.
 
 * `node_names` : vector of strings, used to specify nodes to remove.
 """
-function prune_tree!(root::T, node_names::Vector{String})::Nothing where T<:GeneralNode
+function prune_tree!(root::T, node_names::Vector{String})::Nothing where T<:AbstractNode
     nodes = post_order(root)
     names = [node.name for node in nodes]
     nodes_to_prune = Vector{T}()
@@ -49,7 +49,7 @@ end
 
 
 """
-    prune_tree!(root::T, node_names::Vector{T})::Nothing where T<:GeneralNode
+    prune_tree!(root::T, node_names::Vector{T})::Nothing where T<:AbstractNode
 
 In-place version of prune_tree.
 
@@ -57,7 +57,7 @@ In-place version of prune_tree.
 
 * `node_names`: vector of Node objects to be removed from tree.
 """
-function prune_tree!(root::T, nodes::Vector{T})::Nothing where T<:GeneralNode
+function prune_tree!(root::T, nodes::Vector{T})::Nothing where T<:AbstractNode
     if root in nodes
         throw(ArgumentError("trying to prune root, please set root to nothing instead"))
     else

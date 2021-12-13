@@ -1,5 +1,5 @@
 """
-    NNI(root::T, target::T, lor::Bool)::Int64   where T<:GeneralNode
+    NNI(root::T, target::T, lor::Bool)::Int64   where T<:AbstractNode
 
 This function does a nearest neighbour interchange (NNI) move on the tree specified
 by `root`. The parameter `target` specifies the node which performs the interchange
@@ -14,7 +14,7 @@ The function returns 1 if the move was successful and 0 else.
 
 * `lor` : Bool; "true" uses the left child of `target,` "false," the right child.
 """
-function NNI!(root::T, target::T, lor::Bool)::Int64  where T<:GeneralNode
+function NNI!(root::T, target::T, lor::Bool)::Int64  where T<:AbstractNode
     # NNI move would be illegal
     if target.nchild == 0 || target.root
         return 0
@@ -36,7 +36,7 @@ function NNI!(root::T, target::T, lor::Bool)::Int64  where T<:GeneralNode
 end # function
 
 """
-    NNI!(root::T, target::Int64)::Int64  where T<:GeneralNode
+    NNI!(root::T, target::Int64)::Int64  where T<:AbstractNode
 
 This function does a nearest neighbour interchange (NNI) move on the tree specified
 by `root`. The target is identified by the number of the target node.
@@ -47,27 +47,27 @@ The function returns 1 if the move was successful and 0 else.
 
 * `target` : specific node of tree to interchange.
 """
-function NNI!(root::T, target::Int64, lor::Bool)::Int64  where T<:GeneralNode
+function NNI!(root::T, target::Int64, lor::Bool)::Int64  where T<:AbstractNode
    tn::T = find_num(root, target)
    NNI!(root, tn, lor)
 end #function
 
 
 """
-    NNI!(root::T, target::Int64)::Int64  where T<:GeneralNode
+    NNI!(root::T, target::Int64)::Int64  where T<:AbstractNode
 
 This function does a nearest neighbour interchange (NNI) move on the tree specified
 by `root`. The target is identified by the number of the target node.
 The function returns 1 if the move was successfull and 0 else.
 """
-function NNI!(root::T, target::Int64)::Int64  where T<:GeneralNode
+function NNI!(root::T, target::Int64)::Int64  where T<:AbstractNode
    tn::T = find_num(root, target)
    lor::Bool = 0.5 > rand()
    NNI!(root, tn, lor)
 end #function
 
 """
-    NNI!(root::T)::Int64  where T<:GeneralNode
+    NNI!(root::T)::Int64  where T<:AbstractNode
 
 This function does a nearest neighbour interchange (NNI) move on the tree specified
 by `root`. The target is identified by the number of the target node.
@@ -77,7 +77,7 @@ The function returns 1 if the move was successful and 0 else.
 * `root` : root node of tree on which to perform the NNI.
 
 """
-function NNI!(root::T)::Int64  where T<:GeneralNode
+function NNI!(root::T)::Int64  where T<:AbstractNode
     n = rand(1:size(root)[1])
     tn::T = find_num(root, n)
     lor::Bool = 0.5 > rand()
@@ -85,7 +85,7 @@ function NNI!(root::T)::Int64  where T<:GeneralNode
 end #function
 
 """
-    NNI(root::T)::T  where T<:GeneralNode
+    NNI(root::T)::T  where T<:AbstractNode
 
 This function does a nearest neighbour interchange (NNI) move on the tree specified
 by `root.`
@@ -95,7 +95,7 @@ Returns a mutated copy while leaving the original tree intact.
 * `root` : root node of tree on which to perform the NNI.
 
 """
-function NNI(root::T)::T where T<:GeneralNode
+function NNI(root::T)::T where T<:AbstractNode
     new_root = deepcopy(root)
     NNI!(new_root)
     return new_root

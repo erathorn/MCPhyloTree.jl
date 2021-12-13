@@ -32,14 +32,14 @@ end # end function to_df
 
 #################### Covariance wrapper ####################
 
-function to_covariance(tree::N) where {N<:GeneralNode}
+function to_covariance(tree::N) where {N<:AbstractNode}
     blv = get_branchlength_vector(tree)
     to_covariance(tree, blv)
 end # end to_covariance
 
 #################### To Matrix convertes ####################
 """
-    to_distance_matrix(tree::T)::Array{Float64,2} where T <:GeneralNode
+    to_distance_matrix(tree::T)::Array{Float64,2} where T <:AbstractNode
 
 Calculate the distance matrix over the set of leaves.
 
@@ -47,7 +47,7 @@ Returns an Array of Floats.
 
 * `tree` : root node of tree used to perform caclulcation.
 """
-function to_distance_matrix(tree::T)::Array{Float64,2} where {T<:GeneralNode}
+function to_distance_matrix(tree::T)::Array{Float64,2} where {T<:AbstractNode}
     leaves::Vector{T} = get_leaves(tree)
     ll = length(leaves)
     distance_mat = zeros(Float64, ll, ll)
@@ -64,7 +64,7 @@ function to_distance_matrix(tree::T)::Array{Float64,2} where {T<:GeneralNode}
 end # function to_distance_matrix
 
 """
-    to_covariance(tree::N, blv::Array{T})::Array{T,2} where {N<:GeneralNode,T<: Real}
+    to_covariance(tree::N, blv::Array{T})::Array{T,2} where {N<:AbstractNode,T<: Real}
 
 Calcualte the variance-covariance matrix from `tree`. An entry (i,j) of the matrix
 is defined as the length of the path connecting the latest common ancestor
@@ -77,7 +77,7 @@ Returns an Array of Real numbers.
 * `blv` : branchlength vector of tree.
 
 """
-function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:GeneralNode,T<:Real}
+function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:AbstractNode,T<:Real}
     leaves::Vector{N} = sort(get_leaves(tree), by = x->x.num)
     ll = length(leaves)
     covmat = zeros(T, ll, ll)
@@ -100,7 +100,7 @@ function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:GeneralNod
 end# function to_covariance
 
 """
-    function leave_incidence_matrix(root::G)::Matrix{Float64} where {G<:GeneralNode}
+    function leave_incidence_matrix(root::G)::Matrix{Float64} where {G<:AbstractNode}
 
 Calculate the incidence matrix of the tree whos root node is `root`
 For a tree with ``m`` leaves and ``n`` vertecies this function returns an ``m \\times n`` matrix ``L``,
@@ -110,13 +110,13 @@ Returns leave incidence matrix.
 
 * `root` : Root node of the tree
 """
-function leave_incidence_matrix(root::G)::Matrix{Float64} where {G<:GeneralNode}
+function leave_incidence_matrix(root::G)::Matrix{Float64} where {G<:AbstractNode}
     n = length(get_branchlength_vector(root))
     leave_incidence_matrix(root, n)
 end
 
 
-function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:GeneralNode}
+function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:AbstractNode}
     leaves::Vector{G} = get_leaves(root)
     out = zeros(length(leaves), n)
     for (i, leave) in enumerate(leaves)

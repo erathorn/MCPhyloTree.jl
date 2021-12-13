@@ -1,22 +1,22 @@
 """
-    SPR(original_root::GeneralNode)::GeneralNode
+    function SPR(original_root<:AbstractNode)
 
 Performs SPR on tree. Takes a copy of root of the tree;
 Returns a copy of root of altered tree. Throws error if tree is improperly formatted.
 """
-function SPR(original_root::GeneralNode)
+function SPR(original_root::T)::T where T <: AbstractNode
     root = deepcopy(original_root)
     SPR!(root)
     return root
 end #func
 
 """
-        SPR!(root::GeneralNode)::GeneralNode
+    SPR!(root::T)::T where T <:AbstractNode
 
 Performs SPR on tree in place. Takes reference to root of tree;
 Returns reference to root of altered tree. Throws error if tree is improperly formatted.
 """
-function SPR!(root::GeneralNode)
+function SPR!(root::T)::T where T <:AbstractNode
     if length(post_order(root)) <= 2
         error("The tree is too small for SPR")
     end #if
@@ -26,26 +26,26 @@ function SPR!(root::GeneralNode)
 end #function
 
 """
-        risky_SPR(root::GeneralNode)::GeneralNode
+    function risky_SPR(original_root::T)::T where T<:AbstractNode
 
 Performs SPR on tree in place. Takes reference to root of tree
 Returns copy of root of altered tree. Does not check for correct formatting of tree.
 """
-function risky_SPR(original_root::GeneralNode)
+function risky_SPR(original_root::T)::T where T<:AbstractNode
     root = deepcopy(original_root)
     return risky_SPR!(root)
 end #function
 
 
 """
-        risky_SPR!(root::GeneralNode)::GeneralNode
+        risky_SPR!(root<:AbstractNode)
 
 Performs SPR on tree in place.
 Returns reference to root of altered tree. Does not check for correct formatting of tree.
 
 * `root` : root node of tree.
 """
-function risky_SPR!(root::GeneralNode)
+function risky_SPR!(root::T)::T where T<:AbstractNode
     return perform_spr(root)
 end #func
 
