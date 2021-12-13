@@ -46,7 +46,7 @@ Returns the root node of the new tree.
 
 * `rooted` : Boolean indicating if the tree should be rooted
 """
-function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)<:AbstractNode
+function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)::GeneralNode{Float64, Int64}
     
     my_node_list, temp_name = rooted ? tree_from_leaves(leaf_nodes, 2) : tree_from_leaves(leaf_nodes, 3)
     root = Node(string(temp_name))
