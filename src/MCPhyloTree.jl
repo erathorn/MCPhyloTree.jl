@@ -45,7 +45,7 @@ include("Plotting/tree_plot.jl")
 include("Plotting/ascii.jl")
 
 # Export Type
-export AbstractNode, GeneralNode, Node, FNode
+export AbstractNode, GeneralNode, Node
 
 export add_child!,
     delete_node!,

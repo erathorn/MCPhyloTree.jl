@@ -251,14 +251,14 @@ function node_height_vec(root::T)::Vector{Float64} where T<:GeneralNode
 end # function node_height
 
 """
-    function node_age(node::FNode)::Float64
+    function node_age(node<:GeneralNode)::Float64
 
 Calculates the age of a node. If the tree is ultrametric then the node age is identical 
 to the node height. It is calculated by subtracting the path length between the node & 
 the root from the height of the root. This represents the age of the node, assuming the 
 leaf farthest from the root has a node age of 0, and the root node is the 'oldest' node.
 """
-function node_age(node::FNode)::Float64
+function node_age(node::GeneralNode)::Float64
     depth::Float64 = 0
     while !node.root
         depth += node.inc_length
@@ -375,24 +375,24 @@ function number_nodes!(root::T)::Nothing  where T<:GeneralNode
 end # function number_nodes
 
 """
-    initialize_tree!(root::FNode; height::Bool=true)
+    initialize_tree!(root::GeneralNode; height::Bool=true)
 
 This function initializes a tree, i.e. numbers its nodes and sets the binary + height 
 fields.
 """
-function initialize_tree!(root::FNode; height::Bool=true)
+function initialize_tree!(root::GeneralNode; height::Bool=true)
     set_binary!(root)
     number_nodes!(root)
     height && tree_height(root)
 end # initialize_tree
 
 """
-    update_tree!(root::FNode)
+    update_tree!(root::GeneralNode)
 
 This function can be used to recompute the tree's binary and height values. This might be 
 necessary after adding/moving/removing nodes.
 """
-function update_tree!(root::FNode; height::Bool=true)
+function update_tree!(root::GeneralNode; height::Bool=true)
     set_binary!(root)
     height && tree_height(root)
 end # update_tree
