@@ -19,11 +19,13 @@ function RF(tree1::T, tree2::T)::Int64 where T <: GeneralNode
     return r
 end
 
+
 function RF_int(tree1::T, tree2::T)::Tuple{Int64, Int64} where T <: GeneralNode
     bt3 = get_bipartitions(tree1)
     bt4 = get_bipartitions(tree2)
     length(bt3)+length(bt4) - 2* length(intersect(bt3, bt4)), length(bt3)+length(bt4)
 end
+
 
 """
     RF_weighted(tree1::T, tree2::T)::Float64 where T <:GeneralNode
@@ -45,12 +47,13 @@ function RF_weighted(tree1::T, tree2::T)::Float64 where T <: GeneralNode
     rf / l1
 end
 
+
 """
     get_bipartitions(tree::T)::Vector{Tuple} where T <:GeneralNode
 
 Get a vector of all bipartions of `tree`.
 
-Returns a vector containing Tuples of sets representing the bipartions.
+Returns a vector containing tuples of sets representing the bipartitions.
 """
 function get_bipartitions(tree::T)::Vector{Tuple} where T <:GeneralNode
     po_vect= post_order(tree)[1:end-1]
@@ -66,10 +69,11 @@ function get_bipartitions(tree::T)::Vector{Tuple} where T <:GeneralNode
     bt
 end
 
+
 """
     get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:GeneralNode
 
-Get all bipartions of `tree`.
+Get all bipartitions of `tree`.
 
 Returns a vector containing BitVectors representing the splits.
 """
@@ -100,6 +104,27 @@ function get_split(node::T, l::Int64)::BitVector where T<:GeneralNode
     split::BitVector = falses(l)
     for leaf in get_leaves(node)
         split[leaf.num] = 1
+    end # for
+    split 
+end
+
+
+"""
+    get_split(node::T, leaves_dict::Dict{String, Int64})::BitVector where T<:GeneralNode
+    
+This is a separate get_split function intended to ensure that that the bit vectors of 
+subtrees can be compared.
+    
+Get the split that you get by splitting the tree at `node`. Needs a leaf dictionary
+containing the name of the leaves and their number in a set tree, to ensure the bit vector 
+can be compared to the bit vector of other subtrees.
+
+Returns a BitVector that represents the split.
+"""
+function get_split(node::T, leaves2num::Dict{String, Int64})::BitVector where T<:GeneralNode         
+    split::BitVector = falses(length(leaves2num))
+    for leaf in get_leaves(node)
+        split[leaves2num[leaf.name]] = 1
     end # for
     split 
 end
