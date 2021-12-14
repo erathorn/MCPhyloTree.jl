@@ -565,21 +565,20 @@ end
 checks to see if given tree is binary; returns true if properly formatted and false otherwise
 """
 function check_binary(root::GeneralNode)::Bool
-    if root.root
-        if root.nchild != 2 && root.nchild != 3
-            return false
-        end #if
-    else
-        if root.nchild != 0 && root.nchild != 2
-            return false
-        end #if
-    end #else
-    res::Bool = true
-    for child in root.children
-        res &= check_binary(child)
-    end #for
-    return res
+    check_binary_int(root, true)
 end #function
+
+function check_binary_int(root::AbstractNode, state::Bool)::Bool
+    for child in root.children
+        state &=check_binary_int(child, state)
+    end
+    if root.root && root.nchild == 3
+        state &= true
+    elseif root.nchild !=0 && root.nchild != 2
+        state &= false
+    end
+    state
+end
 
 
 """
