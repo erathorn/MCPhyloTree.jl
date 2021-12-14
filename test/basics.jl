@@ -1,4 +1,22 @@
 
+@testset "Node Building" begin
+    n = Node()
+    @test isa(n, AbstractNode)    
+    @test isa(n, GeneralNode{Float64, Int64})
+
+    n = Node("Name")
+    @test isa(n, AbstractNode)    
+    @test isa(n, GeneralNode{Float64, Int64})
+    @test n.name == "Name"
+
+    n = Node("Name", 0.75)
+    @test isa(n, AbstractNode)    
+    @test isa(n, GeneralNode{Float64, Int64})
+    @test n.name == "Name"
+    @test n.inc_length == 0.75
+end
+
+
 @testset "add_child!" begin
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
     to_add = ParseNewick("no_name;")
