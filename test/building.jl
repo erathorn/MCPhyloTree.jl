@@ -23,6 +23,14 @@ end
     @test tree_length(rt) == 16
 end
 
+@testset "binary" begin
+    gst = ParseNewick("((a,b,g)c,d,e)f;")
+    @test !check_binary(gst)
+
+    gst = ParseNewick("((a,b)c,(d,e))f;")
+    @test check_binary(gst)
+end
+
 @testset "newick" begin
     tree = ParseNewick("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
     @test newick(tree) == "((B:5.0,A:5.0)C:9.0,(D:5.0,E:5.0)F:5.0)G:5.0;"
@@ -97,4 +105,18 @@ end
 
     @test RF(tree, nt) == 0
 
+end
+
+
+@testset "tree_from_leaves" begin
+    l = ["a", "b", "c", "d", "e", "f", "g"]
+    tree = create_tree_from_leaves(l, true)
+    
+    @test tree.nchild == 2
+    @test check_binary(tree)
+
+    tree = create_tree_from_leaves(l, false)
+    @show !check_binary(tree)
+    @test tree.nchild == 3
+    @test check_binary(tree)
 end
