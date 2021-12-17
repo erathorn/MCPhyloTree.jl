@@ -29,9 +29,9 @@ end # Vertex
 
 mutable struct BipartiteGraph
     incidence_matrix::BitMatrix
-	numbers::Vector{Int64}
-	verteces_a::Vector{Vertex}
-    verteces_b::Vector{Vertex}
+	nums::Vector{Int64}
+	a_vertices::Vector{Vertex}
+    b_vertices::Vector{Vertex}
 	debug::Bool
 end # BipartiteGraph
 
@@ -42,15 +42,15 @@ function build_bipartite_graph(incidence_matrix::BitMatrix, a_weight::Vector{Flo
     a::Int64 = length(a_weight)
     b::Int64 = length(b_weight)
     n::Int64 = max(a, b)
-    verteces_a::Vector{Vertex} = fill(Vertex(0.0), n)
-    verteces_b::Vector{Vertex} = fill(Vertex(0.0), n)
+    a_vertices::Vector{Vertex} = fill(Vertex(0.0), n)
+    b_vertices::Vector{Vertex} = fill(Vertex(0.0), n)
     for i in 1:a
-        verteces_a[i]= Vertex(a_weight[i])
+        a_vertices[i]= Vertex(a_weight[i])
     end # for 
     for i in 1:b
-        verteces_b[i]= Vertex(b_weight[i])
+        b_vertices[i]= Vertex(b_weight[i])
     end # for
-    return BipartiteGraph(incidence_matrix, [a, b, n, 0, 0], verteces_a, verteces_b, false)
+    return BipartiteGraph(incidence_matrix, [a, b, n, 0, 0], a_vertices, b_vertices, false)
 end
 
 
@@ -269,8 +269,8 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
     numEdges1::Int64 = numNodes1 - length(leaves1) - 1
     numEdges2::Int64 = numNodes2 - length(leaves2) - 1
     rs::RatioSequence = []
-    aVertices::Vector{Int64} = []
-    bVertices::Vector{Int64} = []
+    a_vertices::Vector{Int64} = []
+    b_vertices::Vector{Int64} = []
     queue::Vector{Ratio} = Vector{Ratio}()
     ratio::Ratio = ([],[])
     cover::Array{Int64} =[[]]
@@ -293,15 +293,145 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
     leaves::Vector{FNode} = get_leaves(tree1)
     leaf_dict::Dict{String, Int64} = Dict(leaf.name => leaf.num for leaf in leaves)
     int_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
-    int2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+    int_nodes2 = filter!(x -> x.nchild != 0, post_order(tree2)[1:end-1])
     incidence_matrix::BitMatrix =  get_incidence_matrix(int_nodes1, int_nodes2, leaf_dict)
 
-    graph::BipartiteGraph = BipartiteGraph(incidence_matrix, 
+    graph::BipartiteGraph = build_bipartite_graph(incidence_matrix,
                                            [n.inc_length for n in int_nodes1], 
                                            [n.inc_length for n in int_nodes2])
     
+    push!(queue, (int_nodes1, int_nodes2)) 
+	
+    while length(queue) > 0
+        ratio = popfirst!(queue)
+        # sizehint!(a_vertices, length(int_nodes1))
+        # sizehint!(b_vertices, length(int_nodes2))
+        for i in 1:length(int_nodes1)
+            push!(a_vertices, )    
+        end    
+    end # while
+    
+    #=
+    ### TODO ###
+		// convert the ratio to what we pass to vertex cover
+		for (int i = 0; i < ratio.getEEdges().size(); i++) {
+			aVertices[i] = t1.getEdges().indexOf(ratio.getEEdges().get(i));
+		}
+		for (int i = 0; i < ratio.getFEdges().size(); i++) {
+			bVertices[i] = t2.getEdges().indexOf(ratio.getFEdges().get(i));
+		}
+
+		// get the cover
+		cover = bg.vertex_cover(aVertices, bVertices);
+		
+		// check if cover is trivial
+		if ( (cover[0][0] == 0) || (cover[0][0] == aVertices.length) ){
+			// add ratio to geodesic
+			rs.add(ratio);
+	
+		}
+    =#
+        
 end # get_geodesic_nocommonedges
 
+
+function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vector{Int64}
+                     )::Matrix{Int64}
+
+    n_AVC = length(a_index)
+    n_BVC = length(b_index)
+    total::Float64 = 0.0
+    ab_flow::Matrix{Float64} = zeros(n_AVC, n_BVC)
+    k, a_scanlistsize, b_scanlistsize, a_pathnode, b_pathnode = [0 for _ = 1:5]
+    augmenting_pathend::Int64 = -1
+    cd::Matrix{Int64} = zeros(Int64, 4, bg.nums[3])   
+    a_scanlist::Vector{Int64} = [0 for _ = 1:bg.nums[1]]
+    b_scanlist::Vector{Int64} = [0 for _ = 1:bg.nums[2]]
+
+    # set normalized weights
+    for i in 1:n_AVC (total += bg.a_vertices[a_index[i]].weight) end
+    for i in 1:n_AVC
+        bg.a_vertices[a_index[i]].residual = bg.a_vertices[a_index[i]].weight / total
+    end # for
+    total = 0.0
+    for i in 1:n_BVC (total += bg.b_vertices[b_index[i]].weight) end
+    for i in 1:n_BVC
+        bg.b_vertices[b_index[i]].residual = bg.b_vertices[b_index[i]].weight / total
+    end # for
+
+    ### FLOW ALGORITHM ###
+    total = 1.0
+    while(total > 0.0)
+        # scan phase
+        # set labels
+        total = 0.0
+        for i in 1:n_AVC
+            a_vertices[a_index[i]].label = -1.0
+            a_vertices[a_index[i]].pred = -1.0
+        end # for
+        for i in 1:n_BVC
+            b_vertices[b_index[i]].label = -1.0
+            b_vertices[b_index[i]].pred = -1.0
+        end # for
+        a_scanlistsize = 0
+        for i in 1:n_AVC
+            if a_vertices[a_index[i]].residual > 0.0
+                a_vertices[a_index[i]].label = a_vertices[a_index[i]].residual
+                a_scanlist[a_scanlistsize] = a_index[i]
+                a_scanlistsize += 1 
+            else
+                a_vertices[a_index[i]].label = -1.0
+            end # if/else
+        end # for
+        for i in 1:n_BVC (b_vertices[i].label = -1.0) end
+
+        #scan for an augmenting path
+        while(a_scanlistsize != 0)
+            # scan the a side nodes
+            b_scanlistsize = 0
+            for i in 1:a_scanlistsize
+                for j in 1:n_BVC
+                    if bg.incidence_matrix[a_scanlist[i], b_index[j]] && b_vertices[b_index[j]].label == -1.0
+                        b_vertices[b_index[j]].label = a_vertices[a_scanlist[i]].label
+                        b_vertices[b_index[j]].pred = a_scanlist[i]
+                        b_scanlist[b_scanlistsize] = b_index[j]
+                        b_scanlistsize += 1
+                    end # if
+                end # for j
+            end # for i
+            
+            # scan the b side nodes
+            a_scanlistsize = 0
+            for j in 1:b_scanlistsize
+                if b_vertices[b_scanlist[j]].residual > 0.0
+                    total = min(b_vertices[b_scanlist[j]].residual, 
+                                b_vertices[b_scanlist[j]].label)
+                    augmenting_pathend = b_scanlist[j]
+                    @goto escape_inner_while_loop
+                else
+                    for i in 1:n_AVC
+                        if (bg.incidence_matrix[a_index[i],b_scanlist[j]] && 
+                            a_vertices[a_index[i]].label == -1 &&
+                            ab_flow[a_index[i], b_scanlist[j]] > 0)
+                            a_vertices[a_index[i]].label = min(b_vertices[b_scanlist[j]].label, 
+                                                               ab_flow[a_index[i], b_scanlist[j]])
+                            a_vertices[a_index[i]].pred = b_scanlist[j]
+                            a_scanlist[a_scanlistsize = a_index[i]
+                            a_scanlistsize += 1
+                        end # if
+                    end # for
+                end # if/else
+            end # for
+        end # while
+        @label escape_inner_while_loop
+        
+        # flow augmentation
+        if total > 0.0
+
+        end # end
+    end # while
+
+end
 
 """
     get_incidence_matrix(edges1::Vector{FNode}, edges2::Vector{FNode}, 
