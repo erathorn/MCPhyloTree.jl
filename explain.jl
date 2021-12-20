@@ -11,9 +11,9 @@ t2 = deepcopy(trees[2])
 MCPhyloTree.initialize_tree!(t1; height=false)
 MCPhyloTree.initialize_tree!(t2; height=false)
 
-cn = MCPhyloTree.getCommonEdges(t1, t2)
+cn = MCPhyloTree.get_common_edges(t1, t2)
 
-nc = MCPhyloTree.splitOnCommonEdge(t1, t2)
+nc = MCPhyloTree.split_on_common_edge(t1, t2)
 leaves = get_leaves(nc[5][1])
 leaf_dict = Dict(leaf.name => leaf.num for leaf in leaves)
 internal_nodes1 = filter!(x -> x.nchild != 0, post_order(nc[5][1])[1:end-1])
