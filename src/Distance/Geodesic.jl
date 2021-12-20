@@ -66,39 +66,36 @@ end
 
 
 function geodesic(tree1::FNode, tree2::FNode)
+    trees::Tuple{FNode, FNode} = (tree1, tree2)
     leaf_contribution²::Float64 = 0.0
-    leaves::Vector{FNode} = get_leaves(tree1)
-    leaves2::Vector{FNode} = get_leaves(tree2)
-    perm = sortperm([leaf.name for leaf in leaves])
-    perm2 = sortperm([leaf.name for leaf in leaves2])
-    leaf_vec::Vector{String} = [leaf.name for leaf in leaves][perm]
-    leaf_vec2::Vector{String} = [leaf.name for leaf in leaves2][perm2]
-    leaf_attribs::Vector{Float64} = [leaf.inc_length for leaf in leaves][perm]
-    leaf_attribs2::Vector{Float64} = [leaf.inc_length for leaf in leaves2][perm2]
+    leaves::Vector{Vector{FNode}} = get_leaves.(trees)
+    leaf_names::Vector{Vector{String}} = [[leaf.name for leaf in leaves[i]] for i in 1:2] 
+    perms = sortperm.(leaf_names) 
+    leaf_vecs::Vector{String} = [leaf_names[perms[i]] for i in 1:2]
+    leaf_attribs::Vector{Float64} = [[leaf.inc_length for leaf in leaves[i]][perms[i]] for i in 1:2]
     
-    leaf_vec != leaf_vec2 && 
+    leaf_vecs[1] != leaf_vecs[2] && 
         throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
-    for (leaf1, leaf2) in zip(leaves1, leaves2)
+    for (leaf1, leaf2) in zip(leaves[1], leaves[2])
         leaf_contribution² += abs(leaf1.inc_length - leaf2.inc_length) ^ 2
     end # for
     
-    geo = Geodesic(RatioSequence(), leaf_attribs, leaf_attribs2)
+    geo = Geodesic(RatioSequence(), leaf_attribs[1], leaf_attribs[2])
     geo.leaf_contribution² = leaf_contribution²
 
-    non_common_edges::Vector{Tuple{FNode, FNode}} = split_on_commonedge(deepycopy(tree1), 
-                                                                      deepcopy(tree2))
+    non_common_edges::Vector{Tuple{FNode, FNode}} = split_on_common_edge(deepycopy.(trees)...)
 
-    common_edges::Vector{CommonEdge} = get_commonedges(tree1, tree2)
+    common_edges::Vector{CommonEdge} = get_common_edges(trees...)
     geo.common_edges = common_edges
 
-    c_e_lengths::Vector{EdgeLengths} = get_commonedge_lengths([tree1, tree2], common_edges,
+    c_e_lengths::Vector{EdgeLengths} = get_common_edge_lengths(trees, common_edges,
                                                               length(leaves1))                                                     
     geo.common_edge_lengths = c_e_lengths
 
     for i in 1:length(non_common_edges)
         subtree_a = non_common_edges[i][1]
         subtree_b = non_common_edges[i][2]
-        new_geo::Geodesic = get_geodesic_nocommonedges(subtree_a, subtree_b)
+        new_geo::Geodesic = get_geodesic_nocommon_edges(subtree_a, subtree_b)
         #TODO: interleave function
         geo.ratio_seq = interleave(geo.ratio_seq, new_geo.ratio_seq)
     end # for
@@ -107,10 +104,10 @@ end # geodesic
 
 
 """
-    get_commonedge_lengths(trees::Vector{FNode}, common_edges::Vector{CommonEdge}, 
+    get_common_edge_lengths(trees::Vector{FNode}, common_edges::Vector{CommonEdge}, 
         l::Int64)::Tuple{Vector{Float64}, Vector{Float64}}
 """
-function get_commonedge_lengths(trees::Vector{FNode}, common_edges::Vector{CommonEdge}, 
+function get_common_edge_lengths(trees::Vector{FNode}, common_edges::Vector{CommonEdge}, 
                                 l::Int64)::Vector{EdgeLengths}
 
     c_e_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
@@ -128,13 +125,12 @@ function get_commonedge_lengths(trees::Vector{FNode}, common_edges::Vector{Commo
             push!(c_e_lengths[i], inc_length)
         end # for
     end # for
-    lengths::Vector{EdgeLengths} = 
-        [(c_e_lengths[1][i], c_e_lengths[2][i]) for i in 1:length(c_e_lengths[1])]
+    return [(c_e_lengths[1][i], c_e_lengths[2][i]) for i in 1:length(c_e_lengths[1])]
 end # get_common_edge_lengths
 
 
 """
-    split_on_commonedge(tree1::FNode, tree2::FNode; non_common_edges=[])
+    split_on_common_edge(tree1::FNode, tree2::FNode; non_common_edges=[])
         ::Vector{Tuple{FNode, FNode}}
 
 This function finds the common edges of two trees, and splits them at the first common edge
@@ -150,33 +146,30 @@ Returns a Vector of all pairs of subtrees that share no common edges.
                        at each recursion
 """
 function split_on_common_edge(tree1::FNode, tree2::FNode; non_common_edges=[]
-                          )::Vector{Tuple{FNode, FNode}}
+                             )::Vector{Tuple{FNode, FNode}}
 
-    numNodes1::Int64 = length(post_order(tree1))
-    numNodes2::Int64 = length(post_order(tree2))
-    leaves1::Vector{FNode} = sort!(get_leaves(tree1), by=x->x.name)
-    leaves2::Vector{FNode} = sort!(get_leaves(tree2), by=x->x.name)
-    numEdges1::Int64 = numNodes1 - length(leaves1) - 1
-    numEdges2::Int64 = numNodes2 - length(leaves2) - 1
-    (numEdges1 <= 0 || numEdges2 <= 0) && return []
+    trees::Tuple{FNode, FNode} = (tree1, tree2)
+    num_nodes::Vector{Int64} = [length(post_order(t)) for t in trees]
+    leaves::Vector{Vector{FNode}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
+    num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
+    (num_edges[1] <= 0 || num_edges[2] <= 0) && return []
     
-    common_edges::Vector{CommonEdge} = get_commonedges(tree1, tree2)
-    
+    common_edges::Vector{CommonEdge} = get_common_edges(trees...)
     # if there are no common edges, add the trees to the array of subtrees that share no 
     # common edges
     if isempty(common_edges)
-        push!(non_common_edges, (tree1, tree2))
+        push!(non_common_edges, trees)
         return non_common_edges
     end # if
     
     # get the first common edge that was found
     common_edge::CommonEdge = common_edges[1]
     # get a bit vector representing the split of the common edge 
-    split::BitVector = get_split(common_edge[1], length(leaves1))
+    split::BitVector = get_split(common_edge[1], length(leaves[1]))
     
     # find the common node in each tree by using its split
-    common_node1, rev1 = get_node_from_split(tree1, split, leaves1)
-    common_node2, rev2 = get_node_from_split(tree2, split, leaves2)
+    common_node1, rev1 = get_node_from_split(tree1, split, leaves[1])
+    common_node2, rev2 = get_node_from_split(tree2, split, leaves[2])
 
     # track if we have to swap the tree pairs after using the reversed split for one of 
     # the common nodes 
@@ -189,23 +182,22 @@ function split_on_common_edge(tree1::FNode, tree2::FNode; non_common_edges=[]
     # initialize the new subtrees
     initialize_tree!(common_node1)
     initialize_tree!(common_node2)
-    initialize_tree!(tree1)
-    initialize_tree!(tree2)
+    initialize_tree!.(trees)
     
     # recursively split new subtrees as well
     if reverse
-        split_on_commonedge(tree1, common_node2; non_common_edges)
-        split_on_commonedge(tree2, common_node1; non_common_edges)
+        split_on_common_edge(tree1, common_node2; non_common_edges)
+        split_on_common_edge(tree2, common_node1; non_common_edges)
     else
-        split_on_commonedge(common_node1, common_node2; non_common_edges)
-        split_on_commonedge(tree1, tree2; non_common_edges)
+        split_on_common_edge(common_node1, common_node2; non_common_edges)
+        split_on_common_edge(tree1, tree2; non_common_edges)
     end # if/else
     return non_common_edges
-end # split_on_commonedge
+end # split_on_common_edge
  
 
 """
-    get_commonedges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
+    get_common_edges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
 
 This function returns all the common edges of two trees with the same leafset. It also
 calculates the length difference of each pair of common edges. 
@@ -214,8 +206,8 @@ calculates the length difference of each pair of common edges.
 
 * `tree2` : root node of the second tree
 """
-function get_commonedges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
-    commonEdges::Vector{CommonEdge} = []
+function get_common_edges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
+    common_edges::Vector{CommonEdge} = []
     # TODO maybe need to check leaves again; skipping for now 
     # TODO maybe return a split instead of a node
     tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
@@ -229,11 +221,11 @@ function get_commonedges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
         if split in tree_splits
             leaf_cluster = leaves2[split]
             length_diff = node.inc_length - find_lca(tree2, leaf_cluster).inc_length
-            push!(commonEdges, (node, length_diff))
+            push!(common_edges, (node, length_diff))
         end
     end # for
-    return commonEdges
-end # get_commonedges
+    return common_edges
+end # get_common_edges
 
 
 """
@@ -291,13 +283,13 @@ end # split_tree!
 
 
 """
-    get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
+    get_geodesic_no_common_edges(tree1::FNode, tree2::FNode)
 """
-function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
-    numNodes1::Int64 = length(post_order(tree1))
-    numNodes2::Int64 = length(post_order(tree2))
-    numEdges1::Int64 = numNodes1 - length(leaves1) - 1
-    numEdges2::Int64 = numNodes2 - length(leaves2) - 1
+function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
+    trees::Tuple{FNode, FNode} = (tree1, tree2)
+    num_nodes::Vector{Int64} = [length(post_order(t)) for t in trees]
+    leaves::Vector{Vector{FNode}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
+    num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     rs::RatioSequence = []
     a_vertices::Vector{Int64} = []
     b_vertices::Vector{Int64} = []
@@ -306,23 +298,22 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
     r1::Ratio, r2::Ratio = [Ratio() for _ in 1:2]
     cover::Array{Int64} =[[]]
 
-    commonedges = get_commonedges(tree1, tree2)
+    common_edges = get_common_edges(trees...)
     # doublecheck to make sure the trees have no common edges
-    length(commonedges) == 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
+    length(common_edges) == 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
     
-    if numEdges1 == 0 || numEdges2 == 0
+    if num_edges[1] == 0 || num_edges[2] == 0
         throw(ArgumentError("Exiting: Can't compute the geodesic for trees with no edges"))
     end # if
 
-    if numEdges1 == 1 || numEdges2 == 1
+    if num_edges[1] == 1 || num_edges[2] == 1
         internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end 1])
         internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
 		push(rs, (internal_nodes1, internal_nodes2))
 		return Geodesic(rs)
 	end # if
 
-    leaves::Vector{FNode} = get_leaves(tree1)
-    leaf_dict::Dict{String, Int64} = Dict(leaf.name => leaf.num for leaf in leaves)
+    leaf_dict::Dict{String, Int64} = Dict(leaf.name => leaf.num for leaf in leaves[1])
     int_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
     int_nodes2 = filter!(x -> x.nchild != 0, post_order(tree2)[1:end-1])
     incidence_matrix::BitMatrix =  get_incidence_matrix(int_nodes1, int_nodes2, leaf_dict)
@@ -346,7 +337,7 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
             b_vertices[i] = findfirst(isequal(ratio.f_edges[i]), int_nodes2) 
         end # for
         
-        cover = vertex_cover(bg, a_vertices, b_vertices)
+        cover = get_vertex_cover(graph, a_vertices, b_vertices)
         
         if (cover[1, 1] == 0 || (cover[1, 1] == length(a_vertices))) 
             push(rs, ratio)
@@ -379,10 +370,10 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
         pushfirst!(queue, r1)
     end # while 
     return Geodesic(rs)     
-end # get_geodesic_nocommonedges
+end # get_geodesic_nocommon_edges
 
 
-function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vector{Int64}
+function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vector{Int64}
                      )::Matrix{Int64}
 
     n_AVC = length(a_index)
@@ -509,7 +500,7 @@ function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vecto
          end # if/else    
     end # while
     return cd
-end # vertex_cover
+end # get_vertex_cover
 
 """
     get_incidence_matrix(edges1::Vector{FNode}, edges2::Vector{FNode}, 
@@ -552,6 +543,10 @@ Check if two splits cross.
 
 Returns true if `b1` & `b2` - the bit vectors representing the two splits - are neither
 disjoint nor does either one contain the other.
+
+* `b1` : first split
+
+* `b2` : second split
 """
 function crosses(b1::BitVector, b2::BitVector)::Bool
     disjoint::Bool = all(.!(b1 .& b2))
@@ -606,7 +601,8 @@ This function adds a new edge to one side of a ratio and adjusts the ratio lengt
 accordingly.
 
 * `ratio` : ratio to which node is added
-* `node`: node that is added to the ratio
+
+* `node` : node that is added to the ratio
 """
 function add_e_edge!(ratio::Ratio, node::FNode)
     push!(ratio.e_edges, node)
