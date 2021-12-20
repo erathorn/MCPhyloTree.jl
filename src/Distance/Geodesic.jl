@@ -9,20 +9,22 @@ mutable struct Ratio
 end # Ratio
 
 const RatioSequence = Vector{Ratio}
-
+const EdgeLengths = Tuple{Float64, Float64}
+const CommonEdge = Tuple{FNode, Float64}
 
 mutable struct Geodesic
     ratio_seq::RatioSequence
     e_leaf_attribs::Vector{Float64}
     f_leaf_attribs::Vector{Float64}
     leaf_contribution²::Float64
-    common_edges::Vector{Tuple{FNode,FNode,Float64}}
+    common_edges::CommonEdge
+    common_edge_lengths::EdgeLengths
 
     Geodesic(rs::RatioSequence, e_lengths::Vector{Float64}, f_lengths::Vector{Float64}) = 
-        new(rs, e_lengths, f_lengths, 0.0, Tuple{FNode,FNode,Float64}[])
+        new(rs, e_lengths, f_lengths, 0.0, CommonEdge[], EdgeLengths[])
 
     Geodesic(rs::RatioSequence) = 
-        new(rs, [], [], 0.0, Tuple{FNode,FNode,Float64}[])
+        new(rs, [], [], 0.0, CommonEdge[], EdgeLengths[])
 end # Geodesic
 
 
@@ -105,14 +107,13 @@ end # geodesic
 
 
 """
-    get_commonedge_lengths(trees::Vector{FNode}, common_edges::Vector{Tuple{FNode, Float64}}, 
+    get_commonedge_lengths(trees::Vector{FNode}, common_edges::Vector{CommonEdge}, 
         l::Int64)::Tuple{Vector{Float64}, Vector{Float64}}
 """
-function get_commonedge_lengths(trees::Vector{FNode}, 
-                                common_edges::Vector{Tuple{FNode, Float64}}, l::Int64
-                                )::Tuple{Vector{Float64}, Vector{Float64}}
+function get_commonedge_lengths(trees::Vector{FNode}, common_edges::Vector{CommonEdge}, 
+                                l::Int64)::Vector{EdgeLengths}
 
-    common_edge_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
+    c_e_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
     post_orders = post_order.(trees)
     bps = get_bipartitions_as_bitvectors.(trees)
     inc_length::Float64 = 0.0
@@ -124,15 +125,16 @@ function get_commonedge_lengths(trees::Vector{FNode},
             ind = findfirst(x -> x == split, bps[i])
             inc_length = isnothing(ind) ? 0.0 : post_orders[i][ind].inc_length
             println(i)
-            push!(common_edge_lengths[i], inc_length)
+            push!(c_e_lengths[i], inc_length)
         end # for
     end # for
-    common_edge_lengths
+    lengths::Vector{EdgeLengths} = 
+        [(c_e_lengths[1][i], c_e_lengths[2][i]) for i in 1:length(c_e_lengths[1])]
 end # get_common_edge_lengths
 
 
 """
-    splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[])
+    split_on_commonedge(tree1::FNode, tree2::FNode; non_common_edges=[])
         ::Vector{Tuple{FNode, FNode}}
 
 This function finds the common edges of two trees, and splits them at the first common edge
@@ -147,7 +149,7 @@ Returns a Vector of all pairs of subtrees that share no common edges.
 * `non_common_edges` : vector of non common edges. It is initialized empty and appended to 
                        at each recursion
 """
-function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
+function split_on_common_edge(tree1::FNode, tree2::FNode; non_common_edges=[]
                           )::Vector{Tuple{FNode, FNode}}
 
     numNodes1::Int64 = length(post_order(tree1))
@@ -158,7 +160,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     numEdges2::Int64 = numNodes2 - length(leaves2) - 1
     (numEdges1 <= 0 || numEdges2 <= 0) && return []
     
-    common_edges::Vector{Tuple{FNode, Float64}} = get_commonedges(tree1, tree2)
+    common_edges::Vector{CommonEdge} = get_commonedges(tree1, tree2)
     
     # if there are no common edges, add the trees to the array of subtrees that share no 
     # common edges
@@ -168,7 +170,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     end # if
     
     # get the first common edge that was found
-    common_edge::Tuple{FNode, Float64} = common_edges[1]
+    common_edge::CommonEdge = common_edges[1]
     # get a bit vector representing the split of the common edge 
     split::BitVector = get_split(common_edge[1], length(leaves1))
     
@@ -192,18 +194,18 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     
     # recursively split new subtrees as well
     if reverse
-        splitOnCommonEdge(tree1, common_node2; non_common_edges)
-        splitOnCommonEdge(tree2, common_node1; non_common_edges)
+        split_on_commonedge(tree1, common_node2; non_common_edges)
+        split_on_commonedge(tree2, common_node1; non_common_edges)
     else
-        splitOnCommonEdge(common_node1, common_node2; non_common_edges)
-        splitOnCommonEdge(tree1, tree2; non_common_edges)
+        split_on_commonedge(common_node1, common_node2; non_common_edges)
+        split_on_commonedge(tree1, tree2; non_common_edges)
     end # if/else
     return non_common_edges
-end # splitOnCommonEdge
+end # split_on_commonedge
  
 
 """
-    get_commonedges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
+    get_commonedges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
 
 This function returns all the common edges of two trees with the same leafset. It also
 calculates the length difference of each pair of common edges. 
@@ -212,8 +214,8 @@ calculates the length difference of each pair of common edges.
 
 * `tree2` : root node of the second tree
 """
-function get_commonedges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
-    commonEdges::Vector{Tuple{FNode, Float64}} = []
+function get_commonedges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
+    commonEdges::Vector{CommonEdge} = []
     # TODO maybe need to check leaves again; skipping for now 
     # TODO maybe return a split instead of a node
     tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
@@ -458,8 +460,10 @@ function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vecto
                         if (bg.incidence_matrix[a_index[i],b_scanlist[j]] && 
                             bg.a_vertices[a_index[i]].label == -1 &&
                             ab_flow[a_index[i], b_scanlist[j]] > 0)
-                            bg.a_vertices[a_index[i]].label = min( bg.b_vertices[b_scanlist[j]].label, 
-                                                               ab_flow[a_index[i], b_scanlist[j]])
+                            bg.a_vertices[a_index[i]].label = 
+                                min(bg.b_vertices[b_scanlist[j]].label, 
+                                    ab_flow[a_index[i], b_scanlist[j]])
+
                             bg.a_vertices[a_index[i]].pred = b_scanlist[j]
                             a_scanlist[a_scanlistsize] = a_index[i]
                             a_scanlistsize += 1
