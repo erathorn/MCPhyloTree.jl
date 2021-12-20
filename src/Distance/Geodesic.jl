@@ -273,6 +273,7 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
     b_vertices::Vector{Int64} = []
     queue::Vector{Ratio} = Vector{Ratio}()
     ratio::Ratio = ([],[])
+    r1::Ratio, r2::Ratio = [([], []) for _ in 1:2]
     cover::Array{Int64} =[[]]
 
     commonedges = getCommonEdges(tree1, tree2)
@@ -323,14 +324,16 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
 
 		// get the cover
 		cover = bg.vertex_cover(aVertices, bVertices);
-		
-		// check if cover is trivial
-		if ( (cover[0][0] == 0) || (cover[0][0] == aVertices.length) ){
-			// add ratio to geodesic
-			rs.add(ratio);
-	
-		}
-    =#
+	=#
+
+    if (cover[1, 1] == 0 || (cover[1, 1] == length(a_vertices))) 
+		push(rs, ratio)
+    
+    else
+        
+
+        j = 1
+    end # if/else
         
 end # get_geodesic_nocommonedges
 
@@ -455,7 +458,7 @@ function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vecto
                     k += 1
                 end # if
             end # for
-
+            
             cd[2, 1] = k
          end # if/else    
     end # while
