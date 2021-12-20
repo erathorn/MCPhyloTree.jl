@@ -1,16 +1,25 @@
-const Ratio = Tuple{Vector{FNode}, Vector{FNode}}
+mutable struct Ratio
+    e_length::Float64
+	f_length::Float64
+	e_edges::Vector{FNode}
+	f_edges::Vector{FNode}
+
+    Ratio() = new(0.0, 0.0, [], [])
+    Ratio(e::Vector{FNode}, f::Vector{FNode}) = new(geo_avg(e), geo_avg(f), e, f)
+end # Ratio
+
 const RatioSequence = Vector{Ratio}
 
 
 mutable struct Geodesic
-    ratioSequence::RatioSequence
-    eLeafAttribs::Vector{Float64}
-    fLeafAttribs::Vector{Float64}
-    leafContributionSquared::Float64
-    commonEdges::Vector{Tuple{FNode,FNode,Float64}}
+    ratio_seq::RatioSequence
+    e_leaf_attribs::Vector{Float64}
+    f_leaf_attribs::Vector{Float64}
+    leaf_contribution²::Float64
+    common_edges::Vector{Tuple{FNode,FNode,Float64}}
 
-    Geodesic(rs::RatioSequence, eLengths::Vector{Float64}, fLengths::Vector{Float64}) = 
-        new(rs, eLengths, fLengths, 0.0, Tuple{FNode,FNode,Float64}[])
+    Geodesic(rs::RatioSequence, e_lengths::Vector{Float64}, f_lengths::Vector{Float64}) = 
+        new(rs, e_lengths, f_lengths, 0.0, Tuple{FNode,FNode,Float64}[])
 
     Geodesic(rs::RatioSequence) = 
         new(rs, [], [], 0.0, Tuple{FNode,FNode,Float64}[])
@@ -55,7 +64,7 @@ end
 
 
 function geodesic(tree1::FNode, tree2::FNode)
-    leafContributionSquared::Float64 = 0.0
+    leaf_contribution²::Float64 = 0.0
     leaves1::Vector{FNode} = get_leaves(tree1)
     leaves2::Vector{FNode} = get_leaves(tree2)
     leafVector1::Vector{String} = sort!([leaf.name for leaf in leaves1])
@@ -63,21 +72,20 @@ function geodesic(tree1::FNode, tree2::FNode)
     leafVector1 != leafVector2 && 
         throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
     for (leaf1, leaf2) in zip(leaves1, leaves2)
-        leafContributionSquared += abs(leaf1.inc_length - leaf2.inc_length) ^ 2
+        leaf_contribution² += abs(leaf1.inc_length - leaf2.inc_length) ^ 2
     end # for
     
-    """
-    geo = Geodesic(RatioSequence(), t1LeafEdgeAttribs, t2LeafEdgeAttribs, 
-                   leafContributionSquared, commonEdges)
-    """
-    non_common_edges::Vector{Tuple{FNode, FNode}} = splitOnCommonEdge(deepycopy(tree1), 
-                                                                      deepcopy(tree2))
+    geo = Geodesic(RatioSequence(), t1LeafEdgeAttribs, t2LeafEdgeAttribs)
+    geo.leaf_contribution² = leaf_contribution²
 
-    common_edges::Vector{Tuple{FNode, Float64}} = getCommonEdges(tree1, tree2)
+    non_common_edges::Vector{Tuple{FNode, FNode}} = splitOnCommonEdge(deepycopy(tree1),                                                           deepcopy(tree2))
+    common_edges::Vector{Tuple{FNode, Float64}} = get_commonedges(tree1, tree2)
     c_e_lengths::Vector{Tuple{Float64, Float64}} = get_commonedge_lengths([tree1, tree2], 
                                                                            common_edges, 
                                                                            length(leaves1))
+    geo.common_edges = common_edges
 end # geodesic
+
 
 """
     get_commonedge_lengths(trees::Vector{FNode}, common_edges::Vector{Tuple{FNode, Float64}}, 
@@ -90,11 +98,14 @@ function get_commonedge_lengths(trees::Vector{FNode},
     common_edge_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
     post_orders = post_order.(trees)
     bps = get_bipartitions_as_bitvectors.(trees)
+    inc_length::Float64 = 0.0
+    ind::Int64 = 0
+
     for common_edge in common_edges 
         split = get_split(common_edge[1], l)
         for i in [1,2]
             ind = findfirst(x -> x == split, bps[i])
-            inc_length::Float64 = isnothing(ind) ? 0.0 : post_orders[i][ind].inc_length
+            inc_length = isnothing(ind) ? 0.0 : post_orders[i][ind].inc_length
             println(i)
             push!(common_edge_lengths[i], inc_length)
         end # for
@@ -130,7 +141,7 @@ function splitOnCommonEdge(tree1::FNode, tree2::FNode; non_common_edges=[]
     numEdges2::Int64 = numNodes2 - length(leaves2) - 1
     (numEdges1 <= 0 || numEdges2 <= 0) && return []
     
-    common_edges::Vector{Tuple{FNode, Float64}} = getCommonEdges(tree1, tree2)
+    common_edges::Vector{Tuple{FNode, Float64}} = get_commonedges(tree1, tree2)
     
     # if there are no common edges, add the trees to the array of subtrees that share no 
     # common edges
@@ -175,7 +186,7 @@ end # splitOnCommonEdge
  
 
 """
-    getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
+    get_commonedges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
 
 This function returns all the common edges of two trees with the same leafset. It also
 calculates the length difference of each pair of common edges. 
@@ -184,7 +195,7 @@ calculates the length difference of each pair of common edges.
 
 * `tree2` : root node of the second tree
 """
-function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
+function get_commonedges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64}}
     commonEdges::Vector{Tuple{FNode, Float64}} = []
     # TODO maybe need to check leaves again; skipping for now 
     # TODO maybe return a split instead of a node
@@ -203,7 +214,7 @@ function getCommonEdges(tree1::FNode, tree2::FNode)::Vector{Tuple{FNode, Float64
         end
     end # for
     return commonEdges
-end # getCommonEdges
+end # get_commonedges
 
 
 """
@@ -272,11 +283,11 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
     a_vertices::Vector{Int64} = []
     b_vertices::Vector{Int64} = []
     queue::Vector{Ratio} = Vector{Ratio}()
-    ratio::Ratio = ([],[])
-    r1::Ratio, r2::Ratio = [([], []) for _ in 1:2]
+    ratio::Ratio = Ratio()
+    r1::Ratio, r2::Ratio = [Ratio() for _ in 1:2]
     cover::Array{Int64} =[[]]
 
-    commonedges = getCommonEdges(tree1, tree2)
+    commonedges = get_commonedges(tree1, tree2)
     # doublecheck to make sure the trees have no common edges
     length(commonedges) == 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
     
@@ -298,43 +309,57 @@ function get_geodesic_nocommonedges(tree1::FNode, tree2::FNode)
     incidence_matrix::BitMatrix =  get_incidence_matrix(int_nodes1, int_nodes2, leaf_dict)
 
     graph::BipartiteGraph = build_bipartite_graph(incidence_matrix,
-                                           [n.inc_length for n in int_nodes1], 
-                                           [n.inc_length for n in int_nodes2])
+                                                  [n.inc_length for n in int_nodes1], 
+                                                  [n.inc_length for n in int_nodes2])
     
-    push!(queue, (int_nodes1, int_nodes2)) 
+    push!(queue, Ratio(int_nodes1, int_nodes2)) 
 	
     while length(queue) > 0
         ratio = popfirst!(queue)
+        a_vertices = []
+        b_vertices = []
         # sizehint!(a_vertices, length(int_nodes1))
         # sizehint!(b_vertices, length(int_nodes2))
-        for i in 1:length(int_nodes1)
-            push!(a_vertices, )    
-        end    
-    end # while
-    
-    #=
-    ### TODO ###
-		// convert the ratio to what we pass to vertex cover
-		for (int i = 0; i < ratio.getEEdges().size(); i++) {
-			aVertices[i] = t1.getEdges().indexOf(ratio.getEEdges().get(i));
-		}
-		for (int i = 0; i < ratio.getFEdges().size(); i++) {
-			bVertices[i] = t2.getEdges().indexOf(ratio.getFEdges().get(i));
-		}
-
-		// get the cover
-		cover = bg.vertex_cover(aVertices, bVertices);
-	=#
-
-    if (cover[1, 1] == 0 || (cover[1, 1] == length(a_vertices))) 
-		push(rs, ratio)
-    
-    else
+        for i in 1:length(ratio.e_edges)
+            a_vertices[i] = findfirst(isequal(ratio.e_edges[i]), int_nodes1) 
+        end # for
+        for i in 1:length(ratio.f_edges)
+            b_vertices[i] = findfirst(isequal(ratio.f_edges[i]), int_nodes2) 
+        end # for
         
-
-        j = 1
-    end # if/else
+        cover = vertex_cover(bg, a_vertices, b_vertices)
         
+        if (cover[1, 1] == 0 || (cover[1, 1] == length(a_vertices))) 
+            push(rs, ratio)
+        
+        else
+            r1 = Ratio()
+            r2 = Ratio()
+            j = 1
+
+            for i in 1:length(a_vertices)
+                if j < size(cover)[2] && (a_vertices[i] == cover[3, j])
+                    add_e_edge!(r1, find_num(tree1, a_vertices[i]))
+                    j += 1
+                else
+                    add_e_edge!(r2, find_num(tree1, a_vertices[i]))
+                end # if/else
+            end # for
+            j = 1
+
+            for i in 1:b_vertices
+                if j < size(cover)[2] && (b_vertices[i] == cover[4, j])
+                    add_f_edge!(r2, find_num(tree2, b_vertices[i]))
+                    j += 1
+                else
+                    add_f_edge!(r1, find_num(tree2, b_vertices[i]))
+                end # if/else
+            end # for
+        end # if/else
+        pushfirst!(queue, r2)
+        pushfirst!(queue, r1)
+    end # while 
+    return Geodesic(rs)     
 end # get_geodesic_nocommonedges
 
 
@@ -448,7 +473,7 @@ function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vecto
                     cd[3, k] = a_index[i]
                     k += 1
                 end # if
-            end #for
+            end # for
 
             cd[1, 1] = k
             k = 1
@@ -532,3 +557,49 @@ function isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector}
     true
 end # isCompatibleWith
 =#
+
+
+"""
+    geo_avg(edges::Vector{FNode})::Float64
+
+--- INTERNAL ---
+This function sums the squared edge lengths of the input edges and returns the square root
+of that sum.
+
+* `edges` : root node of the first tree
+"""
+function geo_avg(edges::Vector{FNode})::Float64
+    avg::Float64 = 0.0
+    for edge in edges
+        avg += edge.inc_length ^ 2
+    end # for
+    return sqrt(avg)
+end # geo_avg
+
+
+"""
+    add_e_edge!(ratio::Ratio, node::FNode)
+
+--- INTERNAL ---
+This function adds a new edge to one side of a ratio and adjusts the ratio length 
+accordingly.
+
+* `ratio` : ratio to which node is added
+* `node`: node that is added to the ratio
+"""
+function add_e_edge!(ratio::Ratio, node::FNode)
+    push!(ratio.e_edges, node)
+    ratio.e_length = sqrt(e_length ^ 2 + node.inc_length ^ 2)
+end # add_e_edge!
+
+
+"""
+    add_f_edge!(ratio::Ratio, node::FNode)
+
+--- INTERNAL ---
+Works like add_e_edge!
+"""
+function add_f_edge!(ratio::Ratio, node::FNode)
+    push!(ratio.f_edges, node)
+    ratio.f_length = sqrt(f_length ^ 2 + node.inc_length ^ 2)
+end # add_f_edge!
