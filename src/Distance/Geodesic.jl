@@ -65,25 +65,42 @@ end
 
 function geodesic(tree1::FNode, tree2::FNode)
     leaf_contribution²::Float64 = 0.0
-    leaves1::Vector{FNode} = get_leaves(tree1)
+    leaves::Vector{FNode} = get_leaves(tree1)
     leaves2::Vector{FNode} = get_leaves(tree2)
-    leafVector1::Vector{String} = sort!([leaf.name for leaf in leaves1])
-    leafVector2::Vector{String} = sort!([leaf.name for leaf in leaves2])
-    leafVector1 != leafVector2 && 
+    perm = sortperm([leaf.name for leaf in leaves])
+    perm2 = sortperm([leaf.name for leaf in leaves2])
+    leaf_vec::Vector{String} = [leaf.name for leaf in leaves][perm]
+    leaf_vec2::Vector{String} = [leaf.name for leaf in leaves2][perm2]
+    leaf_attribs::Vector{Float64} = [leaf.inc_length for leaf in leaves][perm]
+    leaf_attribs2::Vector{Float64} = [leaf.inc_length for leaf in leaves2][perm2]
+    
+    leaf_vec != leaf_vec2 && 
         throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
     for (leaf1, leaf2) in zip(leaves1, leaves2)
         leaf_contribution² += abs(leaf1.inc_length - leaf2.inc_length) ^ 2
     end # for
     
-    geo = Geodesic(RatioSequence(), t1LeafEdgeAttribs, t2LeafEdgeAttribs)
+    geo = Geodesic(RatioSequence(), leaf_attribs, leaf_attribs2)
     geo.leaf_contribution² = leaf_contribution²
 
-    non_common_edges::Vector{Tuple{FNode, FNode}} = splitOnCommonEdge(deepycopy(tree1),                                                           deepcopy(tree2))
-    common_edges::Vector{Tuple{FNode, Float64}} = get_commonedges(tree1, tree2)
-    c_e_lengths::Vector{Tuple{Float64, Float64}} = get_commonedge_lengths([tree1, tree2], 
-                                                                           common_edges, 
-                                                                           length(leaves1))
+    non_common_edges::Vector{Tuple{FNode, FNode}} = split_on_commonedge(deepycopy(tree1), 
+                                                                      deepcopy(tree2))
+
+    common_edges::Vector{CommonEdge} = get_commonedges(tree1, tree2)
     geo.common_edges = common_edges
+
+    c_e_lengths::Vector{EdgeLengths} = get_commonedge_lengths([tree1, tree2], common_edges,
+                                                              length(leaves1))                                                     
+    geo.common_edge_lengths = c_e_lengths
+
+    for i in 1:length(non_common_edges)
+        subtree_a = non_common_edges[i][1]
+        subtree_b = non_common_edges[i][2]
+        new_geo::Geodesic = get_geodesic_nocommonedges(subtree_a, subtree_b)
+        #TODO: interleave function
+        geo.ratio_seq = interleave(geo.ratio_seq, new_geo.ratio_seq)
+    end # for
+    return geo
 end # geodesic
 
 
