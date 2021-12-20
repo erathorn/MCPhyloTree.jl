@@ -342,19 +342,19 @@ function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vecto
     n_BVC = length(b_index)
     total::Float64 = 0.0
     ab_flow::Matrix{Float64} = zeros(n_AVC, n_BVC)
-    k, a_scanlistsize, b_scanlistsize, a_pathnode, b_pathnode = [0 for _ = 1:5]
+    k, a_scanlistsize, b_scanlistsize, a_pathnode, b_pathnode = [1 for _ = 1:5]
     augmenting_pathend::Int64 = -1
     cd::Matrix{Int64} = zeros(Int64, 4, bg.nums[3])   
     a_scanlist::Vector{Int64} = [0 for _ = 1:bg.nums[1]]
     b_scanlist::Vector{Int64} = [0 for _ = 1:bg.nums[2]]
 
     # set normalized weights
-    for i in 1:n_AVC (total += bg.a_vertices[a_index[i]].weight) end
+    for i in 1:n_AVC total += bg.a_vertices[a_index[i]].weight end
     for i in 1:n_AVC
         bg.a_vertices[a_index[i]].residual = bg.a_vertices[a_index[i]].weight / total
     end # for
     total = 0.0
-    for i in 1:n_BVC (total += bg.b_vertices[b_index[i]].weight) end
+    for i in 1:n_BVC total += bg.b_vertices[b_index[i]].weight end
     for i in 1:n_BVC
         bg.b_vertices[b_index[i]].residual = bg.b_vertices[b_index[i]].weight / total
     end # for
@@ -366,34 +366,34 @@ function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vecto
         # set labels
         total = 0.0
         for i in 1:n_AVC
-            a_vertices[a_index[i]].label = -1.0
-            a_vertices[a_index[i]].pred = -1.0
+            bg.a_vertices[a_index[i]].label = -1.0
+            bg.a_vertices[a_index[i]].pred = -1.0
         end # for
         for i in 1:n_BVC
-            b_vertices[b_index[i]].label = -1.0
-            b_vertices[b_index[i]].pred = -1.0
+            bg.b_vertices[b_index[i]].label = -1.0
+            bg.b_vertices[b_index[i]].pred = -1.0
         end # for
-        a_scanlistsize = 0
+        a_scanlistsize = 1
         for i in 1:n_AVC
-            if a_vertices[a_index[i]].residual > 0.0
-                a_vertices[a_index[i]].label = a_vertices[a_index[i]].residual
+            if bg.a_vertices[a_index[i]].residual > 0.0
+                bg.a_vertices[a_index[i]].label = bg.a_vertices[a_index[i]].residual
                 a_scanlist[a_scanlistsize] = a_index[i]
                 a_scanlistsize += 1 
             else
-                a_vertices[a_index[i]].label = -1.0
+                bg.a_vertices[a_index[i]].label = -1.0
             end # if/else
         end # for
-        for i in 1:n_BVC (b_vertices[i].label = -1.0) end
+        for i in 1:n_BVC b_vertices[i].label = -1.0 end
 
         #scan for an augmenting path
-        while(a_scanlistsize != 0)
+        while(a_scanlistsize != 1)
             # scan the a side nodes
-            b_scanlistsize = 0
+            b_scanlistsize = 1
             for i in 1:a_scanlistsize
                 for j in 1:n_BVC
-                    if bg.incidence_matrix[a_scanlist[i], b_index[j]] && b_vertices[b_index[j]].label == -1.0
-                        b_vertices[b_index[j]].label = a_vertices[a_scanlist[i]].label
-                        b_vertices[b_index[j]].pred = a_scanlist[i]
+                    if bg.incidence_matrix[a_scanlist[i], b_index[j]] && bg.b_vertices[b_index[j]].label == -1.0
+                        bg.b_vertices[b_index[j]].label = bg.a_vertices[a_scanlist[i]].label
+                        bg.b_vertices[b_index[j]].pred = a_scanlist[i]
                         b_scanlist[b_scanlistsize] = b_index[j]
                         b_scanlistsize += 1
                     end # if
@@ -401,22 +401,22 @@ function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vecto
             end # for i
             
             # scan the b side nodes
-            a_scanlistsize = 0
+            a_scanlistsize = 1
             for j in 1:b_scanlistsize
-                if b_vertices[b_scanlist[j]].residual > 0.0
-                    total = min(b_vertices[b_scanlist[j]].residual, 
-                                b_vertices[b_scanlist[j]].label)
+                if bg.b_vertices[b_scanlist[j]].residual > 0.0
+                    total = min(bg.b_vertices[b_scanlist[j]].residual, 
+                                bg.b_vertices[b_scanlist[j]].label)
                     augmenting_pathend = b_scanlist[j]
                     @goto escape_inner_while_loop
                 else
                     for i in 1:n_AVC
                         if (bg.incidence_matrix[a_index[i],b_scanlist[j]] && 
-                            a_vertices[a_index[i]].label == -1 &&
+                            bg.a_vertices[a_index[i]].label == -1 &&
                             ab_flow[a_index[i], b_scanlist[j]] > 0)
-                            a_vertices[a_index[i]].label = min(b_vertices[b_scanlist[j]].label, 
+                            bg.a_vertices[a_index[i]].label = min( bg.b_vertices[b_scanlist[j]].label, 
                                                                ab_flow[a_index[i], b_scanlist[j]])
-                            a_vertices[a_index[i]].pred = b_scanlist[j]
-                            a_scanlist[a_scanlistsize = a_index[i]
+                            bg.a_vertices[a_index[i]].pred = b_scanlist[j]
+                            a_scanlist[a_scanlistsize] = a_index[i]
                             a_scanlistsize += 1
                         end # if
                     end # for
@@ -427,11 +427,40 @@ function vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vecto
         
         # flow augmentation
         if total > 0.0
+            bg.b_vertices[augmenting_pathend].residual -= total
+            b_pathnode = augmenting_pathend
+            a_pathnode = bg.b_vertices[b_pathnode].pre_order
+            ab_flow[a_pathnode, b_pathnode] += total
+            while bg.a_vertices[a_pathnode].pred != -1
+                b_pathnode = bg.a_vertices[a_pathnode].pred
+                ab_flow[a_pathnode, b_pathnode] -= total
+                a_pathnode = bg.b_vertices[b_pathnode].pred
+                ab_flow[a_pathnode, b_pathnode] += total
+            end # while
+            bg.a_vertices[a_pathnode].residual -= total
+         else
+            k = 1
+            for i in 1:n_AVC
+                if bg.a_vertices[a_index[i]].label == -1
+                    cd[3, k] = a_index[i]
+                    k += 1
+                end # if
+            end #for
 
-        end # end
+            cd[1, 1] = k
+            k = 1
+            for j in 1:n_BVC
+                if bg.b_vertices[b_index[j]].label >= 0
+                    cd[4, k]=b_index[j]
+                    k += 1
+                end # if
+            end # for
+
+            cd[2, 1] = k
+         end # if/else    
     end # while
-
-end
+    return cd
+end # vertex_cover
 
 """
     get_incidence_matrix(edges1::Vector{FNode}, edges2::Vector{FNode}, 
