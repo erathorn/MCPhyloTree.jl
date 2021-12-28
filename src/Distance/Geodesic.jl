@@ -687,7 +687,7 @@ accordingly.
 """
 function add_e_edge!(ratio::Ratio, node::FNode)
     push!(ratio.e_edges, node)
-    ratio.e_length = sqrt(e_length ^ 2 + node.inc_length ^ 2)
+    ratio.e_length = sqrt(ratio.e_length ^ 2 + node.inc_length ^ 2)
 end # add_e_edge!
 
 
@@ -699,5 +699,5 @@ Works like add_e_edge!
 """
 function add_f_edge!(ratio::Ratio, node::FNode)
     push!(ratio.f_edges, node)
-    ratio.f_length = sqrt(f_length ^ 2 + node.inc_length ^ 2)
+    ratio.f_length = sqrt(ratio.f_length ^ 2 + node.inc_length ^ 2)
 end # add_f_edge!
