@@ -701,3 +701,14 @@ function add_f_edge!(ratio::Ratio, node::FNode)
     push!(ratio.f_edges, node)
     ratio.f_length = sqrt(ratio.f_length ^ 2 + node.inc_length ^ 2)
 end # add_f_edge!
+"""
+    get_ratio(r::Ratio)::Float64
+
+--- INTERNAL ---
+Computes the ratio of a ratio struct
+
+* `ratio` : Ratio for which ratio is computed
+"""
+function get_ratio(r::Ratio)::Float64
+    r.e_length / r.f_length
+end # get_ratio
