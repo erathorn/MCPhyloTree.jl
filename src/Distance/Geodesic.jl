@@ -502,13 +502,13 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
                 bg.a_vertices[a_index[i]].label = -1.0
             end # if/else
         end # for
-        for i in 1:n_BVC b_vertices[i].label = -1.0 end
+        for i in 1:n_BVC bg.b_vertices[i].label = -1.0 end
 
-        #scan for an augmenting path
+        # scan for an augmenting path
         while(a_scanlistsize != 1)
             # scan the a side nodes
             b_scanlistsize = 1
-            for i in 1:a_scanlistsize
+            for i in 1:(a_scanlistsize - 1)
                 for j in 1:n_BVC
                     if bg.incidence_matrix[a_scanlist[i], b_index[j]] && bg.b_vertices[b_index[j]].label == -1.0
                         bg.b_vertices[b_index[j]].label = bg.a_vertices[a_scanlist[i]].label
@@ -550,7 +550,7 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
         if total > 0.0
             bg.b_vertices[augmenting_pathend].residual -= total
             b_pathnode = augmenting_pathend
-            a_pathnode = bg.b_vertices[b_pathnode].pre_order
+            a_pathnode = bg.b_vertices[b_pathnode].pred
             ab_flow[a_pathnode, b_pathnode] += total
             while bg.a_vertices[a_pathnode].pred != -1
                 b_pathnode = bg.a_vertices[a_pathnode].pred
