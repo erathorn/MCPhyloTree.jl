@@ -17,8 +17,8 @@ mutable struct Geodesic
     e_leaf_attribs::Vector{Float64}
     f_leaf_attribs::Vector{Float64}
     leaf_contribution²::Float64
-    common_edges::CommonEdge
-    common_edge_lengths::EdgeLengths
+    common_edges::Vector{CommonEdge}
+    common_edge_lengths::Vector{EdgeLengths}
 
     Geodesic(rs::RatioSequence, e_lengths::Vector{Float64}, f_lengths::Vector{Float64}) = 
         new(rs, e_lengths, f_lengths, 0.0, CommonEdge[], EdgeLengths[])
@@ -116,7 +116,6 @@ function geodesic(tree1::FNode, tree2::FNode)
         subtree_a = non_common_edges[i][1]
         subtree_b = non_common_edges[i][2]
         new_geo::Geodesic = get_geodesic_nocommon_edges(subtree_a, subtree_b)
-        #TODO: interleave function
         geo.ratio_seq = interleave(geo.ratio_seq, new_geo.ratio_seq)
     end # for
     return geo
@@ -386,6 +385,8 @@ function get_non_des_rs_with_min_dist(rs::RatioSequence)::Tuple{RatioSequence, I
 end # get_non_des_rs_with_min_dist
 
 """
+    get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
+"""
 function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
     trees::Tuple{FNode, FNode} = (tree1, tree2)
     num_nodes::Vector{Int64} = [length(post_order(t)) for t in trees]
@@ -397,7 +398,7 @@ function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
     queue::Vector{Ratio} = Vector{Ratio}()
     ratio::Ratio = Ratio()
     r1::Ratio, r2::Ratio = [Ratio() for _ in 1:2]
-    cover::Array{Int64} =[[]]
+    cover::Matrix{Int64} = zeros(Int64, 1, 1)
 
     common_edges = get_common_edges(trees...)
     # doublecheck to make sure the trees have no common edges
@@ -432,16 +433,16 @@ function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
         # sizehint!(a_vertices, length(int_nodes1))
         # sizehint!(b_vertices, length(int_nodes2))
         for i in 1:length(ratio.e_edges)
-            a_vertices[i] = findfirst(isequal(ratio.e_edges[i]), int_nodes1) 
+            push!(a_vertices, findfirst(x -> x.num == ratio.e_edges[i].num, int_nodes1)) 
         end # for
         for i in 1:length(ratio.f_edges)
-            b_vertices[i] = findfirst(isequal(ratio.f_edges[i]), int_nodes2) 
+            push!(b_vertices, findfirst(x -> x.num == ratio.f_edges[i].num, int_nodes2)) 
         end # for
         
         cover = get_vertex_cover(graph, a_vertices, b_vertices)
         
         if (cover[1, 1] == 0 || (cover[1, 1] == length(a_vertices))) 
-            push(rs, ratio)
+            push!(rs, ratio)
         
         else
             r1 = Ratio()
@@ -458,7 +459,7 @@ function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
             end # for
             j = 1
 
-            for i in 1:b_vertices
+            for i in 1:length(b_vertices)
                 if j < size(cover)[2] && (b_vertices[i] == cover[4, j])
                     add_f_edge!(r2, find_num(tree2, b_vertices[i]))
                     j += 1
@@ -721,6 +722,8 @@ function add_f_edge!(ratio::Ratio, node::FNode)
     push!(ratio.f_edges, node)
     ratio.f_length = sqrt(ratio.f_length ^ 2 + node.inc_length ^ 2)
 end # add_f_edge!
+
+
 """
     get_ratio(r::Ratio)::Float64
 
@@ -732,6 +735,7 @@ Computes the ratio of a ratio struct
 function get_ratio(r::Ratio)::Float64
     r.e_length / r.f_length
 end # get_ratio
+
 
 function combine(r1::Ratio, r2::Ratio)::Ratio
     r::Ratio = Ratio()
@@ -761,3 +765,4 @@ function addall_f_edges!(r::Ratio, edges::Vector{FNode})
     r.f_edges = edges
     r.f_length = geo_avg(r.f_edges) 
 end # addall_f_edges!
+
