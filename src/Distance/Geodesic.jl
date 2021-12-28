@@ -732,3 +732,12 @@ function combine(r1::Ratio, r2::Ratio)::Ratio
     return r
 end # combine
 
+function addall_e_edges!(r::Ratio, edges::Vector{FNode})
+    r.e_edges = edges
+    r.e_length = geo_avg(r.e_edges) 
+end # addall_e_edges!
+
+function addall_f_edges!(r::Ratio, edges::Vector{FNode})
+    r.f_edges = edges
+    r.f_length = geo_avg(r.f_edges) 
+end # addall_f_edges!
