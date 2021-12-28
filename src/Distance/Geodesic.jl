@@ -28,6 +28,26 @@ mutable struct Geodesic
 end # Geodesic
 
 
+function get_distance(geo::Geodesic)::Float64
+    common_edge_dist²::Float64 = 0
+    for i in 1:length(geo.common_edges)
+        common_edge_dist² += geo.common_edges[i][2] ^ 2
+    end # for
+    return sqrt(get_distance(get_non_des_rs_with_min_dist(geo.rs)) ^ 2 + common_edge_dist² + geo.leaf_contribution²)
+end # get_distance
+
+
+function get_distance(rs::RatioSequence)::Float64
+    distance²::Float64 = 0
+    r::Ratio = Ratio()
+    for i in 1:length(rs)
+        r = rs[i]
+        distance² += (r.e_length + r.f_length) ^ 2
+    end # for
+    return sqrt(distance²)
+end # get_distance
+
+
 mutable struct Vertex
     label::Float64
     weight::Float64
