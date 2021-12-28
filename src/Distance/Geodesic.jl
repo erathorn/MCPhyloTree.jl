@@ -283,7 +283,46 @@ end # split_tree!
 
 
 """
-    get_geodesic_no_common_edges(tree1::FNode, tree2::FNode)
+    interleave(rs1::RatioSequence, rs2::RatioSequence)::RatioSequence
+
+--- INTERNAL ---
+Interleaves the ratio sequences rs1 and rs2 after combining them to get the ascending ratio
+sequence with the min distance. Returns a new ratio sequence.
+
+* `rs1`: First ratio sequence
+* `rs2`: Second ratio sequence
+"""
+function interleave(rs1::RatioSequence, rs2::RatioSequence)::RatioSequence
+    combined1 = get_non_des_rs_with_min_dist(rs1)
+    combined2 = get_non_des_rs_with_min_dist(rs2)
+
+    interleaved_rs = RatioSequence()
+    ind1::Int64 = 1
+    ind2::Int64 = 1
+    while (ind1 <= length(combined1) && ind2 <= length(combined2))
+        if get_ratio(combined1[ind1]) <= get_ratio(combined2[ind2])
+            push!(interleaved_rs, combined1[ind1])
+            ind1 += 1
+        else
+            push!(interleaved_rs, combined2[ind2])
+            ind2 += 1
+        end # if/else
+    end # while
+
+    while ind1 <= length(combined1)
+        push!(interleaved_rs, combined1[ind1])
+        ind1 += 1
+    end # while
+
+    while ind2 <= length(combined2)
+        push!(interleaved_rs, combined2[ind2])
+        ind2 += 1
+    end # while
+
+    return interleaved_rs
+end # interleave
+
+
 """
 function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
     trees::Tuple{FNode, FNode} = (tree1, tree2)
