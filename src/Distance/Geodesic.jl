@@ -712,3 +712,23 @@ Computes the ratio of a ratio struct
 function get_ratio(r::Ratio)::Float64
     r.e_length / r.f_length
 end # get_ratio
+
+function combine(r1::Ratio, r2::Ratio)::Ratio
+    r::Ratio = Ratio()
+    edges::Vector[FNode] = []
+    if length(r1.e_edges) == 0 && length(r2.e_edges) == 0
+        r.e_length(sqrt(r1.e_length ^ 2 + r2.e_length ^ 2))
+    else
+        edges = deepcopy.([r1.e_edges, r2.e_edges])
+        addall_e_edges!.(r, edges)
+    end # if/else
+
+    if length(r1.f_edges) == 0 && length(r2.f_edges) == 0
+        r.f_length(sqrt(r1.f_length ^ 2 + r2.f_length ^ 2))
+    else 
+        edges = deepcopy.([r1.f_edges, r2.f_edges])
+        addall_f_edges!.(r, edges)
+    end # if/else
+    return r
+end # combine
+
