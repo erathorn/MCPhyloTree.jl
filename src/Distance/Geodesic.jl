@@ -323,6 +323,48 @@ function interleave(rs1::RatioSequence, rs2::RatioSequence)::RatioSequence
 end # interleave
 
 
+function get_non_des_rs_with_min_dist(rs::RatioSequence)::Tuple{RatioSequence, Int64}
+    length(rs) < 2 && return rs
+    combined_rs::RatioSequence = deepcopy(rs)
+    i::Int64 = 1
+    combine_code::Int64 = 0
+    combined_ratio::Ratio = Ratio()
+    cc_array::Vector{Int64} = zeros(Int64, length(rs) - 1)
+    a::Int64 = 1
+
+    while i < length(combined_rs)
+        if get_ratio(combined_rs[i]) > get_ratio(combined_rs[i+1])
+            combined_ratio = combine(combined_rs[i], combined_rs[i+1])
+            deleteat!(combined_rs,[i, i+1])
+            insert!(combined_rs, i, combined_ratio)
+            cc_array[a] = 1
+            if i > 1
+                i -= 1
+                while cc_array[a] == 1
+                    a -= 1
+                end # while
+            else
+                while a < length(rs) && cc_array[a] != 2
+                    a += 1
+                end # while
+            end # if/else
+        else
+            cc_array[a] = 0
+            i += 1
+            while a < length(rs) && cc_array[a] != 2
+                a += 1
+            end # while
+        end # if/else
+    end # while
+    
+    for k in 1:length(rs)
+        if cc_array[k] == 1
+            combine_code = combine_code + 2 ^ k
+        end # if
+    end # for
+    return combined_rs, combine_code
+end # get_non_des_rs_with_min_dist
+
 """
 function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
     trees::Tuple{FNode, FNode} = (tree1, tree2)
