@@ -450,7 +450,7 @@ function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
             j = 1
 
             for i in 1:length(a_vertices)
-                if j < size(cover)[2] && (a_vertices[i] == cover[3, j])
+                if j < (findfirst(cover[3,:] .== 0) - 1) && (a_vertices[i] == cover[3, j])
                     add_e_edge!(r1, find_num(tree1, a_vertices[i]))
                     j += 1
                 else
@@ -460,7 +460,7 @@ function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
             j = 1
 
             for i in 1:length(b_vertices)
-                if j < size(cover)[2] && (b_vertices[i] == cover[4, j])
+                if j < (findfirst(cover[4,:] .== 0) - 1) && (b_vertices[i] == cover[4, j])
                     add_f_edge!(r2, find_num(tree2, b_vertices[i]))
                     j += 1
                 else
