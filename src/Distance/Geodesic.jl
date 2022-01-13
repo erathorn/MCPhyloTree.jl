@@ -1,16 +1,16 @@
-mutable struct Ratio
+mutable struct Ratio{T<:GeneralNode}
     e_length::Float64
 	f_length::Float64
-	e_edges::Vector{FNode}
-	f_edges::Vector{FNode}
+	e_edges::Vector{T}
+	f_edges::Vector{T}
 
-    Ratio() = new(0.0, 0.0, [], [])
-    Ratio(e::Vector{FNode}, f::Vector{FNode}) = new(geo_avg(e), geo_avg(f), e, f)
+    Ratio() = new{GeneralNode}(0.0, 0.0, [], [])
+    Ratio(e::Vector{T}, f::Vector{T}) where T<:GeneralNode = new{typeof(e[1])}(geo_avg(e), geo_avg(f), e, f)
 end # Ratio
 
 const RatioSequence = Vector{Ratio}
 const EdgeLengths = Tuple{Float64, Float64}
-const CommonEdge = Tuple{FNode, Float64}
+const CommonEdge = Tuple{T, Float64} where T<:GeneralNode 
 
 mutable struct Geodesic
     ratio_seq::RatioSequence
@@ -85,10 +85,10 @@ function build_bipartite_graph(incidence_matrix::BitMatrix, a_weight::Vector{Flo
 end
 
 
-function geodesic(tree1::FNode, tree2::FNode)
-    trees::Tuple{FNode, FNode} = (tree1, tree2)
+function geodesic(tree1::T, tree2::T) where T<:GeneralNode
+    trees::Tuple{T, T} = (tree1, tree2)
     leaf_contribution²::Float64 = 0.0
-    leaves::Vector{Vector{FNode}} = get_leaves.(trees)
+    leaves::Vector{Vector{T}} = get_leaves.(trees)
     leaf_names::Vector{Vector{String}} = [[leaf.name for leaf in leaves[i]] for i in 1:2] 
     perms = sortperm.(leaf_names) 
     leaf_vecs::Vector{String} = [leaf_names[perms[i]] for i in 1:2]
@@ -103,7 +103,7 @@ function geodesic(tree1::FNode, tree2::FNode)
     geo = Geodesic(RatioSequence(), leaf_attribs[1], leaf_attribs[2])
     geo.leaf_contribution² = leaf_contribution²
 
-    non_common_edges::Vector{Tuple{FNode, FNode}} = split_on_common_edge(deepycopy.(trees)...)
+    non_common_edges::Vector{Tuple{T, T}} = split_on_common_edge(deepycopy.(trees)...)
 
     common_edges::Vector{CommonEdge} = get_common_edges(trees...)
     geo.common_edges = common_edges
@@ -123,11 +123,11 @@ end # geodesic
 
 
 """
-    get_common_edge_lengths(trees::Vector{FNode}, common_edges::Vector{CommonEdge}, 
-        l::Int64)::Tuple{Vector{Float64}, Vector{Float64}}
+    get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, 
+        l::Int64)::Tuple{Vector{Float64}, Vector{Float64}} where T<:GeneralNode
 """
-function get_common_edge_lengths(trees::Vector{FNode}, common_edges::Vector{CommonEdge}, 
-                                l::Int64)::Vector{EdgeLengths}
+function get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, 
+                                l::Int64)::Vector{EdgeLengths} where T<:GeneralNode
 
     c_e_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
     post_orders = post_order.(trees)
@@ -149,8 +149,8 @@ end # get_common_edge_lengths
 
 
 """
-    split_on_common_edge(tree1::FNode, tree2::FNode; non_common_edges=[])
-        ::Vector{Tuple{FNode, FNode}}
+    split_on_common_edge(tree1::T, tree2::T; non_common_edges=[])
+        ::Vector{Tuple{T, T}} where T<:GeneralNode
 
 This function finds the common edges of two trees, and splits them at the first common edge
 it finds. Then it recursively splits the resulting subtrees aswell. 
@@ -164,12 +164,12 @@ Returns a Vector of all pairs of subtrees that share no common edges.
 * `non_common_edges` : vector of non common edges. It is initialized empty and appended to 
                        at each recursion
 """
-function split_on_common_edge(tree1::FNode, tree2::FNode; non_common_edges=[]
-                             )::Vector{Tuple{FNode, FNode}}
+function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
+                             )::Vector{Tuple{T, T}} where T<:GeneralNode
 
-    trees::Tuple{FNode, FNode} = (tree1, tree2)
+    trees::Tuple{T, T} = (tree1, tree2)
     num_nodes::Vector{Int64} = [length(post_order(t)) for t in trees]
-    leaves::Vector{Vector{FNode}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
+    leaves::Vector{Vector{T}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     (num_edges[1] <= 0 || num_edges[2] <= 0) && return []
     
@@ -216,7 +216,7 @@ end # split_on_common_edge
  
 
 """
-    get_common_edges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
+    get_common_edges(tree1::T, tree2::T)::Vector{CommonEdge} where T<:GeneralNode
 
 This function returns all the common edges of two trees with the same leafset. It also
 calculates the length difference of each pair of common edges. 
@@ -225,7 +225,7 @@ calculates the length difference of each pair of common edges.
 
 * `tree2` : root node of the second tree
 """
-function get_common_edges(tree1::FNode, tree2::FNode)::Vector{CommonEdge}
+function get_common_edges(tree1::T, tree2::T)::Vector{CommonEdge} where T<:GeneralNode
     common_edges::Vector{CommonEdge} = []
     # TODO maybe need to check leaves again; skipping for now 
     # TODO maybe return a split instead of a node
@@ -248,8 +248,8 @@ end # get_common_edges
 
 
 """
-    get_node_from_split(tree::FNode, split::BitVector, leaves::Vector{FNode}
-                       )::Tuple{FNode, Bool}
+    get_node_from_split(tree::T, split::BitVector, leaves::Vector{T}
+                       )::Tuple{T, Bool} where T<:GeneralNode
 
 --- INTERNAL ---
 This function finds the node in a tree that corresponds to the input split or the reverse of
@@ -263,13 +263,13 @@ Returns a Vector of all pairs of subtrees that share no common edges.
 
 * `leaves` : vector of the leaves of the tree
 """
-function get_node_from_split(tree::FNode, split::BitVector, leaves::Vector{FNode}=[]
-                            )::Tuple{FNode, Bool}
+function get_node_from_split(tree::T, split::BitVector, leaves::Vector{T}=[]
+                            )::Tuple{T, Bool} where T<:GeneralNode
 
     if isempty(leaves)
         leaves = get_leaves(tree)
     end # if
-    common_node::FNode = find_lca(tree, leaves[split])
+    common_node::T = find_lca(tree, leaves[split])
     reverse::Bool = false
     # if the found node is the root, instead look for the lca of the other side of the split
     if common_node.root
@@ -282,7 +282,7 @@ end # get_node_from_split
 
 
 """
-    split_tree!(node::FNode)::FNode
+    split_tree!(node::T)::Nothing where T<:GeneralNode
 
 This function splits a tree at the input node. The input node acts as the root of one of the
 resulting subtrees. The tree headed by the original root, receives a new node where the
@@ -290,7 +290,7 @@ split node used to be. It represents all the leaves that were below the split no
 
 * `node`: the node where the tree will be split.
 """
-function split_tree!(node::FNode)::Nothing
+function split_tree!(node::T)::Nothing where T<:GeneralNode
     mother = node.mother
     # remove the split node from the tree
     remove_child!(mother, node)
@@ -385,12 +385,12 @@ function get_non_des_rs_with_min_dist(rs::RatioSequence)::Tuple{RatioSequence, I
 end # get_non_des_rs_with_min_dist
 
 """
-    get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
+    get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
 """
-function get_geodesic_nocommon_edges(tree1::FNode, tree2::FNode)
-    trees::Tuple{FNode, FNode} = (tree1, tree2)
+function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
+    trees::Tuple{T, T} = (tree1, tree2)
     num_nodes::Vector{Int64} = [length(post_order(t)) for t in trees]
-    leaves::Vector{Vector{FNode}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
+    leaves::Vector{Vector{T}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     rs::RatioSequence = []
     a_vertices::Vector{Int64} = []
@@ -605,8 +605,8 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
 end # get_vertex_cover
 
 """
-    get_incidence_matrix(edges1::Vector{FNode}, edges2::Vector{FNode}, 
-        leaf_dict::Dict{String,Int64})::BitMatrix
+    get_incidence_matrix(edges1::Vector{T}, edges2::Vector{T},
+        leaf_dict::Dict{String,Int64})::BitMatrix where T<:GeneralNode
 
 --- INTERNAL ---
 This function computes the incidence_matrix of two trees. A field of the matrix contains a 1
@@ -620,8 +620,8 @@ Returns the incidence_matrix.
 
 * `leaf_dict` : Dictionary that links each leaf to a unique number
 """
-function get_incidence_matrix(edges1::Vector{FNode}, edges2::Vector{FNode}, 
-                              leaf_dict::Dict{String,Int64})::BitMatrix
+function get_incidence_matrix(edges1::Vector{T}, edges2::Vector{T}, 
+                              leaf_dict::Dict{String,Int64})::BitMatrix where T<:GeneralNode
 
     incidence_matrix::BitMatrix = trues((length(edges1), length(edges2)))   
     for i in 1:length(edges1)
@@ -678,7 +678,7 @@ end # isCompatibleWith
 
 
 """
-    geo_avg(edges::Vector{FNode})::Float64
+    geo_avg(edges::Vector{T})::Float64 where T<:GeneralNode
 
 --- INTERNAL ---
 This function sums the squared edge lengths of the input edges and returns the square root
@@ -686,7 +686,7 @@ of that sum.
 
 * `edges` : root node of the first tree
 """
-function geo_avg(edges::Vector{FNode})::Float64
+function geo_avg(edges::Vector{T})::Float64 where T<:GeneralNode
     avg::Float64 = 0.0
     for edge in edges
         avg += edge.inc_length ^ 2
@@ -696,7 +696,7 @@ end # geo_avg
 
 
 """
-    add_e_edge!(ratio::Ratio, node::FNode)
+    add_e_edge!(ratio::Ratio, node::T) where T<:GeneralNode
 
 --- INTERNAL ---
 This function adds a new edge to one side of a ratio and adjusts the ratio length 
@@ -706,19 +706,19 @@ accordingly.
 
 * `node` : node that is added to the ratio
 """
-function add_e_edge!(ratio::Ratio, node::FNode)
+function add_e_edge!(ratio::Ratio, node::T) where T<:GeneralNode
     push!(ratio.e_edges, node)
     ratio.e_length = sqrt(ratio.e_length ^ 2 + node.inc_length ^ 2)
 end # add_e_edge!
 
 
 """
-    add_f_edge!(ratio::Ratio, node::FNode)
+    add_f_edge!(ratio::Ratio, node::T) where T<:GeneralNode
 
 --- INTERNAL ---
 Works like add_e_edge!
 """
-function add_f_edge!(ratio::Ratio, node::FNode)
+function add_f_edge!(ratio::Ratio, node::T) where T<:GeneralNode
     push!(ratio.f_edges, node)
     ratio.f_length = sqrt(ratio.f_length ^ 2 + node.inc_length ^ 2)
 end # add_f_edge!
@@ -739,7 +739,7 @@ end # get_ratio
 
 function combine(r1::Ratio, r2::Ratio)::Ratio
     r::Ratio = Ratio()
-    edges::Vector[FNode] = []
+    edges::Vector{T where T<:GeneralNode} = []
     if length(r1.e_edges) == 0 && length(r2.e_edges) == 0
         r.e_length(sqrt(r1.e_length ^ 2 + r2.e_length ^ 2))
     else
@@ -756,12 +756,12 @@ function combine(r1::Ratio, r2::Ratio)::Ratio
     return r
 end # combine
 
-function addall_e_edges!(r::Ratio, edges::Vector{FNode})
+function addall_e_edges!(r::Ratio, edges::Vector{T}) where T<:GeneralNode
     r.e_edges = edges
     r.e_length = geo_avg(r.e_edges) 
 end # addall_e_edges!
 
-function addall_f_edges!(r::Ratio, edges::Vector{FNode})
+function addall_f_edges!(r::Ratio, edges::Vector{T}) where T<:GeneralNode
     r.f_edges = edges
     r.f_length = geo_avg(r.f_edges) 
 end # addall_f_edges!
