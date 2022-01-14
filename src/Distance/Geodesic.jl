@@ -404,7 +404,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
     num_nodes::Vector{Int64} = [length(post_order(t)) for t in trees]
     leaves::Vector{Vector{T}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
-    rs::RatioSequence = []
+    rs::RatioSequence = RatioSequence()
     a_vertices::Vector{Int64} = []
     b_vertices::Vector{Int64} = []
     queue::Vector{Ratio} = Vector{Ratio}()
@@ -423,7 +423,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
     if num_edges[1] == 1 || num_edges[2] == 1
         internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end 1])
         internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
-		push(rs, (internal_nodes1, internal_nodes2))
+		push!(rs.ratios, Ratio(internal_nodes1, internal_nodes2))
 		return Geodesic(rs)
 	end # if
 
@@ -453,8 +453,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
         
         cover = get_vertex_cover(graph, a_vertices, b_vertices)
         
-        if (cover[1, 1] == 0 || (cover[1, 1] == length(a_vertices))) 
-            push!(rs, ratio)
+            push!(rs.ratios, ratio)
         
         else
             r1 = Ratio()
