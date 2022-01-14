@@ -8,9 +8,18 @@ mutable struct Ratio{T<:GeneralNode}
     Ratio(e::Vector{T}, f::Vector{T}) where T<:GeneralNode = new{typeof(e[1])}(geo_avg(e), geo_avg(f), e, f)
 end # Ratio
 
-const RatioSequence = Vector{Ratio}
+
+mutable struct RatioSequence
+    ratios::Vector{Ratio}
+    combine_code::Int64
+
+    RatioSequence() = new([], 0)
+end # RatioSequence
+
+
 const EdgeLengths = Tuple{Float64, Float64}
 const CommonEdge = Tuple{T, Float64} where T<:GeneralNode 
+
 
 mutable struct Geodesic
     ratio_seq::RatioSequence
