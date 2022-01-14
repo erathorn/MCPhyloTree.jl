@@ -39,10 +39,11 @@ end # Geodesic
 
 function get_distance(geo::Geodesic)::Float64
     common_edge_dist²::Float64 = 0
-    for i in 1:length(geo.common_edges)
-        common_edge_dist² += geo.common_edges[i][2] ^ 2
+    for i in 1:length(geo.common_edge_lengths)
+        common_edge_dist² += (geo.common_edge_lengths[i][1] - 
+                              geo.common_edge_lengths[i][2]) ^ 2
     end # for
-    return sqrt(get_distance(get_non_des_rs_with_min_dist(geo.rs)) ^ 2 + common_edge_dist² + geo.leaf_contribution²)
+    return sqrt(get_distance(get_non_des_rs_with_min_dist(geo.ratio_seq)) ^ 2 + common_edge_dist² + geo.leaf_contribution²)
 end # get_distance
 
 
