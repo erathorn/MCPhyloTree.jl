@@ -479,9 +479,9 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
                     add_f_edge!(r1, int_nodes2[b_vertices[i]])
                 end # if/else
             end # for
-        end # if/else
         pushfirst!(queue, r2)
         pushfirst!(queue, r1)
+        end # if/else
     end # while 
     return Geodesic(rs)     
 end # get_geodesic_nocommon_edges
