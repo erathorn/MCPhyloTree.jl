@@ -113,13 +113,13 @@ function geodesic(tree1::T, tree2::T) where T<:GeneralNode
     geo = Geodesic(RatioSequence(), leaf_attribs[1], leaf_attribs[2])
     geo.leaf_contribution² = leaf_contribution²
 
-    non_common_edges::Vector{Tuple{T, T}} = split_on_common_edge(deepycopy.(trees)...)
+    non_common_edges::Vector{Tuple{T, T}} = split_on_common_edge(deepcopy.(trees)...)
 
     common_edges::Vector{CommonEdge} = get_common_edges(trees...)
     geo.common_edges = common_edges
 
     c_e_lengths::Vector{EdgeLengths} = get_common_edge_lengths(trees, common_edges,
-                                                              length(leaves1))                                                     
+                                                               length(leaves[1]))                                                     
     geo.common_edge_lengths = c_e_lengths
 
     for i in 1:length(non_common_edges)
