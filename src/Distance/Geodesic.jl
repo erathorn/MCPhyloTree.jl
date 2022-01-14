@@ -50,8 +50,8 @@ end # get_distance
 function get_distance(rs::RatioSequence)::Float64
     distance²::Float64 = 0
     r::Ratio = Ratio()
-    for i in 1:length(rs)
-        r = rs[i]
+    for i in 1:length(rs.ratios)
+        r = rs.ratios[i]
         distance² += (r.e_length + r.f_length) ^ 2
     end # for
     return sqrt(distance²)
@@ -322,29 +322,29 @@ sequence with the min distance. Returns a new ratio sequence.
 * `rs2`: Second ratio sequence
 """
 function interleave(rs1::RatioSequence, rs2::RatioSequence)::RatioSequence
-    combined1 = get_non_des_rs_with_min_dist(rs1)
-    combined2 = get_non_des_rs_with_min_dist(rs2)
+    combined1::RatioSequence = get_non_des_rs_with_min_dist(rs1)
+    combined2::RatioSequence = get_non_des_rs_with_min_dist(rs2)
 
     interleaved_rs = RatioSequence()
     ind1::Int64 = 1
     ind2::Int64 = 1
-    while (ind1 <= length(combined1) && ind2 <= length(combined2))
-        if get_ratio(combined1[ind1]) <= get_ratio(combined2[ind2])
-            push!(interleaved_rs, combined1[ind1])
+    while (ind1 <= length(combined1.ratios) && ind2 <= length(combined2.ratios))
+        if get_ratio(combined1.ratios[ind1]) <= get_ratio(combined2.ratios[ind2])
+            push!(interleaved_rs.ratios, combined1.ratios[ind1])
             ind1 += 1
         else
-            push!(interleaved_rs, combined2[ind2])
+            push!(interleaved_rs.ratios, combined2.ratios[ind2])
             ind2 += 1
         end # if/else
     end # while
 
-    while ind1 <= length(combined1)
-        push!(interleaved_rs, combined1[ind1])
+    while ind1 <= length(combined1.ratios)
+        push!(interleaved_rs.ratios, combined1.ratios[ind1])
         ind1 += 1
     end # while
 
-    while ind2 <= length(combined2)
-        push!(interleaved_rs, combined2[ind2])
+    while ind2 <= length(combined2.ratios)
+        push!(interleaved_rs.ratios, combined2.ratios[ind2])
         ind2 += 1
     end # while
 
@@ -352,20 +352,20 @@ function interleave(rs1::RatioSequence, rs2::RatioSequence)::RatioSequence
 end # interleave
 
 
-function get_non_des_rs_with_min_dist(rs::RatioSequence)::Tuple{RatioSequence, Int64}
-    length(rs) < 2 && return rs
+function get_non_des_rs_with_min_dist(rs::RatioSequence)::RatioSequence
+    length(rs.ratios) < 2 && return rs
     combined_rs::RatioSequence = deepcopy(rs)
     i::Int64 = 1
     combine_code::Int64 = 0
     combined_ratio::Ratio = Ratio()
-    cc_array::Vector{Int64} = zeros(Int64, length(rs) - 1)
+    cc_array::Vector{Int64} = zeros(Int64, length(rs.ratios) - 1) .+ 2
     a::Int64 = 1
 
-    while i < length(combined_rs)
-        if get_ratio(combined_rs[i]) > get_ratio(combined_rs[i+1])
-            combined_ratio = combine(combined_rs[i], combined_rs[i+1])
-            deleteat!(combined_rs,[i, i+1])
-            insert!(combined_rs, i, combined_ratio)
+    while i < length(combined_rs.ratios) - 1
+        if get_ratio(combined_rs.ratios[i]) > get_ratio(combined_rs.ratios[i+1])
+            combined_ratio = combine(combined_rs.ratios[i], combined_rs.ratios[i+1])
+            deleteat!(combined_rs.ratios,[i, i+1])
+            insert!(combined_rs.ratios, i, combined_ratio.ratios)
             cc_array[a] = 1
             if i > 1
                 i -= 1
@@ -373,26 +373,28 @@ function get_non_des_rs_with_min_dist(rs::RatioSequence)::Tuple{RatioSequence, I
                     a -= 1
                 end # while
             else
-                while a < length(rs) && cc_array[a] != 2
+                while (a < length(rs.ratios) - 1) && cc_array[a] != 2
                     a += 1
                 end # while
             end # if/else
         else
             cc_array[a] = 0
             i += 1
-            while a < length(rs) && cc_array[a] != 2
+            while (a < length(rs.ratios) - 1) && cc_array[a] != 2
                 a += 1
             end # while
         end # if/else
     end # while
     
-    for k in 1:length(rs)
+    for k in 1:(length(rs.ratios) - 1)
         if cc_array[k] == 1
             combine_code = combine_code + 2 ^ k
         end # if
     end # for
-    return combined_rs, combine_code
+    combined_rs.combine_code = combine_code
+    return combined_rs
 end # get_non_des_rs_with_min_dist
+
 
 """
     get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
