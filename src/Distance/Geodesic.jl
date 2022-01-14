@@ -96,13 +96,13 @@ end
 
 
 function geodesic(tree1::T, tree2::T) where T<:GeneralNode
-    trees::Tuple{T, T} = (tree1, tree2)
+    trees::Vector{T} = [tree1, tree2]
     leaf_contribution²::Float64 = 0.0
     leaves::Vector{Vector{T}} = get_leaves.(trees)
     leaf_names::Vector{Vector{String}} = [[leaf.name for leaf in leaves[i]] for i in 1:2] 
-    perms = sortperm.(leaf_names) 
-    leaf_vecs::Vector{String} = [leaf_names[perms[i]] for i in 1:2]
-    leaf_attribs::Vector{Float64} = [[leaf.inc_length for leaf in leaves[i]][perms[i]] for i in 1:2]
+    perms::Vector{Vector{Int64}} = sortperm.(leaf_names)
+    leaf_vecs::Vector{Vector{String}} = [leaf_names[i][perms[i]] for i in 1:2]
+    leaf_attribs::Vector{Vector{Float64}} = [[leaf.inc_length for leaf in leaves[i]][perms[i]] for i in 1:2]
     
     leaf_vecs[1] != leaf_vecs[2] && 
         throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
