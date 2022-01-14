@@ -414,14 +414,14 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
 
     common_edges = get_common_edges(trees...)
     # doublecheck to make sure the trees have no common edges
-    length(common_edges) == 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
+    length(common_edges) != 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
     
     if num_edges[1] == 0 || num_edges[2] == 0
         throw(ArgumentError("Exiting: Can't compute the geodesic for trees with no edges"))
     end # if
 
     if num_edges[1] == 1 || num_edges[2] == 1
-        internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end 1])
+        internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
         internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
 		push!(rs.ratios, Ratio(internal_nodes1, internal_nodes2))
 		return Geodesic(rs)
@@ -453,6 +453,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
         
         cover = get_vertex_cover(graph, a_vertices, b_vertices)
         
+        if (cover[1, 1] == 1 || (cover[1, 1] == length(a_vertices))) 
             push!(rs.ratios, ratio)
         
         else
@@ -492,7 +493,7 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
     n_AVC = length(a_index)
     n_BVC = length(b_index)
     total::Float64 = 0.0
-    ab_flow::Matrix{Float64} = zeros(n_AVC, n_BVC)
+    ab_flow::Matrix{Float64} = zeros(bg.nums[1], bg.nums[2])
     k, a_scanlistsize, b_scanlistsize, a_pathnode, b_pathnode = [1 for _ = 1:5]
     augmenting_pathend::Int64 = -1
     cd::Matrix{Int64} = zeros(Int64, 4, bg.nums[3])   
@@ -540,7 +541,7 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
         while(a_scanlistsize != 1)
             # scan the a side nodes
             b_scanlistsize = 1
-            for i in 1:(a_scanlistsize - 1)
+            for i in 1:(a_scanlistsize)
                 for j in 1:n_BVC
                     if bg.incidence_matrix[a_scanlist[i], b_index[j]] && bg.b_vertices[b_index[j]].label == -1.0
                         bg.b_vertices[b_index[j]].label = bg.a_vertices[a_scanlist[i]].label
