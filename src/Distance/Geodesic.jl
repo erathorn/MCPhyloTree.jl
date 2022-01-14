@@ -92,7 +92,7 @@ function build_bipartite_graph(incidence_matrix::BitMatrix, a_weight::Vector{Flo
         b_vertices[i]= Vertex(b_weight[i])
     end # for
     return BipartiteGraph(incidence_matrix, [a, b, n, 0, 0], a_vertices, b_vertices, false)
-end
+end # build_bipartite_graph
 
 
 function geodesic(tree1::T, tree2::T) where T<:GeneralNode
@@ -133,8 +133,8 @@ end # geodesic
 
 
 """
-    get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, 
-        l::Int64)::Tuple{Vector{Float64}, Vector{Float64}} where T<:GeneralNode
+    get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, l::Int64)
+        ::Tuple{Vector{Float64}, Vector{Float64}} where T<:GeneralNode
 """
 function get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, 
                                 l::Int64)::Vector{EdgeLengths} where T<:GeneralNode
@@ -150,7 +150,6 @@ function get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEd
         for i in [1,2]
             ind = findfirst(x -> x == split, bps[i])
             inc_length = isnothing(ind) ? 0.0 : post_orders[i][ind].inc_length
-            println(i)
             push!(c_e_lengths[i], inc_length)
         end # for
     end # for
@@ -442,8 +441,6 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
         ratio = popfirst!(queue)
         a_vertices = []
         b_vertices = []
-        # sizehint!(a_vertices, length(int_nodes1))
-        # sizehint!(b_vertices, length(int_nodes2))
         for i in 1:length(ratio.e_edges)
             push!(a_vertices, findfirst(x -> x.num == ratio.e_edges[i].num, int_nodes1)) 
         end # for
