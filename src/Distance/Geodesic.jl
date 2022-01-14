@@ -538,6 +538,7 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
         for i in 1:n_BVC bg.b_vertices[i].label = -1.0 end
 
         # scan for an augmenting path
+        a_scanlistsize -= 1
         while(a_scanlistsize != 1)
             # scan the a side nodes
             b_scanlistsize = 1
@@ -552,6 +553,7 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
                 end # for j
             end # for i
             
+            b_scanlistsize -= 1
             # scan the b side nodes
             a_scanlistsize = 1
             for j in 1:b_scanlistsize
