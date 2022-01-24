@@ -364,7 +364,7 @@ function get_non_des_rs_with_min_dist(rs::RatioSequence)::RatioSequence
         if get_ratio(combined_rs.ratios[i]) > get_ratio(combined_rs.ratios[i+1])
             combined_ratio = combine(combined_rs.ratios[i], combined_rs.ratios[i+1])
             deleteat!(combined_rs.ratios,[i, i+1])
-            insert!(combined_rs.ratios, i, combined_ratio.ratios)
+            insert!(combined_rs.ratios, i, combined_ratio)
             cc_array[a] = 1
             if i > 1
                 i -= 1
