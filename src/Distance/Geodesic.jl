@@ -105,8 +105,9 @@ function geodesic(tree1::T, tree2::T) where T<:GeneralNode
     
     leaf_vecs[1] != leaf_vecs[2] && 
         throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
-    for (leaf1, leaf2) in zip(leaves[1], leaves[2])
-        leaf_contribution² += abs(leaf1.inc_length - leaf2.inc_length) ^ 2
+    for (inc_length1, inc_length2) in zip(leaf_attribs[1], leaf_attribs[2])
+        leaf_contribution = inc_length1 - inc_length2
+        leaf_contribution² += (leaf_contribution) ^ 2
     end # for
     
     geo = Geodesic(RatioSequence(), leaf_attribs[1], leaf_attribs[2])
