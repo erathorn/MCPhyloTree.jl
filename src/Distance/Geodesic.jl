@@ -421,7 +421,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
 
     if num_edges[1] == 1 || num_edges[2] == 1
         internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
-        internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+        internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree2)[1:end-1])
 		push!(rs.ratios, Ratio(internal_nodes1, internal_nodes2))
 		return Geodesic(rs)
 	end # if
