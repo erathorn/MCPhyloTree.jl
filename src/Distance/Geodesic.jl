@@ -1,3 +1,13 @@
+"""
+    Ratio
+    
+This struct represents a ratio of vectors of tree edges. 
+
+* `e_length` : Specifies the square root of the sum of the lengths of all e_edges.
+* `f_length` : Specifies the square root of the sum of the lengths of all f_edges.
+* `e_edges` : The edges of the first tree used in the geodesic calculation.
+* `f_edges` : The edges of the second tree. 
+"""
 mutable struct Ratio{T<:GeneralNode}
     e_length::Float64
 	f_length::Float64
@@ -9,6 +19,14 @@ mutable struct Ratio{T<:GeneralNode}
 end # Ratio
 
 
+"""
+    RatioSequence
+    
+This data type holds a sequence of ratios and a combine code.
+
+* `ratios` : A vector of ratios, making up the sequence.
+* `combine_code` : A code, relevant when RatioSequence needs to be combined.
+"""
 mutable struct RatioSequence
     ratios::Vector{Ratio}
     combine_code::Int64
@@ -21,6 +39,17 @@ const EdgeLengths = Tuple{Float64, Float64}
 const CommonEdge = Tuple{T, Float64} where T<:GeneralNode 
 
 
+"""
+    Geodesic
+    
+Struct that tracks all relevant parameters, when computing the Geodesic between two trees.
+
+* `ratio_seq` : The ratio sequence of the Geodesic.
+* `leaf_contribution` : Contribution of the leafs to the geodesic distance.
+* `common_edges` : Stores the common edges of the two compared trees.
+* `common_edge_lengths` : A vector of tuples, where each tuple stores the lengths of a
+                          common edge in the first and the second tree.
+"""
 mutable struct Geodesic
     ratio_seq::RatioSequence
     leaf_contribution²::Float64
@@ -35,6 +64,13 @@ mutable struct Geodesic
 end # Geodesic
 
 
+"""
+    get_distance(geo::Geodesic)::Float64
+
+Returns the distance of a geodesic. The smaller the number, the more similar are the trees.
+
+* `geo` : The geodesic for which the distance is calculated.
+"""
 function get_distance(geo::Geodesic)::Float64
     common_edge_dist²::Float64 = 0
     for i in 1:length(geo.common_edge_lengths)
@@ -46,6 +82,12 @@ function get_distance(geo::Geodesic)::Float64
 end # get_distance
 
 
+"""
+    get_distance(rs::RatioSequence)::Float64
+
+--- INTERNAL ---
+Returns the distance of a RatioSequence.
+"""
 function get_distance(rs::RatioSequence)::Float64
     distance²::Float64 = 0
     r::Ratio = Ratio()
@@ -57,6 +99,11 @@ function get_distance(rs::RatioSequence)::Float64
 end # get_distance
 
 
+"""
+    Vertex
+    
+This struct represents a vertex of a bipartite graph.
+"""
 mutable struct Vertex
     label::Float64
     weight::Float64
@@ -67,34 +114,64 @@ mutable struct Vertex
 end # Vertex
 
 
+"""
+    BipartiteGraph
+    
+This struct represents a bipartite node-weighted graph.
+
+* `incidence_matrix` : The incidence_matrix of the graph.
+* `nums` : The number of nodes on each side, and their maximum.
+* `a_vertices` : A vector of the vertices of the first tree.
+* `b_vertices` : A vector of the vertices of the second tree.
+"""
 mutable struct BipartiteGraph
     incidence_matrix::BitMatrix
 	nums::Vector{Int64}
 	a_vertices::Vector{Vertex}
     b_vertices::Vector{Vertex}
-	debug::Bool
 end # BipartiteGraph
 
 
-function build_bipartite_graph(incidence_matrix::BitMatrix, a_weight::Vector{Float64}, 
-                               b_weight::Vector{Float64})::BipartiteGraph
+"""
+    build_bipartite_graph(incidence_matrix::BitMatrix, a_weight::Vector{Float64}, 
+                          b_weight::Vector{Float64})::BipartiteGraph
+  
+--- INTERNAL ---                          
+This function builds and returns bipartite graph based on an incidence matrix and node
+weights given to it.
 
-    a::Int64 = length(a_weight)
-    b::Int64 = length(b_weight)
+`incidence_matrix` : The incidence matrix of the graph.
+`a_weights` : Weights of the a-side nodes.
+`b_weights` : Weights of the b-side nodes.
+"""
+function build_bipartite_graph(incidence_matrix::BitMatrix, a_weights::Vector{Float64}, 
+                               b_weights::Vector{Float64})::BipartiteGraph
+
+    a::Int64 = length(a_weights)
+    b::Int64 = length(b_weights)
     n::Int64 = max(a, b)
     a_vertices::Vector{Vertex} = fill(Vertex(0.0), n)
     b_vertices::Vector{Vertex} = fill(Vertex(0.0), n)
     for i in 1:a
-        a_vertices[i]= Vertex(a_weight[i])
+        a_vertices[i]= Vertex(a_weights[i])
     end # for 
     for i in 1:b
-        b_vertices[i]= Vertex(b_weight[i])
+        b_vertices[i]= Vertex(b_weights[i])
     end # for
-    return BipartiteGraph(incidence_matrix, [a, b, n, 0, 0], a_vertices, b_vertices, false)
+    return BipartiteGraph(incidence_matrix, [a, b, n], a_vertices, b_vertices)
 end # build_bipartite_graph
 
 
-function geodesic(tree1::T, tree2::T) where T<:GeneralNode
+"""
+    geodesic(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
+
+This function calculates and returns the geodesic between two trees.
+
+* `tree1` : root node of the first tree.
+* `tree2` : root node of the second tree.
+
+"""
+function geodesic(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
     trees::Vector{T} = [tree1, tree2]
     leaf_contribution²::Float64 = 0.0
     leaves::Vector{Vector{T}} = get_leaves.(trees)
@@ -135,9 +212,17 @@ end # geodesic
 """
     get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, l::Int64)
         ::Tuple{Vector{Float64}, Vector{Float64}} where T<:GeneralNode
+         
+--- INTERNAL ---
+This function finds the edge lengths of each common node in both trees. Returns a vector of
+tuples containing the paired edge lengths.
+
+* `trees` : A vector of trees.
+* `common_edges` : A vector of shared edges between trees.
+* `l` : number of leaves the trees have; the trees have the same leaf set    
 """
 function get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, 
-                                l::Int64)::Vector{EdgeLengths} where T<:GeneralNode
+                                 l::Int64)::Vector{EdgeLengths} where T<:GeneralNode
 
     c_e_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
     post_orders = post_order.(trees)
@@ -161,17 +246,16 @@ end # get_common_edge_lengths
     split_on_common_edge(tree1::T, tree2::T; non_common_edges=[])
         ::Vector{Tuple{T, T}} where T<:GeneralNode
 
+--- INTERNAL ---
 This function finds the common edges of two trees, and splits them at the first common edge
 it finds. Then it recursively splits the resulting subtrees aswell. 
 
 Returns a Vector of all pairs of subtrees that share no common edges.
 
-* `tree1` : root node of the first tree
-
-* `tree2` : root node of the second tree
-
+* `tree1` : root node of the first tree.
+* `tree2` : root node of the second tree.
 * `non_common_edges` : vector of non common edges. It is initialized empty and appended to 
-                       at each recursion
+                       at each recursion.
 """
 function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
                              )::Vector{Tuple{T, T}} where T<:GeneralNode
@@ -231,7 +315,6 @@ This function returns all the common edges of two trees with the same leafset. I
 calculates the length difference of each pair of common edges. 
 
 * `tree1` : root node of the first tree
-
 * `tree2` : root node of the second tree
 """
 function get_common_edges(tree1::T, tree2::T)::Vector{CommonEdge} where T<:GeneralNode
@@ -267,9 +350,7 @@ the input split (in case the found node for the original split would have been t
 Returns a Vector of all pairs of subtrees that share no common edges.
 
 * `tree` : root node of the tree.
-
 * `split` : A bit vector representing the split
-
 * `leaves` : vector of the leaves of the tree
 """
 function get_node_from_split(tree::T, split::BitVector, leaves::Vector{T}=[]
@@ -316,13 +397,10 @@ end # split_tree!
 --- INTERNAL ---
 Interleaves the ratio sequences rs1 and rs2 after combining them to get the ascending ratio
 sequence with the min distance. Returns a new ratio sequence.
-
-* `rs1`: First ratio sequence
-* `rs2`: Second ratio sequence
 """
 function interleave(rs1::RatioSequence, rs2::RatioSequence)::RatioSequence
-    combined1::RatioSequence = get_non_des_rs_with_min_dist(rs1)
-    combined2::RatioSequence = get_non_des_rs_with_min_dist(rs2)
+    combined1::RatioSequence = get_non_desc_rs_with_min_dist(rs1)
+    combined2::RatioSequence = get_non_desc_rs_with_min_dist(rs2)
 
     interleaved_rs = RatioSequence()
     ind1::Int64 = 1
@@ -351,7 +429,13 @@ function interleave(rs1::RatioSequence, rs2::RatioSequence)::RatioSequence
 end # interleave
 
 
-function get_non_des_rs_with_min_dist(rs::RatioSequence)::RatioSequence
+"""
+    get_non_desc_rs_with_min_dist(rs::RatioSequence)::RatioSequence
+
+--- INTERNAL ---
+This function returns a combined RatioSequence, so that the ratios are non-descending.
+"""
+function get_non_desc_rs_with_min_dist(rs::RatioSequence)::RatioSequence
     length(rs.ratios) < 2 && return rs
     combined_rs::RatioSequence = deepcopy(rs)
     i::Int64 = 1
@@ -392,11 +476,15 @@ function get_non_des_rs_with_min_dist(rs::RatioSequence)::RatioSequence
     end # for
     combined_rs.combine_code = combine_code
     return combined_rs
-end # get_non_des_rs_with_min_dist
+end # get_non_desc_rs_with_min_dist
 
 
 """
     get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
+
+--- INTERNAL ---
+This function computes the geodesic between two trees that share no common edges. Is 
+called in the function `geodesic` after the common edges have been removed.
 """
 function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
     trees::Tuple{T, T} = (tree1, tree2)
@@ -484,8 +572,25 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
 end # get_geodesic_nocommon_edges
 
 
+"""
+    get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vector{Int64})
+        ::Matrix{Int64}
+
+--- INTERNAL ---
+This function computes the min-normalized-square-weighted vertex cover. 
+
+Returns a 4xn matrix cd[1][] = #A-side cover elements
+                     cd[2][] = #B-side cover elements
+                     cd[3][] = list of A-side cover elements
+                     cd[4][] = list of B-side cover elements
+
+* `bg` : bipartite graph, holds incidence_matrix, several number used for calculations, 
+         as well as the a_vertices and b_vertices.
+* `a_index` : Vector of indices for a_vertices.
+* `b_index` : Vector of indices for b_vertices.
+"""
 function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::Vector{Int64}
-                     )::Matrix{Int64}
+                         )::Matrix{Int64}
 
     n_AVC = length(a_index)
     n_BVC = length(b_index)
@@ -615,6 +720,7 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
     return cd
 end # get_vertex_cover
 
+
 """
     get_incidence_matrix(edges1::Vector{T}, edges2::Vector{T},
         leaf_dict::Dict{String,Int64})::BitMatrix where T<:GeneralNode
@@ -625,11 +731,9 @@ if the corresponding subtrees of our input trees are not compatible.
 
 Returns the incidence_matrix.
 
-* `edges1` : edges of the first tree
-
-* `edges2` : edges of the second tree
-
-* `leaf_dict` : Dictionary that links each leaf to a unique number
+* `edges1` : edges of the first tree.
+* `edges2` : edges of the second tree.
+* `leaf_dict` : Dictionary that links each leaf to a unique number.
 """
 function get_incidence_matrix(edges1::Vector{T}, edges2::Vector{T}, 
                               leaf_dict::Dict{String,Int64})::BitMatrix where T<:GeneralNode
@@ -656,36 +760,13 @@ Check if two splits cross.
 
 Returns true if `b1` & `b2` - the bit vectors representing the two splits - are neither
 disjoint nor does either one contain the other.
-
-* `b1` : first split
-
-* `b2` : second split
 """
 function crosses(b1::BitVector, b2::BitVector)::Bool
     disjoint::Bool = all(.!(b1 .& b2))
     contains1::Bool = all(b1 .>= b2)
     contains2::Bool = all(b2 .>= b1)
     return !(disjoint || contains1 || contains2)   
-end # isCompatibleWith
-
-
-#=
-### might need these function at some point, probably not though
-
-    isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector})::Bool
-
---- INTERNAL ---
-Check if a split is compatible with a vector of splits.
-
-Returns true if `node_split` is compatible with all splits in `bipartitions`.
-"""
-function isCompatibleWith(node_split::BitVector, bipartitions::Vector{BitVector})::Bool
-    for bipartition in bipartitions
-        !isCompatibleWith(node_split, bipartition) && return false
-    end # for
-    true
-end # isCompatibleWith
-=#
+end # crosses
 
 
 """
@@ -694,8 +775,6 @@ end # isCompatibleWith
 --- INTERNAL ---
 This function sums the squared edge lengths of the input edges and returns the square root
 of that sum.
-
-* `edges` : root node of the first tree
 """
 function geo_avg(edges::Vector{T})::Float64 where T<:GeneralNode
     avg::Float64 = 0.0
@@ -707,47 +786,22 @@ end # geo_avg
 
 
 """
-    add_e_edge!(ratio::Ratio, node::T) where T<:GeneralNode
-
---- INTERNAL ---
-This function adds a new edge to one side of a ratio and adjusts the ratio length 
-accordingly.
-
-* `ratio` : ratio to which node is added
-
-* `node` : node that is added to the ratio
-"""
-function add_e_edge!(ratio::Ratio, node::T) where T<:GeneralNode
-    push!(ratio.e_edges, node)
-    ratio.e_length = sqrt(ratio.e_length ^ 2 + node.inc_length ^ 2)
-end # add_e_edge!
-
-
-"""
-    add_f_edge!(ratio::Ratio, node::T) where T<:GeneralNode
-
---- INTERNAL ---
-Works like add_e_edge!
-"""
-function add_f_edge!(ratio::Ratio, node::T) where T<:GeneralNode
-    push!(ratio.f_edges, node)
-    ratio.f_length = sqrt(ratio.f_length ^ 2 + node.inc_length ^ 2)
-end # add_f_edge!
-
-
-"""
     get_ratio(r::Ratio)::Float64
 
 --- INTERNAL ---
-Computes the ratio of a ratio struct
-
-* `ratio` : Ratio for which ratio is computed
+Computes the ratio of a ratio struct.
 """
 function get_ratio(r::Ratio)::Float64
     r.e_length / r.f_length
 end # get_ratio
 
 
+"""
+combine(r1::Ratio, r2::Ratio)::Ratio
+
+-- INTERNAL ---
+Combine two ratios to make a new one.
+"""
 function combine(r1::Ratio, r2::Ratio)::Ratio
     r::Ratio = Ratio()
     edges::Vector{T where T<:GeneralNode} = []
@@ -769,13 +823,30 @@ function combine(r1::Ratio, r2::Ratio)::Ratio
     return r
 end # combine
 
-function addall_e_edges!(r::Ratio, edges::Vector{T}) where T<:GeneralNode
-    r.e_edges = edges
-    r.e_length = geo_avg(r.e_edges) 
-end # addall_e_edges!
 
-function addall_f_edges!(r::Ratio, edges::Vector{T}) where T<:GeneralNode
-    r.f_edges = edges
-    r.f_length = geo_avg(r.f_edges) 
-end # addall_f_edges!
+"""
+    add_e_edge!(ratio::Ratio, node::T) where T<:GeneralNode
 
+--- INTERNAL ---
+This function adds a new edge to one side of a ratio and adjusts the ratio length 
+accordingly.
+
+* `ratio` : ratio to which node is added
+* `node` : node that is added to the ratio
+"""
+function add_e_edge!(ratio::Ratio, node::T) where T<:GeneralNode
+    push!(ratio.e_edges, node)
+    ratio.e_length = sqrt(ratio.e_length ^ 2 + node.inc_length ^ 2)
+end # add_e_edge!
+
+
+"""
+    add_f_edge!(ratio::Ratio, node::T) where T<:GeneralNode
+
+--- INTERNAL ---
+See 'add_e_edge!'
+"""
+function add_f_edge!(ratio::Ratio, node::T) where T<:GeneralNode
+    push!(ratio.f_edges, node)
+    ratio.f_length = sqrt(ratio.f_length ^ 2 + node.inc_length ^ 2)
+end # add_f_edge!
