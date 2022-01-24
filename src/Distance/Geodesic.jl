@@ -23,17 +23,15 @@ const CommonEdge = Tuple{T, Float64} where T<:GeneralNode
 
 mutable struct Geodesic
     ratio_seq::RatioSequence
-    e_leaf_attribs::Vector{Float64}
-    f_leaf_attribs::Vector{Float64}
     leaf_contribution²::Float64
     common_edges::Vector{CommonEdge}
     common_edge_lengths::Vector{EdgeLengths}
 
     Geodesic(rs::RatioSequence, e_lengths::Vector{Float64}, f_lengths::Vector{Float64}) = 
-        new(rs, e_lengths, f_lengths, 0.0, CommonEdge[], EdgeLengths[])
+        new(rs, 0.0, CommonEdge[], EdgeLengths[])
 
     Geodesic(rs::RatioSequence) = 
-        new(rs, [], [], 0.0, CommonEdge[], EdgeLengths[])
+        new(rs, 0.0, CommonEdge[], EdgeLengths[])
 end # Geodesic
 
 
