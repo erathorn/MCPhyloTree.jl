@@ -77,7 +77,7 @@ function get_distance(geo::Geodesic)::Float64
         common_edge_dist² += (geo.common_edge_lengths[i][1] - 
                               geo.common_edge_lengths[i][2]) ^ 2
     end # for
-    non_desending_rs::RatioSequence = get_non_desc_rs_with_min_dist(geo.ratio_seq)
+    non_descending_rs::RatioSequence = get_non_desc_rs_with_min_dist(geo.ratio_seq)
     return sqrt(get_distance(non_descending_rs) ^ 2 + common_edge_dist² + geo.leaf_contribution²)
 end # get_distance
 
