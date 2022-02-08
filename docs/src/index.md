@@ -18,5 +18,5 @@ The stable version can also be installed via the Julia package manager.
 
 ```julia
 using Pkg
-Pkg.add("MCPhylotree")
+Pkg.add("MCPhyloTree")
 ```

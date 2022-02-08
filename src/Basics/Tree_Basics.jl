@@ -60,7 +60,7 @@ function remove_child!(mother_node::N, left::Bool)::N where N <: GeneralNode
 end # function
 
 """
-    remove_child!(mother_node::N, child::N)::N where N<:GeneralNode
+    remove_child!(mother_node::N, child::N)::N where N<:AbstractNode
 
 This function removes a child from the list of nodes which are daughters of this
 node.
@@ -71,7 +71,7 @@ The removed node is returned.
 
 * `child` : specific Node to remove. This node has to be a child of `mother_node`.
 """
-function remove_child!(mother_node::N, child::N)::N where N<:GeneralNode
+function remove_child!(mother_node::N, child::N)::N where N<:AbstractNode
     ind = findfirst(x->x==child, mother_node.children)
     deleteat!(mother_node.children, ind)
     child.mother = missing
@@ -81,14 +81,14 @@ function remove_child!(mother_node::N, child::N)::N where N<:GeneralNode
 end # function
 
 """
-    delete_node!(node::T)::Nothing where T<:GeneralNode
+    delete_node!(node::T)::Nothing where T<:AbstractNode
 
 This functions deletes node from a tree and assigns all its children to its
 mother node.
 
 * `node` : Node to be deleted.
 """
-function delete_node!(node::T)::Nothing where T<:GeneralNode
+function delete_node!(node::T)::Nothing where T<:AbstractNode
     if node.root == true
         throw(ArgumentError("Cannot remove root node"))
     end
@@ -101,7 +101,7 @@ function delete_node!(node::T)::Nothing where T<:GeneralNode
 end
 
 """
-    insert_node!(mother::T, children::Vector{T})::T where T<:GeneralNode
+    insert_node!(mother::T, children::Vector{T})::T where T<:AbstractNode
 
 This function inserts a node into a tree after a mother node and gains
 a subset of the mother's children as its children.
@@ -112,7 +112,7 @@ Returns the inserted node.
 
 * `children` : Children of node referenced by "mother" to reassign as children of the newly-inserted node.
 """
-function insert_node!(mother::T, children::Vector{T})::T where T<:GeneralNode
+function insert_node!(mother::T, children::Vector{T})::T where T<:AbstractNode
     @assert length(children) >= 1
     inserted_node = Node()
     for child in children
@@ -131,17 +131,17 @@ end
 
 
 # legacy wrapper
-function rescale_length(root::T) where T<:GeneralNode
+function rescale_length(root::T) where T<:AbstractNode
     force_ultrametric(root)
 end
 
 
 """
-    force_ultrametric!(root::T) where T<:GeneralNode
+    force_ultrametric!(root::T) where T<:AbstractNode
 
 Force an ultrametric version of the tree.
 """
-function force_ultrametric!(root::T) where T<:GeneralNode
+function force_ultrametric!(root::T) where T<:AbstractNode
     po::Vector{T} = post_order(root)
     node2max_depth = zeros(UInt32, length(po))
     for node in po
@@ -178,20 +178,20 @@ end # function force_ultrametric!
 #################### Tree length & height ####################
 
 """
-    tree_length(root::T)::Float64  where T<:GeneralNode
+    tree_length(root::T)::Float64  where T<:AbstractNode
 
 This function calculates the tree length.
 """
-function tree_length(root::T)::Float64  where T<:GeneralNode
+function tree_length(root::T)::Float64  where T<:AbstractNode
     return tree_length(root, 0.0)
 end # function tree_length
 
 """
-    tree_length(root::T, tl::Float64)::Float64 where T<:GeneralNode
+    tree_length(root::T, tl::Float64)::Float64 where T<:AbstractNode
 
 This function does the internal tree length recursion
 """
-function tree_length(root::T, tl::Float64)::Float64 where T<:GeneralNode
+function tree_length(root::T, tl::Float64)::Float64 where T<:AbstractNode
 
     #if length(root.children) != 0
     for child in root.children
@@ -207,21 +207,21 @@ end # function tree_length
 
 
 """
-    tree_height(root::T)::Float64  where T<:GeneralNode
+    tree_height(root::T)::Float64  where T<:AbstractNode
 
 This function calculates the tree height.
 """
-function tree_height(root::T)::Float64  where T<:GeneralNode
+function tree_height(root::T)::Float64  where T<:AbstractNode
     node_height(root)
     return root.height
 end
 
 """
-    node_height(root::T, mv::Float64)::Float64  where T<:GeneralNode
+    node_height(root::T, mv::Float64)::Float64  where T<:AbstractNode
 
 Calculate the height of a node.
 """
-function node_height(root::T)  where T<:GeneralNode
+function node_height(root::T)  where T<:AbstractNode
 
     if root.nchild != 0
         for node in root.children
@@ -233,7 +233,7 @@ function node_height(root::T)  where T<:GeneralNode
     end
 end # function node_height
 
-function node_height_vec(root::T, vec::Vector{N})  where {T<:GeneralNode, N<:Real}
+function node_height_vec(root::T, vec::Vector{N})  where {T<:AbstractNode, N<:Real}
 
     if root.nchild != 0
         for node in root.children
@@ -247,21 +247,21 @@ function node_height_vec(root::T, vec::Vector{N})  where {T<:GeneralNode, N<:Rea
 end # function node_height
 
 
-function node_height_vec(root::T)::Vector{Float64} where T<:GeneralNode
+function node_height_vec(root::T)::Vector{Float64} where T<:AbstractNode
     t = zeros(length(post_order(root)))
     node_height_vec(root, t)
     t
 end # function node_height
 
 """
-    function node_age(node::FNode)::Float64
+    function node_age(node<:AbstractNode)::Float64
 
 Calculates the age of a node. If the tree is ultrametric then the node age is identical 
 to the node height. It is calculated by subtracting the path length between the node & 
 the root from the height of the root. This represents the age of the node, assuming the 
 leaf farthest from the root has a node age of 0, and the root node is the 'oldest' node.
 """
-function node_age(node::FNode)::Float64
+function node_age(node::GeneralNode)::Float64
     depth::Float64 = 0
     while !node.root
         depth += node.inc_length
@@ -271,20 +271,20 @@ function node_age(node::FNode)::Float64
 end # function node_age
 
 """
-    node_depth(node::T)::Int64 where T<:GeneralNode
+    node_depth(node::T)::Int64 where T<:AbstractNode
 
 Calculate the depth of a node.
 """
-function node_depth(node::T)::Int64 where T<:GeneralNode
+function node_depth(node::T)::Int64 where T<:AbstractNode
     return length(split(node.binary, ",")) - 1
 end
 
-function node_distance(tree::T, node1::T, node2::T)::Float64 where T<:GeneralNode
+function node_distance(tree::T, node1::T, node2::T)::Float64 where T<:AbstractNode
     lca = find_lca(tree, node1, node2)
     path_length(lca, node1)+path_length(lca,node2)
 end
 
-function get_path(ancestor::T, descendant::T)::Vector{Int64} where T<:GeneralNode
+function get_path(ancestor::T, descendant::T)::Vector{Int64} where T<:AbstractNode
     path::Vector{Int64} = []
     while descendant.num != ancestor.num
         push!(path, descendant.num)
@@ -295,7 +295,7 @@ end
 
 
 """
-    path_length(ancestor::T, descendant::T)::Float64  where T<:GeneralNode
+    path_length(ancestor::T, descendant::T)::Float64  where T<:AbstractNode
 
 Note: The function assumes there is an ancestral relationship between the two nodes.
 
@@ -303,7 +303,7 @@ This function calculates the length of the path separating the ancestor from the
 offspring node. The function follows the path specified through the binary
 description of the node.
 """
-function path_length(ancestor::T, descendant::T)::Float64  where T<:GeneralNode
+function path_length(ancestor::T, descendant::T)::Float64  where T<:AbstractNode
     l::Float64 = 0.0
 
     while descendant != ancestor
@@ -315,19 +315,19 @@ end # function path_length
 
 
 """
-    get_sister(node::T)::T  where T<:GeneralNode
+    get_sister(node::T)::T  where T<:AbstractNode
 
 This function gets the sister of `node`. It does so by looking for the respective
 binary representation of the sister.
 """
-@inline function get_sister(node::T)::T  where T<:GeneralNode
+@inline function get_sister(node::T)::T  where T<:AbstractNode
     m::T = get_mother(node)
     m.children[findfirst(y-> y!=node, m.children)]
 end # function
 
 
 """
-    get_mother(node::T)::T  where T<:GeneralNode
+    get_mother(node::T)::T  where T<:AbstractNode
 
 This function gets the mother of `node`. It does so by looking for the respective
 binary representation of the mother node.
@@ -358,12 +358,12 @@ function set_binary!(root::T)  where T <: GeneralNode
 end # function set_binary
 
 """
-    number_nodes!(root::T)::Nothing  where T<:GeneralNode
+    number_nodes!(root::T)::Nothing  where T<:AbstractNode
 
 This function assigns a unique, sequential number to each node. Leaves are numbered first
 in alphabetical order.
 """
-function number_nodes!(root::T)::Nothing  where T<:GeneralNode
+function number_nodes!(root::T)::Nothing  where T<:AbstractNode
     tips = [n.name for n in get_leaves(root)]
     sort!(tips)
     running = length(tips)
@@ -378,34 +378,34 @@ function number_nodes!(root::T)::Nothing  where T<:GeneralNode
 end # function number_nodes
 
 """
-    initialize_tree!(root::FNode; height::Bool=true)
+    initialize_tree!(root::GeneralNode; height::Bool=true)
 
 This function initializes a tree, i.e. numbers its nodes and sets the binary + height 
 fields.
 """
-function initialize_tree!(root::FNode; height::Bool=true)
+function initialize_tree!(root::GeneralNode; height::Bool=true)
     set_binary!(root)
     number_nodes!(root)
     height && tree_height(root)
 end # initialize_tree
 
 """
-    update_tree!(root::FNode)
+    update_tree!(root::GeneralNode)
 
 This function can be used to recompute the tree's binary and height values. This might be 
 necessary after adding/moving/removing nodes.
 """
-function update_tree!(root::FNode; height::Bool=true)
+function update_tree!(root::GeneralNode; height::Bool=true)
     set_binary!(root)
     height && tree_height(root)
 end # update_tree
 
 """
-    random_node(root::T)::T  where T<:GeneralNode
+    random_node(root::T)::T  where T<:AbstractNode
 
 This function returns a random node from the tree.
 """
-function random_node(root::T)::T  where T<:GeneralNode
+function random_node(root::T)::T  where T<:AbstractNode
     post_order_trav = post_order(root)
     return rand(post_order_trav)
 end # function random_node
@@ -415,11 +415,11 @@ end # function random_node
 #################### Vector of branch lengths: get & set ####################
 
 """
-    get_branchlength_vector(root::N)::Vector{T}  where {N <:GeneralNode, T<:Real}
+    get_branchlength_vector(root::N)::Vector{T}  where {N <:AbstractNode, T<:Real}
 
 Get the vector of branch lengths of the tree.
 """
-function get_branchlength_vector(root::N)::Vector{Float64}  where {N <:GeneralNode}
+function get_branchlength_vector(root::N)::Vector{Float64}  where {N <:AbstractNode}
     if length(root.blv) == 0
         root.blv = zeros(length(post_order(root))-1)
     end
@@ -429,11 +429,11 @@ end # function get_branchlength_vector
 
 
 """
-    get_branchlength_vector(root::N, out_vec::Vector{T}) where {N<:GeneralNode, T<:Real}
+    get_branchlength_vector(root::N, out_vec::Vector{T}) where {N<:AbstractNode, T<:Real}
 
 Do post order traversal to retrieve a vector of branch lengths.
 """
-function get_branchlength_vector(root::N, out_vec::Vector{T})::Nothing where {N<:GeneralNode, T<:Real}
+function get_branchlength_vector(root::N, out_vec::Vector{T})::Nothing where {N<:AbstractNode, T<:Real}
     for child in root.children
         get_branchlength_vector(child, out_vec)
     end
@@ -446,11 +446,11 @@ end
 
 
 """
-    set_branchlength_vector!(root::N, blenvec::Array{T}) where {N<:GeneralNode, T<:Real}
+    set_branchlength_vector!(root::N, blenvec::Array{T}) where {N<:AbstractNode, T<:Real}
 
 This function sets the branch lengths of a tree to the values specified in blenvec.
 """
-function set_branchlength_vector!(root::N, blenvec::Array{T}) where {N<:GeneralNode, T<:Real}
+function set_branchlength_vector!(root::N, blenvec::Array{T}) where {N<:AbstractNode, T<:Real}
     any(0 .> blenvec) && throw("this should never happen")
     for child in root.children
         set_branchlength_vector!(child, blenvec)
@@ -464,23 +464,23 @@ end # function set_branchlength_vector!
 
 
 """
-    get_sum_seperate_length!(root::T)::Vector{Float64}  where T<:GeneralNode
+    get_sum_seperate_length!(root::T)::Vector{Float64}  where T<:AbstractNode
 
 This function gets the sum of the branch lengths of the internal branches and the
 branches leading to the leave nodes.
 """
-function get_sum_seperate_length!(root::T)::Vector{Float64}  where T<:GeneralNode
+function get_sum_seperate_length!(root::T)::Vector{Float64}  where T<:AbstractNode
     return get_sum_seperate_length!(post_order(root))
 end # function get_sum_seperate_length!
 
 
 """
-    get_sum_seperate_length!(post_order::Vector{T})::Vector{Float64}  where T<:GeneralNode
+    get_sum_seperate_length!(post_order::Vector{T})::Vector{Float64}  where T<:AbstractNode
 
 This function gets the sum of the branch lengths of the internal branches and the
 branches leading to the leave nodes.
 """
-function get_sum_seperate_length!(post_order::Vector{T})::Vector{Float64}  where T<:GeneralNode
+function get_sum_seperate_length!(post_order::Vector{T})::Vector{Float64}  where T<:AbstractNode
     res_int::Float64 = 0.0
     res_leave::Float64 = 0.0
     res_int_log::Float64 = 0.0
@@ -501,11 +501,11 @@ function get_sum_seperate_length!(post_order::Vector{T})::Vector{Float64}  where
     return [res_int, res_leave, res_int_log, res_leave_log]
 end # function get_sum_seperate_length!
 
-function internal_external_map(root::T)::Vector{Int64}  where T<:GeneralNode
+function internal_external_map(root::T)::Vector{Int64}  where T<:AbstractNode
     internal_external_map(post_order(root))
 end
 
-function internal_external_map(post_order::Vector{T})::Vector{Int64}  where T<:GeneralNode
+function internal_external_map(post_order::Vector{T})::Vector{Int64}  where T<:AbstractNode
     my_map::Vector{Int64} = zeros(Int64, length(post_order)-1)
     for node in post_order
         if !node.root
@@ -517,7 +517,7 @@ function internal_external_map(post_order::Vector{T})::Vector{Int64}  where T<:G
     return my_map
 end
 
-function internal_external(root::T)::Vector{Int64}  where T<:GeneralNode
+function internal_external(root::T)::Vector{Int64}  where T<:AbstractNode
     v = root.IntExtMap
     length(v) != 0 && return v
     v = internal_external_map(root)
@@ -527,11 +527,11 @@ function internal_external(root::T)::Vector{Int64}  where T<:GeneralNode
 end
 
 
-function find_lca(tree::T, node_l::Array{String, 1})::T  where T<:GeneralNode
+function find_lca(tree::T, node_l::Array{String, 1})::T  where T<:AbstractNode
     find_lca(tree, [find_by_name(tree, i) for i in node_l])
 end
 
-function find_lca(tree::T, node_l::Array{T})::T  where T<:GeneralNode
+function find_lca(tree::T, node_l::Array{T})::T  where T<:AbstractNode
     @assert length(node_l) > 0
     if length(node_l) === 1
         return node_l[1]
@@ -547,7 +547,7 @@ function find_lca(tree::T, node_l::Array{T})::T  where T<:GeneralNode
     end
 end
 
-function find_lca(tree::T, node1::T, node2::T)::T  where T<:GeneralNode
+function find_lca(tree::T, node1::T, node2::T)::T  where T<:AbstractNode
     nb = lcp(node1.binary, node2.binary)
     thing = nb[end]
     if nb[end] == ','
@@ -568,29 +568,28 @@ end
 checks to see if given tree is binary; returns true if properly formatted and false otherwise
 """
 function check_binary(root::GeneralNode)::Bool
-    if root.root
-        if root.nchild != 2 && root.nchild != 3
-            return false
-        end #if
-    else
-        if root.nchild != 0 && root.nchild != 2
-            return false
-        end #if
-    end #else
-    res::Bool = true
-    for child in root.children
-        res &= check_binary(child)
-    end #for
-    return res
+    check_binary_int(root, true)
 end #function
+
+function check_binary_int(root::AbstractNode, state::Bool)::Bool
+    for child in root.children
+        state &=check_binary_int(child, state)
+    end
+    if root.root && root.nchild == 3
+        state &= true
+    elseif root.nchild !=0 && root.nchild != 2
+        state &= false
+    end
+    state
+end
 
 
 """
-    check_leafsets(trees::Vector{T})::Nothing where T<:GeneralNode
+    check_leafsets(trees::Vector{T})::Nothing where T<:AbstractNode
 
 Checks if an array of trees shares the same leafset (based on the leaf names)
 """
-function check_leafsets(trees::Vector{T})::Nothing where T<:GeneralNode
+function check_leafsets(trees::Vector{T})::Nothing where T<:AbstractNode
     leaveset = Set([n.name for n in get_leaves(trees[1])])
     count = 0
     for (index, tree) in enumerate(trees[2:end])

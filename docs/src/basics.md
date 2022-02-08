@@ -3,12 +3,13 @@
 This section provides an overview over the basic functionalities offered.
 
 When building / modifying trees with methods like *add_child!* or *insert_node!*, it might
-be necessarry to run *initialize_tree!* or *update_tree!* to ensure the nodes remain /are 
-initialized. 
+be necessarry to run *initialize_tree!* or *update_tree!* to ensure the nodes remain /are
+initialized.
 
 **WARNING**: Do not run *initialize_tree!* after changing a tree, if you rely on the num
 field of the nodes to identify them. The same applies to the method *number_nodes* that is
 called in *initalize_tree*.
+
 ## Basic Tree Functionalities
 
 ```@autodocs
@@ -41,5 +42,5 @@ Pages = ["Basics/Tree_Traversal.jl"]
 ## Tree Representations
 
 ```@docs
-newick(root::T) where T<:GeneralNode
+newick(root::T) where T<:AbstractNode
 ```

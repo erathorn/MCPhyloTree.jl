@@ -13,7 +13,7 @@
 
 """
     majority_consensus_tree(trees::Vector{T}, percentage::Float64=0.5)
-        ::T where T<:GeneralNode
+        ::T where T<:AbstractNode
 
 Construct the majority rule consensus tree from a set of trees that share the
 same leafset. By default the output tree includes clusters that occur in over
@@ -26,7 +26,7 @@ for constructing consensustrees. J. ACM 63, 3, Article 28 (June 2016), 24 pages
 https://dl.acm.org/doi/pdf/10.1145/2925985
 """
 function majority_consensus_tree(trees::Vector{T}, percentage::Float64=0.5
-         )::T where T<:GeneralNode
+         )::T where T<:AbstractNode
 
     merged_tree = deepcopy(trees[1])
     check_leafsets(trees)
@@ -76,7 +76,7 @@ end
 
 
 """
-    loose_consensus_tree(trees::Vector{T})::T where T<:GeneralNode
+    loose_consensus_tree(trees::Vector{T})::T where T<:AbstractNode
 
 Construct the loose consensus tree from a set of trees that share the same
 leafset. I.e. a tree with all the clusters that appear in at least one tree
@@ -88,7 +88,7 @@ Jesper Jansson, Chuanqi Shen, and Wing-Kin Sung. 2016. Improved algorithms
 for constructing consensustrees. J. ACM 63, 3, Article 28 (June 2016), 24 pages
 https://dl.acm.org/doi/pdf/10.1145/2925985
 """
-function loose_consensus_tree(trees::Vector{T})::T where T<:GeneralNode
+function loose_consensus_tree(trees::Vector{T})::T where T<:AbstractNode
     r_tree = trees[1]
     check_leafsets(trees)
     nodes = post_order(r_tree)
@@ -119,7 +119,7 @@ end
 
 
 """
-    greedy_consensus_tree(trees::Vector{T})::T where T<:GeneralNode
+    greedy_consensus_tree(trees::Vector{T})::T where T<:AbstractNode
 
 
 Construct the greedy consensus tree from a set of trees that share the same
@@ -241,7 +241,7 @@ end # count_cluster_occurences
 
 """
     set_node_stats!(tree::T, trees::Vector{T}, majority::Bool)
-        ::Nothing where T<:GeneralNode
+        ::Nothing where T<:AbstractNode
 
 --- INTERNAL ---
 Helper function for the construction of a consensus tree. Calculates the
@@ -298,7 +298,7 @@ Returns dictionary.
 * `tree` : Tree used to create dictionary.
 
 """
-function find_common_clusters(ref_tree::T, tree::T) where T<:GeneralNode
+function find_common_clusters(ref_tree::T, tree::T) where T<:AbstractNode
     ref_nodes = post_order(ref_tree)
     leaves_dict = Dict{String, Tuple{Int64, Float64}}()
     clusters = Dict{T, Vector{String}}()
@@ -370,7 +370,7 @@ end # find_common_clusters
 
 
 """
-    one_way_compatible(ref_tree::T, tree::T)::T where T<:GeneralNode
+    one_way_compatible(ref_tree::T, tree::T)::T where T<:AbstractNode
 
 --- INTERNAL ---
 Takes two trees and returns a copy of the first one, where all the clusters that
@@ -405,7 +405,7 @@ end # function one_way_compatible
 
 
 """
-    merge_trees!(ref_tree::T, tree::T)::Vector{T}} where T<:GeneralNode
+    merge_trees!(ref_tree::T, tree::T)::Vector{T}} where T<:AbstractNode
 
 --- INTERNAL ---
 Merge two compatible trees, i.e. inserts all cluster of the first tree, which
@@ -418,7 +418,7 @@ of nodes that were added.
 
 * `tree` : tree used to determine common clusters.
 """
-function merge_trees!(ref_tree::T, tree::T)::Vector{T} where T<:GeneralNode
+function merge_trees!(ref_tree::T, tree::T)::Vector{T} where T<:AbstractNode
     ref_nodes = post_order(ref_tree)
     cluster_start_indeces = get_cluster_start_indeces(ref_nodes, tree)
     leaves::Vector{T} = order_tree!(tree, cluster_start_indeces; height=false)
@@ -468,7 +468,7 @@ end # function merge_trees!
         xleft_dict::Dict{T, Tuple{T, Dict{Int64, T}}},
         xright_dict::Dict{T, Tuple{T, Dict{Int64, T}}},
         marked_nodes::Union{Dict{Int64, Bool, Nothing}}=nothing
-        )::Union{Nothing, Tuple{T, T, T, Dict{Int64, T}, Dict{Int64, T}}} where T<:GeneralNode
+        )::Union{Nothing, Tuple{T, T, T, Dict{Int64, T}, Dict{Int64, T}}} where T<:AbstractNode
 
 --- INTERNAL ---
 Helper function that handles major chunk of code that one_way_compatible and
@@ -479,7 +479,7 @@ function check_node!(ref_node::T, leaves::Vector{T},
                      xleft_dict::Dict{T, Tuple{T, Dict{Int64, T}}},
                      xright_dict::Dict{T, Tuple{T, Dict{Int64, T}}},
                      marked_nodes::Union{Dict{Int64, Bool}, Nothing}=nothing
-                     )::Union{Nothing, Tuple{T, T, T, T, T, Dict{Int64, T}, Dict{Int64, T}}} where T<:GeneralNode
+                     )::Union{Nothing, Tuple{T, T, T, T, T, Dict{Int64, T}, Dict{Int64, T}}} where T<:AbstractNode
     if ref_node.nchild != 0
         start = min_leaf_rank(leaf_ranks_reverse, ref_node)
         stop = max_leaf_rank(leaf_ranks_reverse, ref_node)
@@ -530,14 +530,14 @@ end # check_node
 
 """
     get_cluster_start_indeces(ref_nodes::T, tree::T)
-        ::Dict{T, Int64} where T<:GeneralNode
+        ::Dict{T, Int64} where T<:AbstractNode
 
 --- INTERNAL ---
 Helper function to obtain the cluster start indeces for a tree (tree), based
 on the nodes of another tree (ref_nodes).
 """
 function get_cluster_start_indeces(ref_nodes::Vector{T}, tree::T
-                                  )::Dict{T, Int64} where T<:GeneralNode
+                                  )::Dict{T, Int64} where T<:AbstractNode
 
     leaf_ranks = get_leaf_ranks(ref_nodes)
     leaves = Vector{T}()
@@ -563,13 +563,13 @@ end
 
 """
     function get_leaf_ranks(nodes::Vector{T})
-        ::Dict{String, Int64} where T<:GeneralNode
+        ::Dict{String, Int64} where T<:AbstractNode
 
 --- INTERNAL ---
 Enumerate the leaf nodes in a tree. Returns a dictionary of this mapping.
 """
 function get_leaf_ranks(nodes::Vector{T}
-                       )::Dict{String, Int64} where T<:GeneralNode
+                       )::Dict{String, Int64} where T<:AbstractNode
 
     leaf_ranks = Dict{String, Int64}()
     count = 1
@@ -585,14 +585,14 @@ end # get_leaf_ranks
 
 """
     order_tree!(root::T, cluster_start_indeces::Dict{T, Int64}, leaves=Vector{T}();
-                height=true)::Vector{T} where T<:GeneralNode
+                height=true)::Vector{T} where T<:AbstractNode
 
 --- INTERNAL ---
 Helper function to order a tree based on cluster indeces and return the leaves
 of the ordered tree
 """
 function order_tree!(root::T, cluster_start_indeces::Dict{T, Int64}, leaves=Vector{T}();
-                     height=true)::Vector{T} where T<:GeneralNode
+                     height=true)::Vector{T} where T<:AbstractNode
 
     sort!(root.children, by = child -> cluster_start_indeces[child],
           alg=InsertionSort)
@@ -610,13 +610,13 @@ end # order_tree!
 
 """
     min_leaf_rank(leaf_ranks::Dict{String, Int64}, node::T)
-        ::Int64 where T<:GeneralNode
+        ::Int64 where T<:AbstractNode
 
 ---- INTERNAL ---
 Recursive helper function to find the lowest ranked leaf descendant of a node
 """
 function min_leaf_rank(leaf_ranks::Dict{String, Int64}, node::T
-                      )::Int64 where T<:GeneralNode
+                      )::Int64 where T<:AbstractNode
 
     if node.nchild == 0
         return leaf_ranks[node.name]
@@ -636,13 +636,13 @@ end # min_leaf_rank
 
 """
     max_leaf_rank(leaf_ranks::Dict{String, Int64}, node::T)
-        ::Int64 where T<:GeneralNode
+        ::Int64 where T<:AbstractNode
 
 --- INTERNAL ---
 Recursive helper function to find the highest ranked leaf descendant of a node
 """
 function max_leaf_rank(leaf_ranks::Dict{String, Int64}, node::T
-                      )::Int64 where T<:GeneralNode
+                      )::Int64 where T<:AbstractNode
 
     if node.nchild == 0
         return leaf_ranks[node.name]
@@ -661,13 +661,13 @@ end # max_leaf_rank
 
 
 """
-    x_left(node::T)::Tuple{T,Vector{T}} where T<:GeneralNode
+    x_left(node::T)::Tuple{T,Vector{T}} where T<:AbstractNode
 
 --- INTERNAL ---
 Helper function to find ancestor of a leaf that has said leaf as leftmost
 descendant. Also returns the path from the leaf to the mother of that node.
 """
-function x_left(node::T)::Tuple{T, Vector{T}} where T<:GeneralNode
+function x_left(node::T)::Tuple{T, Vector{T}} where T<:AbstractNode
     path::Vector{T} = [node]
     while true
         if node.root
@@ -686,13 +686,13 @@ end # x_left
 
 
 """
-    x_right(node::T)::Tuple{T,Vector{T}} where T<:GeneralNode
+    x_right(node::T)::Tuple{T,Vector{T}} where T<:AbstractNode
 
 --- INTERNAL ---
 Helper function to find ancestor of a leaf that has said leaf as rightmost
 descendant. Also returns the path from the leaf to the mother of that node.
 """
-function x_right(node::T)::Tuple{T, Vector{T}} where T<:GeneralNode
+function x_right(node::T)::Tuple{T, Vector{T}} where T<:AbstractNode
     path::Vector{T} = [node]
     while true
         if node.root
@@ -712,14 +712,14 @@ end # x_right
 
 """
     depth_dicts(leaves::Vector{T})
-        ::Tuple{Dict{T, Tuple{T, Dict{Int64, T}}}, Dict{T, Tuple{T, Dict{Int64, T}}}} where T<:GeneralNode
+        ::Tuple{Dict{T, Tuple{T, Dict{Int64, T}}}, Dict{T, Tuple{T, Dict{Int64, T}}}} where T<:AbstractNode
 
 --- INTERNAL ---
 Helper function for one_way_compatible and merge_trees!. Creates a dictionary
 based on a vector of leaf nodes, and stores the depth of each node, as well as
 the left and right path leading to it. Based on section 6.1 of the paper.
 """
-function depth_dicts(leaves::Vector{T})::Tuple{Dict{T, Tuple{T, Dict{Int64, T}}}, Dict{T, Tuple{T, Dict{Int64, T}}}} where T<:GeneralNode
+function depth_dicts(leaves::Vector{T})::Tuple{Dict{T, Tuple{T, Dict{Int64, T}}}, Dict{T, Tuple{T, Dict{Int64, T}}}} where T<:AbstractNode
     xleft_dict = Dict{T, Tuple{T, Dict{Int64, T}}}()
     xright_dict = Dict{T, Tuple{T, Dict{Int64, T}}}()
     for leaf in leaves

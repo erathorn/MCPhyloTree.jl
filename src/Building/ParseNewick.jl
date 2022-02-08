@@ -62,7 +62,7 @@ In this function main parsing process happens, it uses recursive method to parse
 formated string.
 """
 
-function parsing_newick_string(newick::String)::FNode
+function parsing_newick_string(newick::String)::GeneralNode{Float64, Int64}
     newick = replace(newick, " " => "")
 
     if newick[end] == ';' # no need for semicolon
@@ -140,11 +140,11 @@ a newick string in the file.
 
 * `s` : newick string or name of file containing newick strings to parse.
 """
-function ParseNewick(s::String)::Union{FNode, Array{FNode,1}}
+function ParseNewick(s::String)::Union{GeneralNode, Array{GeneralNode,1}}
     
     # check if the input string is a newick string & parse + return it if so
     if is_valid_newick_string(s) 
-        tree::FNode = parsing_newick_string(s)
+        tree = parsing_newick_string(s)
         initialize_tree!(tree)
         return tree
     end # if
@@ -158,7 +158,7 @@ function ParseNewick(s::String)::Union{FNode, Array{FNode,1}}
         throw(ErrorException("Input must be valid newick string or file name. Check path to file & check validity of newick string by running is_valid_newick_string(string)"))
     end # try/catch
         
-    list_of_newicks = FNode[]
+    list_of_newicks = GeneralNode[]
     for content in list_of_trees
         if content == ""
             continue

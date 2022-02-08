@@ -1,22 +1,4 @@
-function reroot(root::T, new_root::T)::T where T<:GeneralNode
-
-    new_tree = deepcopy(root)
-    root_node = find_by_num(new_tree, new_root.num)
-    mother = get_mother(root_node)
-
-    recursive_invert(mother, root_node)
-
-    root_node.root = true
-    new_tree.root = false
-
-
-    set_binary!(root_node)
-
-    return root_node
-end
-
-# TODO (maybe): this only works when nodes have distinct names
-function reroot(root::T, new_root::String)::T where T<:GeneralNode
+function reroot(root::T, new_root::String)::T where T<:AbstractNode
 
     new_tree = deepcopy(root)
     root_node = find_by_name(new_tree, new_root)

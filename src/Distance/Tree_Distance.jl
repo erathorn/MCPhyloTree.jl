@@ -1,7 +1,7 @@
 # TODO: check trees are on the same leave set
 
 """
-    RF(tree1::T, tree2::T)::Int64 where T <:GeneralNode
+    RF(tree1::T, tree2::T)::Int64 where T <:AbstractNode
 
 Calculate the Robinson-Foulds distance between the two trees.
 In its current form the function assumes the trees have identical leave sets.
@@ -28,7 +28,7 @@ end
 
 
 """
-    RF_weighted(tree1::T, tree2::T)::Float64 where T <:GeneralNode
+    RF_weighted(tree1::T, tree2::T)::Float64 where T <:AbstractNode
 
 Calculate the weighted Robinson-Foulds distance between the two trees.
 The raw Robinson-Foulds distance is weighted by the maximum distance between the trees.
@@ -49,13 +49,13 @@ end
 
 
 """
-    get_bipartitions(tree::T)::Vector{Tuple} where T <:GeneralNode
+    get_bipartitions(tree::T)::Vector{Tuple} where T <:AbstractNode
 
 Get a vector of all bipartions of `tree`.
 
 Returns a vector containing tuples of sets representing the bipartitions.
 """
-function get_bipartitions(tree::T)::Vector{Tuple} where T <:GeneralNode
+function get_bipartitions(tree::T)::Vector{Tuple} where T <:AbstractNode
     po_vect= post_order(tree)[1:end-1]
     bt = Vector{Tuple}(undef, length(po_vect))
     all_leaves = [n.name for n in get_leaves(tree)]
@@ -131,14 +131,14 @@ end
 
 
 """
-    BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:GeneralNode
+    BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:AbstractNode
 
 This function calculates the lower and upper bounds of the geodesic in the
 Billera-Holmes-Vogtman space.
 
 Returns tuple of floats.
 """
-function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:GeneralNode
+function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:AbstractNode
     bp_t1 = get_bipartitions(tree1)
     bp_t2 = get_bipartitions(tree2)
     
