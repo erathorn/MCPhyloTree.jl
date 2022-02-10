@@ -248,7 +248,7 @@ Returns a Vector of all pairs of subtrees that share no common edges.
 * `split` : A bit vector representing the split
 * `leaves` : vector of the leaves of the tree
 """
-function get_node_from_split(tree::T, split::BitVector, leaves::Vector{T}=[]
+function get_node_from_split(tree::T, split::BitVector, leaves::Vector{T}
                             )::Tuple{T, Bool} where T<:GeneralNode
 
     if isempty(leaves)
