@@ -9,17 +9,14 @@ Struct that tracks all relevant parameters, when computing the Geodesic between 
 * `common_edge_lengths` : A vector of tuples, where each tuple stores the lengths of a
                           common edge in the first and the second tree.
 """
-mutable struct Geodesic
+mutable struct Geodesic{T<:GeneralNode}
     ratio_seq::RatioSequence
     leaf_contribution²::Float64
-    common_edges::Vector{CommonEdge}
+    common_edges::Vector{T}
     common_edge_lengths::Vector{EdgeLengths}
 
-    Geodesic(rs::RatioSequence, e_lengths::Vector{Float64}, f_lengths::Vector{Float64}) = 
-        new(rs, 0.0, CommonEdge[], EdgeLengths[])
-
     Geodesic(rs::RatioSequence) = 
-        new(rs, 0.0, CommonEdge[], EdgeLengths[])
+        new{GeneralNode}(rs, 0.0, [], EdgeLengths[])
 end # Geodesic
 
 
