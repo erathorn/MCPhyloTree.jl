@@ -116,36 +116,39 @@ end # build_bipartite_graph
 
 
 """
-    get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, l::Int64)
-        ::Tuple{Vector{Float64}, Vector{Float64}} where T<:GeneralNode
+    get_common_edges(tree1::T, tree2::T)::Vector{T} where T<:GeneralNode
          
---- INTERNAL ---
-This function finds the edge lengths of each common node in both trees. Returns a vector of
-tuples containing the paired edge lengths.
+This function returns the common edges of two trees with the same leafset. It also
+returns the lengths of those edges from each tree. 
 
-* `trees` : A vector of trees.
-* `common_edges` : A vector of shared edges between trees.
-* `l` : number of leaves the trees have; the trees have the same leaf set    
+* `tree1` : root node of the first tree
+* `tree2` : root node of the second tree
 """
-function get_common_edge_lengths(trees::Vector{T}, common_edges::Vector{CommonEdge}, 
-                                 l::Int64)::Vector{EdgeLengths} where T<:GeneralNode
+function get_common_edges(tree1::T, tree2::T
+                         )::Tuple{Vector{T}, Vector{EdgeLengths}} where T<:GeneralNode
 
-    c_e_lengths::Tuple{Vector{Float64}, Vector{Float64}} = ([], [])
-    post_orders = post_order.(trees)
-    bps = get_bipartitions_as_bitvectors.(trees)
-    inc_length::Float64 = 0.0
-    ind::Int64 = 0
+    common_edges::Vector{T} = []
+    common_edge_lengths::Vector{EdgeLengths} = []
+    tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
+    l = length(get_leaves(tree1))
+    nodes2::Vector{T} = post_order(tree2)
+    bp::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
 
-    for common_edge in common_edges 
-        split = get_split(common_edge[1], l)
-        for i in [1,2]
-            ind = findfirst(x -> x == split, bps[i])
-            inc_length = isnothing(ind) ? 0.0 : post_orders[i][ind].inc_length
-            push!(c_e_lengths[i], inc_length)
+    for node in post_order(tree1)
+        (node.nchild == 0 || node.root) && continue
+        # get the split of the current node represented as a BitVector
+        split::BitVector = get_split(node, l)
+        # if the same split exits in both trees, then we found a common node
+        if split in tree_splits
+            # find the node in the other tree and save its length
+            ind = findfirst(x -> x == split, bp)
+            length = nodes2[ind].inc_length
+            push!(common_edges, node)
+            push!(common_edge_lengths, (node.inc_length, length))
+        end # if
         end # for
-    end # for
-    return [(c_e_lengths[1][i], c_e_lengths[2][i]) for i in 1:length(c_e_lengths[1])]
-end # get_common_edge_lengths
+    return (common_edges, common_edge_lengths)
+end # get_common_edges
 
 
 """
@@ -212,37 +215,6 @@ function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
     end # if/else
     return non_common_edges
 end # split_on_common_edge
- 
-
-"""
-    get_common_edges(tree1::T, tree2::T)::Vector{CommonEdge} where T<:GeneralNode
-
-This function returns all the common edges of two trees with the same leafset. It also
-calculates the length difference of each pair of common edges. 
-
-* `tree1` : root node of the first tree
-* `tree2` : root node of the second tree
-"""
-function get_common_edges(tree1::T, tree2::T)::Vector{CommonEdge} where T<:GeneralNode
-    common_edges::Vector{CommonEdge} = []
-    # TODO maybe need to check leaves again; skipping for now 
-    # TODO maybe return a split instead of a node
-    tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
-    l = length(get_leaves(tree1))
-    leaves2 = get_leaves(tree2)
-    for node in post_order(tree1)
-        (node.nchild == 0 || node.root) && continue
-        # get the split of the current node represented as a BitVector
-        split::BitVector = get_split(node, l)
-        length_diff::Float64 = 0.0
-        if split in tree_splits
-            leaf_cluster = leaves2[split]
-            length_diff = node.inc_length - find_lca(tree2, leaf_cluster).inc_length
-            push!(common_edges, (node, length_diff))
-        end
-    end # for
-    return common_edges
-end # get_common_edges
 
 
 """
