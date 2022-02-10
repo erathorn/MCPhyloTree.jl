@@ -101,7 +101,7 @@ export to_covariance,
     cov2tree
 
 # Distance
-export RF, RF_weighted, BHV_bounds
+export RF, RF_weighted, BHV_bounds, geodesic
 
 # Moves
 export slide,
