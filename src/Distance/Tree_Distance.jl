@@ -55,9 +55,15 @@ This function calculates and returns the geodesic distance between two trees.
 
 * `tree1` : root node of the first tree.
 * `tree2` : root node of the second tree.
+* `verbose`: Set to true to print the common edge contribution and the leaf contribution.
 
+The GTP algorithm computing the geodesic distance is closely adapted from the java 
+implementation of that same algorithm by Megan Owen and J. Scott Provan.
+
+(M. Owen and J.S. Provan. A fast algorithm for computing geodesic distances in tree space. 
+IEEE/ACM Transactions on Computational Biology and Bioinformatics, 8:2-13, 2011.) 
 """
-function geodesic(tree1::T, tree2::T)::Float64 where T<:GeneralNode
+function geodesic(tree1::T, tree2::T; verbose=false)::Float64 where T<:GeneralNode
     trees::Vector{T} = [tree1, tree2]
     leaf_contribution²::Float64 = 0.0
     leaves::Vector{Vector{T}} = get_leaves.(trees)
@@ -73,16 +79,14 @@ function geodesic(tree1::T, tree2::T)::Float64 where T<:GeneralNode
         leaf_contribution² += (leaf_contribution) ^ 2
     end # for
     
-    geo = Geodesic(RatioSequence(), leaf_attribs[1], leaf_attribs[2])
+    geo = Geodesic(RatioSequence())
     geo.leaf_contribution² = leaf_contribution²
+    verbose && println("Leaf contribution squared: $leaf_contribution²")
 
     non_common_edges::Vector{Tuple{T, T}} = split_on_common_edge(deepcopy.(trees)...)
 
-    common_edges::Vector{CommonEdge} = get_common_edges(trees...)
+    common_edges::Vector{T}, c_e_lengths::Vector{EdgeLengths} = get_common_edges(trees...)
     geo.common_edges = common_edges
-
-    c_e_lengths::Vector{EdgeLengths} = get_common_edge_lengths(trees, common_edges,
-                                                               length(leaves[1]))                                                     
     geo.common_edge_lengths = c_e_lengths
 
     for i in 1:length(non_common_edges)
@@ -91,7 +95,7 @@ function geodesic(tree1::T, tree2::T)::Float64 where T<:GeneralNode
         new_geo::Geodesic = get_geodesic_nocommon_edges(subtree_a, subtree_b)
         geo.ratio_seq = interleave(geo.ratio_seq, new_geo.ratio_seq)
     end # for
-    dist = get_distance(geo)
+    dist = get_distance(geo, verbose)
     return dist
 end # geodesic
 
