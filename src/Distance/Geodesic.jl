@@ -23,20 +23,34 @@ end # Geodesic
 """
     get_distance(geo::Geodesic)::Float64
 
+--- INTERNAL ---
 Returns the distance of a geodesic. The smaller the number, the more similar are the trees.
 
 * `geo` : The geodesic for which the distance is calculated.
 """
-function get_distance(geo::Geodesic)::Float64
-    common_edge_dist²::Float64 = 0
-    for i in 1:length(geo.common_edge_lengths)
-        common_edge_dist² += (geo.common_edge_lengths[i][1] - 
-                              geo.common_edge_lengths[i][2]) ^ 2
-    end # for
+function get_distance(geo::Geodesic, verbose::Bool)::Float64
+    common_edge_dist²::Float64 = common_edge_contribution(geo.common_edge_lengths)
+    verbose && println("Common edge contribution squared: $common_edge_dist²")
     non_descending_rs::RatioSequence = get_non_desc_rs_with_min_dist(geo.ratio_seq)
     return sqrt(get_distance(non_descending_rs) ^ 2 + common_edge_dist² + geo.leaf_contribution²)
 end # get_distance
 
+
+"""
+    common_edge_contribution(edge_lengths::Vector{EdgeLengths})::Float64
+
+--- INTERNAL ---
+Returns the squared common edge contribution.
+
+* `edge_lengths` : Pairwise edge lengths of the common nodes.
+"""
+function common_edge_contribution(edge_lengths::Vector{EdgeLengths})::Float64
+    common_edge_dist²::Float64 = 0.0
+    for i in 1:length(edge_lengths)
+        common_edge_dist² += (edge_lengths[i][1] - edge_lengths[i][2]) ^ 2
+    end # for
+    return common_edge_dist²
+end # common_edge_contribution
 
 """
     Vertex
