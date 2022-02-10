@@ -49,6 +49,106 @@ end
 
 
 """
+    geodesic(tree1::T, tree2::T)::Float64 where T<:GeneralNode
+
+This function calculates and returns the geodesic distance between two trees.
+
+* `tree1` : root node of the first tree.
+* `tree2` : root node of the second tree.
+
+"""
+function geodesic(tree1::T, tree2::T)::Float64 where T<:GeneralNode
+    trees::Vector{T} = [tree1, tree2]
+    leaf_contribution²::Float64 = 0.0
+    leaves::Vector{Vector{T}} = get_leaves.(trees)
+    leaf_names::Vector{Vector{String}} = [[leaf.name for leaf in leaves[i]] for i in 1:2] 
+    perms::Vector{Vector{Int64}} = sortperm.(leaf_names)
+    leaf_vecs::Vector{Vector{String}} = [leaf_names[i][perms[i]] for i in 1:2]
+    leaf_attribs::Vector{Vector{Float64}} = [[leaf.inc_length for leaf in leaves[i]][perms[i]] for i in 1:2]
+    
+    leaf_vecs[1] != leaf_vecs[2] && 
+        throw(ArgumentError("The two input trees do not have the same sets of leaves")) 
+    for (inc_length1, inc_length2) in zip(leaf_attribs[1], leaf_attribs[2])
+        leaf_contribution = inc_length1 - inc_length2
+        leaf_contribution² += (leaf_contribution) ^ 2
+    end # for
+    
+    geo = Geodesic(RatioSequence(), leaf_attribs[1], leaf_attribs[2])
+    geo.leaf_contribution² = leaf_contribution²
+
+    non_common_edges::Vector{Tuple{T, T}} = split_on_common_edge(deepcopy.(trees)...)
+
+    common_edges::Vector{CommonEdge} = get_common_edges(trees...)
+    geo.common_edges = common_edges
+
+    c_e_lengths::Vector{EdgeLengths} = get_common_edge_lengths(trees, common_edges,
+                                                               length(leaves[1]))                                                     
+    geo.common_edge_lengths = c_e_lengths
+
+    for i in 1:length(non_common_edges)
+        subtree_a = non_common_edges[i][1]
+        subtree_b = non_common_edges[i][2]
+        new_geo::Geodesic = get_geodesic_nocommon_edges(subtree_a, subtree_b)
+        geo.ratio_seq = interleave(geo.ratio_seq, new_geo.ratio_seq)
+    end # for
+    dist = get_distance(geo)
+    return dist
+end # geodesic
+
+
+"""
+    BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:AbstractNode
+
+This function calculates the lower and upper bounds of the geodesic in the
+Billera-Holmes-Vogtman space.
+
+Returns tuple of floats.
+"""
+function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:AbstractNode
+    bp_t1 = get_bipartitions(tree1)
+    bp_t2 = get_bipartitions(tree2)
+    
+    T1minusT2 = 0.0
+    T2minusT1 = 0.0
+    T1andT2 = 0.0
+    
+    for bp in bp_t1
+        found1 = find_lca(tree1, String.(split(bp[1], ",")))
+        if found1.root
+            found1 = find_lca(tree1, String.(split(bp[2], ",")))
+        end
+        
+        ind = findfirst(isequal(bp), bp_t2)
+        if !isnothing(ind)
+            found2 = find_lca(tree2, String.(split(bp[1], ",")))
+            if found2.root
+                found2 = find_lca(tree2, String.(split(bp[2], ",")))
+            end
+            T1andT2 += (found1.inc_length - found2.inc_length)^2
+            deleteat!(bp_t2, ind)
+        else
+            T1minusT2 += found1.inc_length^2
+        end
+    end
+    
+    # only nodes which are present in the second tree are left in bp_t2
+    for bp in bp_t2
+        found2 = find_lca(tree2, String.(split(bp[1], ",")))
+        if found2.root
+            found2 = find_lca(tree2, String.(split(bp[2], ",")))
+        end
+        T2minusT1 += found2.inc_length^2
+    end
+    
+    
+    res_low::Float64 = T1minusT2+T2minusT1+T1andT2
+    res_high::Float64 = (sqrt(T1minusT2)+sqrt(T2minusT1))^2+T1andT2
+
+    sqrt(res_low), sqrt(res_high)
+end
+
+
+"""
     get_bipartitions(tree::T)::Vector{Tuple} where T <:AbstractNode
 
 Get a vector of all bipartions of `tree`.
@@ -127,56 +227,4 @@ function get_split(node::T, leaves2num::Dict{String, Int64})::BitVector where T<
         split[leaves2num[leaf.name]] = 1
     end # for
     split 
-end
-
-
-"""
-    BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:AbstractNode
-
-This function calculates the lower and upper bounds of the geodesic in the
-Billera-Holmes-Vogtman space.
-
-Returns tuple of floats.
-"""
-function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:AbstractNode
-    bp_t1 = get_bipartitions(tree1)
-    bp_t2 = get_bipartitions(tree2)
-    
-    T1minusT2 = 0.0
-    T2minusT1 = 0.0
-    T1andT2 = 0.0
-    
-    for bp in bp_t1
-        found1 = find_lca(tree1, String.(split(bp[1], ",")))
-        if found1.root
-            found1 = find_lca(tree1, String.(split(bp[2], ",")))
-        end
-        
-        ind = findfirst(isequal(bp), bp_t2)
-        if !isnothing(ind)
-            found2 = find_lca(tree2, String.(split(bp[1], ",")))
-            if found2.root
-                found2 = find_lca(tree2, String.(split(bp[2], ",")))
-            end
-            T1andT2 += (found1.inc_length - found2.inc_length)^2
-            deleteat!(bp_t2, ind)
-        else
-            T1minusT2 += found1.inc_length^2
-        end
-    end
-    
-    # only nodes which are present in the second tree are left in bp_t2
-    for bp in bp_t2
-        found2 = find_lca(tree2, String.(split(bp[1], ",")))
-        if found2.root
-            found2 = find_lca(tree2, String.(split(bp[2], ",")))
-        end
-        T2minusT1 += found2.inc_length^2
-    end
-    
-    
-    res_low::Float64 = T1minusT2+T2minusT1+T1andT2
-    res_high::Float64 = (sqrt(T1minusT2)+sqrt(T2minusT1))^2+T1andT2
-
-    sqrt(res_low), sqrt(res_high)
 end
