@@ -29,6 +29,7 @@ include("Building/ParseNewick.jl")
 
 # Tree Distance
 include("Distance/Tree_Distance.jl")
+include("Distance/Ratio.jl")
 include("Distance/Geodesic.jl")
 
 # Tree Moves
