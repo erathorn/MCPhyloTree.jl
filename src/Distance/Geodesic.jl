@@ -123,16 +123,20 @@ returns the lengths of those edges from each tree.
 
 * `tree1` : root node of the first tree
 * `tree2` : root node of the second tree
+* `skip`  : when the lengths are not needed, their computation is skipped
 """
-function get_common_edges(tree1::T, tree2::T
+function get_common_edges(tree1::T, tree2::T, skip::Bool
                          )::Tuple{Vector{T}, Vector{EdgeLengths}} where T<:GeneralNode
 
     common_edges::Vector{T} = []
     common_edge_lengths::Vector{EdgeLengths} = []
     tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
     l = length(get_leaves(tree1))
-    nodes2::Vector{T} = post_order(tree2)
-    bp::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
+    
+    if !skip
+        nodes2::Vector{T} = post_order(tree2)
+        bp::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
+    end # if
 
     for node in post_order(tree1)
         (node.nchild == 0 || node.root) && continue
@@ -141,10 +145,12 @@ function get_common_edges(tree1::T, tree2::T
         # if the same split exits in both trees, then we found a common node
         if split in tree_splits
             # find the node in the other tree and save its length
-            ind = findfirst(x -> x == split, bp)
-            length = nodes2[ind].inc_length
+            if !skip
+                ind = findfirst(x -> x == split, bp)
+                length = nodes2[ind].inc_length
+                push!(common_edge_lengths, (node.inc_length, length))
+            end # if
             push!(common_edges, node)
-            push!(common_edge_lengths, (node.inc_length, length))
         end # if
     end # for
     return (common_edges, common_edge_lengths)
@@ -175,7 +181,7 @@ function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     (num_edges[1] <= 0 || num_edges[2] <= 0) && return []
     
-    common_edges::Vector{T} = get_common_edges(trees...)[1]
+    common_edges::Vector{T} = get_common_edges(trees..., true)[1]
     # if there are no common edges, add trees to list of trees that share no common edges
     if isempty(common_edges)
         push!(non_common_edges, trees)
@@ -288,7 +294,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
     r1::Ratio, r2::Ratio = [Ratio() for _ in 1:2]
     cover::Matrix{Int64} = zeros(Int64, 1, 1)
 
-    common_edges = get_common_edges(trees...)[1]
+    common_edges = get_common_edges(trees..., true)[1]
     # doublecheck to make sure the trees have no common edges
     length(common_edges) != 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
     

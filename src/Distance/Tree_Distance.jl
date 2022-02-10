@@ -85,10 +85,10 @@ function geodesic(tree1::T, tree2::T; verbose=false)::Float64 where T<:GeneralNo
 
     non_common_edges::Vector{Tuple{T, T}} = split_on_common_edge(deepcopy.(trees)...)
 
-    common_edges::Vector{T}, c_e_lengths::Vector{EdgeLengths} = get_common_edges(trees...)
-    geo.common_edges = common_edges
+    common_edges::Vector{T}, c_e_lengths::Vector{EdgeLengths} = get_common_edges(trees..., false)
+    geo.common_edges = common_edges                                             
     geo.common_edge_lengths = c_e_lengths
-
+   
     for i in 1:length(non_common_edges)
         subtree_a = non_common_edges[i][1]
         subtree_b = non_common_edges[i][2]
