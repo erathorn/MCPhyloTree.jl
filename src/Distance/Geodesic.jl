@@ -117,7 +117,7 @@ end # build_bipartite_graph
 
 """
     get_common_edges(tree1::T, tree2::T)::Vector{T} where T<:GeneralNode
-         
+
 This function returns the common edges of two trees with the same leafset. It also
 returns the lengths of those edges from each tree. 
 
@@ -146,7 +146,7 @@ function get_common_edges(tree1::T, tree2::T
             push!(common_edges, node)
             push!(common_edge_lengths, (node.inc_length, length))
         end # if
-        end # for
+    end # for
     return (common_edges, common_edge_lengths)
 end # get_common_edges
 
@@ -175,18 +175,17 @@ function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     (num_edges[1] <= 0 || num_edges[2] <= 0) && return []
     
-    common_edges::Vector{CommonEdge} = get_common_edges(trees...)
-    # if there are no common edges, add the trees to the array of subtrees that share no 
-    # common edges
+    common_edges::Vector{T} = get_common_edges(trees...)[1]
+    # if there are no common edges, add trees to list of trees that share no common edges
     if isempty(common_edges)
         push!(non_common_edges, trees)
         return non_common_edges
     end # if
     
     # get the first common edge that was found
-    common_edge::CommonEdge = common_edges[1]
+    common_edge::T = common_edges[1]
     # get a bit vector representing the split of the common edge 
-    split::BitVector = get_split(common_edge[1], length(leaves[1]))
+    split::BitVector = get_split(common_edge, length(leaves[1]))
     
     # find the common node in each tree by using its split
     common_node1, rev1 = get_node_from_split(tree1, split, leaves[1])
@@ -289,7 +288,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
     r1::Ratio, r2::Ratio = [Ratio() for _ in 1:2]
     cover::Matrix{Int64} = zeros(Int64, 1, 1)
 
-    common_edges = get_common_edges(trees...)
+    common_edges = get_common_edges(trees...)[1]
     # doublecheck to make sure the trees have no common edges
     length(common_edges) != 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
     
