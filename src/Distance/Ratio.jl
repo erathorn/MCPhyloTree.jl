@@ -103,10 +103,7 @@ mutable struct RatioSequence
     RatioSequence() = new([], 0)
 end # RatioSequence
 
-
 const EdgeLengths = Tuple{Float64, Float64}
-const CommonEdge = Tuple{T, Float64} where T<:GeneralNode 
-
 
 """
     get_distance(rs::RatioSequence)::Float64
