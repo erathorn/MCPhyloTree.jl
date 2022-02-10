@@ -55,9 +55,9 @@ This function calculates and returns the geodesic distance between two trees.
 
 * `tree1` : root node of the first tree.
 * `tree2` : root node of the second tree.
-* `verbose`: Set to true to print the common edge contribution and the leaf contribution.
+* `verbose`: If set to 'true', prints the common edge and the leaf contribution.
 
-The GTP algorithm computing the geodesic distance is closely adapted from the java 
+The GTP algorithm computing the geodesic distance is closely adapted from the Java 
 implementation of that same algorithm by Megan Owen and J. Scott Provan.
 
 (M. Owen and J.S. Provan. A fast algorithm for computing geodesic distances in tree space. 

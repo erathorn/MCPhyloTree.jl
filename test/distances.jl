@@ -39,7 +39,7 @@ end
         t3 = MCPhyloTree.parsing_newick_string("(((((A:1,B:1):0.88,(C:1,D:1):1)J:0.47,E:1):0.73,F:1):0.83,G:1);")
         t4 = MCPhyloTree.parsing_newick_string("(((((C:0.2,D:1):0.5,A:1):0.15,E:1):0.87,(B:1,G:1):0.42):0.7,F:1);")
         MCPhyloTree.initialize_tree!.([t1, t2, t3, t4]; height=false)
-        @test MCPhyloTree.get_common_edges(t3, t4) == [find_by_name(t3, "C").mother]
+        @test MCPhyloTree.get_common_edges(t3, t4, true)[1] == [find_by_name(t3, "C").mother]
         test_common_nodes = [find_by_name(t1, "SM_2").mother,
                             find_by_name(t1, "SM_10").mother,
                             find_lca(t1, ["SM_2", "SM_13", "SM_10", "SM_19"]),
@@ -58,12 +58,10 @@ end
                             find_lca(t1, ["SM_11", "SM_14", "SM_16" ,"SM_17", "SM_18", "SM_3",
                                         "SM_6" , "SM_8"])
                             ]
-        @test MCPhyloTree.get_common_edges(t1, t2) == test_common_nodes
+        @test MCPhyloTree.get_common_edges(t1, t2, true)[1] == test_common_nodes
     end # testset
     @testset "common_edge_contribution" begin
-        common_edges = MCPhyloTree.get_common_edges(t1, t2)
-        edge_lengths = MCPhyloTree.get_common_edge_lengths([t1, t2], common_edges, 
-                                                           length(get_leaves(t1)))
+        common_edges, edge_lengths = MCPhyloTree.get_common_edges(t1, t2, false)
         common_edge_contribution = MCPhyloTree.common_edge_contribution(edge_lengths)
         @test common_edge_contribution == 4.865552798722346
     end # testset
