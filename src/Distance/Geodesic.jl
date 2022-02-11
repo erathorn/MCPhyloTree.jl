@@ -120,7 +120,7 @@ end # build_bipartite_graph
 This function finds the common edges of two trees with the same leafset.
 
 Returns the common edges as a vector of tuples.   
-
+    
 * `tree1` : root node of the first tree
 * `tree2` : root node of the second tree
 """
@@ -130,7 +130,7 @@ function get_common_edges(tree1::T, tree2::T)::Vector{Tuple{T, T}} where T<:Gene
     tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
     l = length(get_leaves(tree1))
     nodes_tree2::Vector{T} = post_order(tree2)
-        bp::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
+    bp::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
 
     for node in post_order(tree1)
         (node.nchild == 0 || node.root) && continue
@@ -139,7 +139,7 @@ function get_common_edges(tree1::T, tree2::T)::Vector{Tuple{T, T}} where T<:Gene
         # if the same split exits in both trees, then we found a common node
         if split in tree_splits
             # find the node in the other tree and save its length
-                ind = findfirst(x -> x == split, bp)
+            ind = findfirst(x -> x == split, bp)
             # push the common node of each tree and their lengths
             push!(common_edges, (node, nodes_tree2[ind]))
         end # if
@@ -172,26 +172,17 @@ function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     (num_edges[1] <= 0 || num_edges[2] <= 0) && return []
     
-    common_edges::Vector{T} = get_common_edges(trees..., true)[1]
+    common_edges::Vector{Tuple{T, T}} = get_common_edges(trees...)
     # if there are no common edges, add trees to list of trees that share no common edges
     if isempty(common_edges)
         push!(non_common_edges, trees)
         return non_common_edges
     end # if
     
-    # get the first common edge that was found
-    common_edge::T = common_edges[1]
-    # get a bit vector representing the split of the common edge 
-    split::BitVector = get_split(common_edge, length(leaves[1]))
-    
-    # find the common node in each tree by using its split
-    common_node1, rev1 = get_node_from_split(tree1, split, leaves[1])
-    common_node2, rev2 = get_node_from_split(tree2, split, leaves[2])
+    # get the common nodes
+    common_node1 = common_edges[1][1]
+    common_node2 = common_edges[1][2]
 
-    # track if we have to swap the tree pairs after using the reversed split for one of 
-    # the common nodes 
-    reverse::Bool = rev1 ⊻ rev2
-    
     # split the trees at the common nodes
     split_tree!(common_node1)
     split_tree!(common_node2)
@@ -202,13 +193,8 @@ function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
     initialize_tree!.(trees)
     
     # recursively split new subtrees as well
-    if reverse
-        split_on_common_edge(tree1, common_node2; non_common_edges)
-        split_on_common_edge(tree2, common_node1; non_common_edges)
-    else
-        split_on_common_edge(common_node1, common_node2; non_common_edges)
-        split_on_common_edge(tree1, tree2; non_common_edges)
-    end # if/else
+    split_on_common_edge(common_node1, common_node2; non_common_edges)
+    split_on_common_edge(tree1, tree2; non_common_edges)
     return non_common_edges
 end # split_on_common_edge
 
