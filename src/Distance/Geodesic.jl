@@ -6,17 +6,14 @@ Struct that tracks all relevant parameters, when computing the Geodesic between 
 * `ratio_seq` : The ratio sequence of the Geodesic.
 * `leaf_contribution` : Contribution of the leafs to the geodesic distance.
 * `common_edges` : Stores the common edges of the two compared trees.
-* `common_edge_lengths` : A vector of tuples, where each tuple stores the lengths of a
-                          common edge in the first and the second tree.
 """
 mutable struct Geodesic{T<:GeneralNode}
     ratio_seq::RatioSequence
     leaf_contribution²::Float64
-    common_edges::Vector{T}
-    common_edge_lengths::Vector{EdgeLengths}
+    common_edges::Vector{Tuple{T, T}}
 
     Geodesic(rs::RatioSequence) = 
-        new{GeneralNode}(rs, 0.0, [], EdgeLengths[])
+        new{GeneralNode}(rs, 0.0, [])
 end # Geodesic
 
 
@@ -29,7 +26,7 @@ Returns the distance of a geodesic. The smaller the number, the more similar are
 * `geo` : The geodesic for which the distance is calculated.
 """
 function get_distance(geo::Geodesic, verbose::Bool)::Float64
-    common_edge_dist²::Float64 = common_edge_contribution(geo.common_edge_lengths)
+    common_edge_dist²::Float64 = common_edge_contribution(geo.common_edges)
     verbose && println("Common edge contribution squared: $common_edge_dist²")
     non_descending_rs::RatioSequence = get_non_desc_rs_with_min_dist(geo.ratio_seq)
     return sqrt(get_distance(non_descending_rs) ^ 2 + common_edge_dist² + geo.leaf_contribution²)
@@ -37,20 +34,21 @@ end # get_distance
 
 
 """
-    common_edge_contribution(edge_lengths::Vector{EdgeLengths})::Float64
+    common_edge_contribution(common_edges::Vector{Tuple{T}})::Float64 where T<:GeneralNode
 
 --- INTERNAL ---
-Returns the squared common edge contribution.
+Returns the squared common edge contribution of a vector of common edges.
 
-* `edge_lengths` : Pairwise edge lengths of the common nodes.
+* `common_edges` : Common edges of the two trees.
 """
-function common_edge_contribution(edge_lengths::Vector{EdgeLengths})::Float64
+function common_edge_contribution(common_edges::Vector{Tuple{T, T}})::Float64 where T<:GeneralNode
     common_edge_dist²::Float64 = 0.0
-    for i in 1:length(edge_lengths)
-        common_edge_dist² += (edge_lengths[i][1] - edge_lengths[i][2]) ^ 2
+    for ce_pair in common_edges
+        common_edge_dist² += (ce_pair[1].inc_length - ce_pair[2].inc_length) ^ 2
     end # for
     return common_edge_dist²
 end # common_edge_contribution
+
 
 """
     Vertex
@@ -116,27 +114,23 @@ end # build_bipartite_graph
 
 
 """
-    get_common_edges(tree1::T, tree2::T)::Vector{T} where T<:GeneralNode
+    get_common_edges(tree1::T, tree2::T)
+        ::Vector{Tuple{T, T}} where T<:GeneralNode
 
-This function returns the common edges of two trees with the same leafset. It also
-returns the lengths of those edges from each tree. 
+This function finds the common edges of two trees with the same leafset.
+
+Returns the common edges as a vector of tuples.   
 
 * `tree1` : root node of the first tree
 * `tree2` : root node of the second tree
-* `skip`  : when the lengths are not needed, their computation is skipped
 """
-function get_common_edges(tree1::T, tree2::T, skip::Bool
-                         )::Tuple{Vector{T}, Vector{EdgeLengths}} where T<:GeneralNode
+function get_common_edges(tree1::T, tree2::T)::Vector{Tuple{T, T}} where T<:GeneralNode
 
-    common_edges::Vector{T} = []
-    common_edge_lengths::Vector{EdgeLengths} = []
+    common_edges::Vector{Tuple{T, T}} = []
     tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
     l = length(get_leaves(tree1))
-    
-    if !skip
-        nodes2::Vector{T} = post_order(tree2)
+    nodes_tree2::Vector{T} = post_order(tree2)
         bp::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
-    end # if
 
     for node in post_order(tree1)
         (node.nchild == 0 || node.root) && continue
@@ -145,15 +139,12 @@ function get_common_edges(tree1::T, tree2::T, skip::Bool
         # if the same split exits in both trees, then we found a common node
         if split in tree_splits
             # find the node in the other tree and save its length
-            if !skip
                 ind = findfirst(x -> x == split, bp)
-                length = nodes2[ind].inc_length
-                push!(common_edge_lengths, (node.inc_length, length))
-            end # if
-            push!(common_edges, node)
+            # push the common node of each tree and their lengths
+            push!(common_edges, (node, nodes_tree2[ind]))
         end # if
     end # for
-    return (common_edges, common_edge_lengths)
+    return common_edges
 end # get_common_edges
 
 
@@ -294,7 +285,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
     r1::Ratio, r2::Ratio = [Ratio() for _ in 1:2]
     cover::Matrix{Int64} = zeros(Int64, 1, 1)
 
-    common_edges = get_common_edges(trees..., true)[1]
+    common_edges = get_common_edges(trees...)
     # doublecheck to make sure the trees have no common edges
     length(common_edges) != 0 && throw(ArgumentError("Exiting: Can't compute geodesic between subtrees that have common edges."))
     

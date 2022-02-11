@@ -103,7 +103,6 @@ mutable struct RatioSequence
     RatioSequence() = new([], 0)
 end # RatioSequence
 
-const EdgeLengths = Tuple{Float64, Float64}
 
 """
     get_distance(rs::RatioSequence)::Float64
