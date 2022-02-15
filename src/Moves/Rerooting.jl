@@ -1,3 +1,4 @@
+
 function reroot(root::T, new_root::String)::T where T<:AbstractNode
 
     new_tree = deepcopy(root)
