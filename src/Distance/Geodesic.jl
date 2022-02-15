@@ -310,7 +310,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
         
         cover = get_vertex_cover(graph, a_vertices, b_vertices)
         
-        if (cover[1, 1] == 1 || (cover[1, 1] == length(a_vertices))) 
+        if (cover[1, 1] == 1 || (cover[1, 1] == length(a_vertices) + 1)) 
             push!(rs.ratios, ratio)
         
         else
@@ -319,7 +319,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
             j = 1
 
             for i in 1:length(a_vertices)
-                if j < (findfirst(cover[3,:] .== 0) - 1) && (a_vertices[i] == cover[3, j])
+                if j < length(cover[3,:]) && (a_vertices[i] == cover[3, j])
                     add_e_edge!(r1, int_nodes1[a_vertices[i]])
                     j += 1
                 else
@@ -329,7 +329,7 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
             j = 1
 
             for i in 1:length(b_vertices)
-                if j < (findfirst(cover[4,:] .== 0) - 1) && (b_vertices[i] == cover[4, j])
+                if j < length(cover[4,:]) && (b_vertices[i] == cover[4, j])
                     add_f_edge!(r2, int_nodes2[b_vertices[i]])
                     j += 1
                 else
@@ -412,11 +412,10 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
         for i in 1:n_BVC bg.b_vertices[i].label = -1.0 end
 
         # scan for an augmenting path
-        a_scanlistsize -= 1
         while(a_scanlistsize != 1)
             # scan the a side nodes
             b_scanlistsize = 1
-            for i in 1:(a_scanlistsize)
+            for i in 1:(a_scanlistsize - 1)
                 for j in 1:n_BVC
                     if bg.incidence_matrix[a_scanlist[i], b_index[j]] && bg.b_vertices[b_index[j]].label == -1.0
                         bg.b_vertices[b_index[j]].label = bg.a_vertices[a_scanlist[i]].label
@@ -427,10 +426,9 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
                 end # for j
             end # for i
             
-            b_scanlistsize -= 1
             # scan the b side nodes
             a_scanlistsize = 1
-            for j in 1:b_scanlistsize
+            for j in 1:(b_scanlistsize - 1)
                 if bg.b_vertices[b_scanlist[j]].residual > 0.0
                     total = min(bg.b_vertices[b_scanlist[j]].residual, 
                                 bg.b_vertices[b_scanlist[j]].label)
@@ -481,7 +479,7 @@ function get_vertex_cover(bg::BipartiteGraph, a_index::Vector{Int64}, b_index::V
             k = 1
             for j in 1:n_BVC
                 if bg.b_vertices[b_index[j]].label >= 0
-                    cd[4, k]=b_index[j]
+                    cd[4, k] = b_index[j]
                     k += 1
                 end # if
             end # for
