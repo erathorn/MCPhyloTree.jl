@@ -223,7 +223,7 @@ end # split_tree!
     get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
 
 --- INTERNAL ---
-This function computes the geodesic between two trees that share no common edges. Is 
+This function computes the geodesic between two trees that share no common edges. It is 
 called in the function `geodesic` after the common edges have been removed.
 """
 function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
