@@ -200,38 +200,6 @@ end # split_on_common_edge
 
 
 """
-    get_node_from_split(tree::T, split::BitVector, leaves::Vector{T}
-                       )::Tuple{T, Bool} where T<:GeneralNode
-
---- INTERNAL ---
-This function finds the node in a tree that corresponds to the input split or the reverse of
-the input split (in case the found node for the original split would have been the root).
-
-Returns a Vector of all pairs of subtrees that share no common edges.
-
-* `tree` : root node of the tree.
-* `split` : A bit vector representing the split
-* `leaves` : vector of the leaves of the tree
-"""
-function get_node_from_split(tree::T, split::BitVector, leaves::Vector{T}
-                            )::Tuple{T, Bool} where T<:GeneralNode
-
-    if isempty(leaves)
-        leaves = get_leaves(tree)
-    end # if
-    common_node::T = find_lca(tree, leaves[split])
-    reverse::Bool = false
-    # if the found node is the root, instead look for the lca of the other side of the split
-    if common_node.root
-        reverse = true
-        # get the reversed bitsplit of the common edge, in case the common edge is the root
-        common_node = find_lca(tree, leaves[(!).(split)])
-    end # if
-    (common_node, reverse)
-end # get_node_from_split
-
-
-"""
     split_tree!(node::T)::Nothing where T<:GeneralNode
 
 This function splits a tree at the input node. The input node acts as the root of one of the
