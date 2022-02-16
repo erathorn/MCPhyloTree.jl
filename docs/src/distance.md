@@ -1,7 +1,9 @@
 # Distance
 
-```@autodocs
-Modules = [MCPhyloTree]
-Pages   = ["Distance/Tree_Distance.jl"]
-Filter =
+```@docs
+MCPhyloTree.RF
+MCPhyloTree.RF_weighted
+MCPhyloTree.geodesic
+MCPhyloTree.BHV_bounds
+MCPhyloTree.get_bipartitions
 ```
