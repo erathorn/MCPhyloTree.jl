@@ -8,7 +8,29 @@ my_tree:
 #TODO: Automate export of automatically genereated funtions
 
 """
-    add_child!(mother_node::N, child::N, child_position::Union{Int64, Missing}=missing) where N <: GeneralNode
+    add_child!(mother_node::N, child::N)::Nothing where N <: GeneralNode
+
+This function adds a child to the mother node.
+The arity of the mother node is increased by `1` and the root
+status of the child is set to `False`.
+
+* `mother_node` : Node to add a child to.
+
+* `child` : Node to add to mother_node.children.
+"""
+function add_child!(mother_node::N, child::N)::Nothing where N <: GeneralNode
+
+    push!(mother_node.children, child)
+    
+    child.mother = mother_node
+    mother_node.nchild += 1
+    child.root = false
+    nothing
+end # function add_child
+
+
+"""
+    function add_child!(mother_node::N, child::N, child_position::Int64)::Nothing where N <: GeneralNode
 
 This function adds a child to the mother node.
 The arity of the mother node is increased by `1` and the root
@@ -18,20 +40,16 @@ status of the child is set to `False`.
 
 * `child` : Node to add to mother_node.children.
 
-* `child_position` : index at which to add the new child node; optional.
+* `child_position` : index at which to add the new child node.
 """
-function add_child!(mother_node::N, child::N, child_position::Union{Int64, Missing}=missing
-                   ) where N <: GeneralNode
+function add_child!(mother_node::N, child::N, child_position::Int64)::Nothing where N <: GeneralNode
+   
+    insert!(mother_node.children, child_position, child)
 
-    # TODO: maybe need to specify return type so false is not returned
-    if ismissing(child_position)
-        push!(mother_node.children, child)
-    else
-        insert!(mother_node.children, child_position, child)
-    end # if/else
     child.mother = mother_node
     mother_node.nchild += 1
     child.root = false
+    nothing
 end # function add_child
 
 """
