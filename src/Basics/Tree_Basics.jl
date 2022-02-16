@@ -43,7 +43,8 @@ status of the child is set to `False`.
 * `child_position` : index at which to add the new child node.
 """
 function add_child!(mother_node::N, child::N, child_position::Int64)::Nothing where N <: GeneralNode
-   
+    
+    @assert child_position <= mother_node.nchild + 1
     insert!(mother_node.children, child_position, child)
 
     child.mother = mother_node

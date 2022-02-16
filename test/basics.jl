@@ -40,6 +40,40 @@ end
 
     @test mid.children[end].name == "no_name"
     @test length(post_order(tree))==8
+
+
+    tree = ParseNewick("(A,B,(C,D,E)F)G;")
+    to_add = ParseNewick("no_name;")
+    mid = find_by_name(tree,"F")
+    add_child!(mid,to_add, 1)
+
+    @test mid.children[1].name == "no_name"
+    @test length(post_order(tree))==8
+
+    tree = ParseNewick("(A,B,(C,D,E)F)G;")
+    to_add = ParseNewick("no_name;")
+    mid = find_by_name(tree,"F")
+    @test_throws AssertionError add_child!(mid,to_add, 5)
+
+    tree = ParseNewick("(A,B,(C,D,E)F)G;")
+    to_add = ParseNewick("no_name;")
+    mid = find_by_name(tree,"F")
+    
+    add_child!(mid,to_add, 4)
+    
+    @test mid.children[4].name == "no_name"
+    @test length(post_order(tree))==8
+
+    tree = ParseNewick("(A,B,(C,D,E)F)G;")
+    to_add = ParseNewick("no_name;")
+    mid = find_by_name(tree,"F")
+    add_child!(mid,to_add, 2)
+
+    @test mid.children[2].name == "no_name"
+    @test length(post_order(tree))==8
+
+
+
 end
 
 @testset "remove_child!" begin
