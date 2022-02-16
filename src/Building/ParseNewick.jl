@@ -1,6 +1,5 @@
 """
     is_valid_newick_string(newick::String)
-
 This function checks if the given string is valid: is the brackets number matches and if the string ends with ";"
 """
 
@@ -29,7 +28,8 @@ end
 """
     parse_name_length(newick::String)
 
-This function parses two optional elements of the tree, name and length. In case, when neither of this is provided, empty string and nothing are return
+This function parses two optional elements of the tree, name and length. In case, 
+when neither of this is provided, empty string and nothing are returned.
 """
 
 function parse_name_length(newick::S) where S<:AbstractString
@@ -58,7 +58,8 @@ end # function
 """
     parsing_newick_string(newick::String)
 
-In this function main parsing process happens, it uses recursive method to parse newick formated string
+In this function main parsing process happens, it uses recursive method to parse newick 
+formated string.
 """
 
 function parsing_newick_string(newick::String)::GeneralNode{Float64, Int64}
@@ -102,6 +103,7 @@ function parsing_newick_string(newick::String)::GeneralNode{Float64, Int64}
     throw("You left recursion somehow.")
 end # function
 
+
 function Sibling_parse(childrenstring::String) # returns list of children of a node
     child_list = []
     counter = ""
@@ -123,6 +125,7 @@ function Sibling_parse(childrenstring::String) # returns list of children of a n
     return child_list
 end # function
 
+
 """
     ParseNewick(s::String)::Union{GeneralNode, Array{GeneralNode, 1}}
 
@@ -131,7 +134,7 @@ string to return an array of trees (represented as Node objects). The file shoul
 consist of newick tree representations, separated by line. The function checks for proper 
 newick formatting, and will return an error if the string / file is incorrectly formatted.
 
-Mewick string input: Returns the root of the tree represented by the newick string.
+Newick string input: Returns the root of the tree represented by the newick string.
 Filename input: Returns an Array of Nodes; each Node is the root of the tree represented by
 a newick string in the file.
 

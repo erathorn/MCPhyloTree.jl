@@ -29,6 +29,8 @@ include("Building/ParseNewick.jl")
 
 # Tree Distance
 include("Distance/Tree_Distance.jl")
+include("Distance/Ratio.jl")
+include("Distance/Geodesic.jl")
 
 # Tree Moves
 include("Moves/NNI.jl")
@@ -100,7 +102,7 @@ export to_covariance,
     cov2tree
 
 # Distance
-export RF, RF_weighted, BHV_bounds
+export RF, RF_weighted, BHV_bounds, geodesic
 
 # Moves
 export slide,
