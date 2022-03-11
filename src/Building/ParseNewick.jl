@@ -155,16 +155,16 @@ function ParseNewick(s::String)::Union{GeneralNode, Array{GeneralNode,1}}
             readlines(file)
         end # do
     catch
-        throw(ErrorException("Input must be valid newick string or file name. Check path to file & check validity of newick string by running is_valid_newick_string(string)"))
+        throw(ArgumentError("Input must be valid newick string or file name. Check path to file & check validity of newick string by running is_valid_newick_string(string)"))
     end # try/catch
-        
+    
     list_of_newicks = GeneralNode[]
     for content in list_of_trees
         if content == ""
             continue
         end # if
         if !is_valid_newick_string(content)
-            throw("$content is not correctly formatted!")
+            throw(ArgumentError("$content is not correctly formatted!"))
         end # if
         tree = parsing_newick_string(string(content))
         initialize_tree!(tree)

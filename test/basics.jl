@@ -16,6 +16,35 @@
     @test n.inc_length == 0.75
 end
 
+@testset "Newick_Letters" begin
+    tree = ParseNewick("(A,B)C;")
+    @test length(tree) == 2
+    @test tree.nchild == 2
+
+    tree = ParseNewick("(A:1,B:1)C:1;")
+    @test length(tree) == 2
+    @test tree.nchild == 2
+end
+
+@testset "Newick_Numbers" begin
+    tree = ParseNewick("(1,2)3;")
+    @test length(tree) == 2
+    @test tree.nchild == 2
+
+    tree = ParseNewick("(1:1,2:1)3:1;")
+    @test length(tree) == 2
+    @test tree.nchild == 2
+end
+
+@testset "Newick_List" begin
+    tree = ParseNewick("testtrees.nwk")
+    @test length(tree) == 3
+
+    @test_throws ArgumentError ParseNewick("I am no file")
+
+    @test_throws ArgumentError ParseNewick("brokentree.nwk")
+end
+
 
 @testset "add_child!" begin
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
