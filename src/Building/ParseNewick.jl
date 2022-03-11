@@ -69,7 +69,7 @@ function parsing_newick_string(newick::String)::GeneralNode{Float64, Int64}
         newick = chop(newick)
     end # if
 
-    if newick[1] != ')' && occursin(r"^[a-zA-Z]+[:]?[0-9]*", newick)
+    if newick[1] != ')' && newick[1] != '(' && occursin(r"^[a-zA-Z]|[0-9]*+[:]?[0-9]*", newick)
         leaf_node = Node()
         name, len = parse_name_length(newick)
         leaf_node.name = name
