@@ -5,7 +5,6 @@ function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tupl
     # first create a list of leaf nodes
     for node_name in leaf_nodes
         nn = Node(node_name)
-
         push!(my_node_list,nn)
     end # for
 
@@ -20,7 +19,7 @@ function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tupl
         # create a new mother node to which the two first nodes are added as children
         # add the new mother node to the list and reshuffle
         first_child::GeneralNode = pop!(my_node_list)
-        first_child.inc_length = rand()#*0.1
+        first_child.inc_length = rand()
         second_child::GeneralNode = pop!(my_node_list)
         second_child.inc_length = rand()
         curr_node::GeneralNode = Node(string(temp_name))
