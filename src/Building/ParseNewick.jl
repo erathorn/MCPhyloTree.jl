@@ -79,9 +79,8 @@ function parsing_newick_string(newick::String)::GeneralNode{Float64, Int64}
 
     else
         current_node = Node()
-        childrenstring_with_parenthesis = (match(r"\(([^()]|(?R))*\)", newick)).match # returns section of newick corresponding to descendants of current node, check https://regex101.com/r/lF0fI1/1
-        index = findlast(')', childrenstring_with_parenthesis)[1]
-        childrenstring = SubString(childrenstring_with_parenthesis, 2, index - 1) # ... so that we can remove the superfluous parentheses here
+        index = findlast(')', newick)[1]
+        childrenstring = SubString(newick, 2, index - 1) # ... so that we can remove the superfluous parentheses here
         child_list = Sibling_parse(String(childrenstring))
 
         for x in child_list # recursion happens here
@@ -104,8 +103,8 @@ function parsing_newick_string(newick::String)::GeneralNode{Float64, Int64}
 end # function
 
 
-function Sibling_parse(childrenstring::String) # returns list of children of a node
-    child_list = []
+function Sibling_parse(childrenstring::A)::Vector{String} where A<:AbstractString # returns list of children of a node
+    child_list = String[]
     counter = ""
     bracket_depth = 0
     for x in (childrenstring * ",") # splits string identified above into a list, where each element corresponds to a child of current_node
@@ -124,6 +123,8 @@ function Sibling_parse(childrenstring::String) # returns list of children of a n
     end # for
     return child_list
 end # function
+
+
 
 
 """
