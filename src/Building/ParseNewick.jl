@@ -103,7 +103,7 @@ function parsing_newick_string(newick::String)::GeneralNode{Float64, Int64}
 end # function
 
 
-function Sibling_parse(childrenstring::A)::Vector{String} where A<:AbstractString # returns list of children of a node
+function Sibling_parse(childrenstring::A)::Vector{A} where A<:AbstractString # returns list of children of a node
     child_list = String[]
     counter = ""
     bracket_depth = 0
