@@ -13,14 +13,14 @@ Returns vector of Nodes.
 
 * `traversal` : vector of Nodes; nodes are pushed to this vector as the tree is traversed.
 """
-function post_order(root::T, traversal::Vector{T}) where T<:AbstractNode
+function post_order(root::T, traversal::Vector{T})::Nothing where T<:AbstractNode
    if root.nchild != 0
         for child in root.children
             post_order(child, traversal)
         end
    end # if
    push!(traversal, root)
-   return traversal
+   nothing
 end # function post_order_trav
 
 
