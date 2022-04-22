@@ -236,11 +236,11 @@ function tree_height(root::T)::Float64  where T<:AbstractNode
 end
 
 """
-    node_height(root::T, mv::Float64)::Float64  where T<:AbstractNode
+    function node_height(root::T)::Nothing where T<:AbstractNode
 
 Calculate the height of a node.
 """
-function node_height(root::T)  where T<:AbstractNode
+function node_height(root::T)::Nothing where T<:AbstractNode
 
     if root.nchild != 0
         for node in root.children
@@ -250,9 +250,10 @@ function node_height(root::T)  where T<:AbstractNode
     else
         root.height = 0.0
     end
+    nothing
 end # function node_height
 
-function node_height_vec(root::T, vec::Vector{N})  where {T<:AbstractNode, N<:Real}
+function node_height_vec(root::T, vec::N)::N  where {T<:AbstractNode, N<:AbstractVector{<:Real}}
 
     if root.nchild != 0
         for node in root.children
@@ -363,7 +364,7 @@ Assign a binary representation to each node, which specifies the path from the
 root to this node via the binary representation of the node.
 A left turn is a 1 in binary and a right turn a 0.
 """
-function set_binary!(root::T)  where T <: GeneralNode
+function set_binary!(root::T)::Nothing  where T <: GeneralNode
     if root.root
         root.binary = "1"
     end # if
@@ -374,6 +375,7 @@ function set_binary!(root::T)  where T <: GeneralNode
             set_binary!(node)
         end
     end # if
+    nothing
 end # function set_binary
 
 """
@@ -394,6 +396,7 @@ function number_nodes!(root::T)::Nothing  where T<:AbstractNode
             running += 1
         end
     end # for
+    nothing
 end # function number_nodes
 
 """

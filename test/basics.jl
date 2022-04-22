@@ -45,6 +45,20 @@ end
     @test_throws ArgumentError ParseNewick("brokentree.nwk")
 end
 
+@testset "LargeNewick" begin
+    Nleaves = 6000
+    leave_list = ["leave_$i" for i in 1:Nleaves]
+
+    gs_tree = MCPhyloTree.create_tree_from_leaves(leave_list, true)
+    nstring = newick(gs_tree)
+    tree = ParseNewick(nstring)
+    
+    @test gs_tree.height == tree.height
+    @test length(get_leaves(tree)) == Nleaves
+    @test RF(gs_tree, tree) == 0
+end
+
+
 
 @testset "add_child!" begin
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
