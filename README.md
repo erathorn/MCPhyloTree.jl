@@ -1,7 +1,9 @@
 # MCPhyloTree.jl
+[![CI](https://github.com/erathorn/MCPhyloTree.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/erathorn/MCPhyloTree.jl/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/erathorn/MCPhyloTree.jl/branch/main/graph/badge.svg?token=Y87Yu43PWl)](https://codecov.io/gh/erathorn/MCPhyloTree.jl)
 [![Dev Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://erathorn.github.io/MCPhyloTree.jl/dev/)
 [![CompatHelper](https://github.com/erathorn/MCPhyloTree.jl/actions/workflows/CompatHelper.yml/badge.svg)](https://github.com/erathorn/MCPhyloTree.jl/actions/workflows/CompatHelper.yml)
+
 
 The tree module for the MCPhylo.jl package.
 
