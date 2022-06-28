@@ -40,6 +40,29 @@ end
 
     @test l == l2
     @test MCPhyloTree.RF_int(tree, tr2)[1] == 2
+
+    @test NNI!(tr2, tr2.num, true) == 0
+
+    tr2 = deepcopy(tree)
+
+    res = NNI!(tr2, 10)
+
+    l = tree_length(tree)
+    l2 = tree_length(tr2)
+
+    @test l == l2
+    @test MCPhyloTree.RF_int(tree, tr2)[1] == 2
+    
+    tr2 = deepcopy(tree)
+
+    res = NNI!(tr2)
+
+    l = tree_length(tree)
+    l2 = tree_length(tr2)
+
+    @test l == l2
+    @test MCPhyloTree.RF_int(tree, tr2)[1] == 2
+
 end
 
 @testset "move" begin
@@ -70,4 +93,9 @@ end
     target = find_by_name(tree2,"A")
     nutree = MCPhyloTree.perform_spr(tree2,subtree,target)
     @test newick(nutree) == "(B:1.0,C:1.0,((D:1.0,E:1.0)F:1.0,A:1.0)G:1.0)H:1.0;"
+end
+
+@testset "SPR_error" begin
+    tree2 = ParseNewick("(A,B,(C,(D,I,E)F)G)H;")
+    @test_throws ArgumentError SPR(tree2)
 end
