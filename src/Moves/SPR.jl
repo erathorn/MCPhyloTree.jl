@@ -61,21 +61,23 @@ function perform_spr(root::T) where T <: GeneralNode
     # find node to move
     available = [n.num for n in post_order(root)]
     n = rand(available)
-    tn::T = find_num(root, n) #this is the root of the subtree which will be moved
-    while tn.root || get_mother(tn).root
+    subtree::T = find_num(root, n) #this is the root of the subtree which will be moved
+    while subtree.root || get_mother(subtree).root
         n = rand(available)
-        tn = find_num(root, n) #this is the root of the subtree which will be moved
+        subtree = find_num(root, n) #this is the root of the subtree which will be moved
     end # while
 
-    available = [n.num for n in post_order(root)]
-    n = rand(available)
+    #available = [n.num for n in post_order(root)]
+    #n = rand(available)
     target::T = find_num(root, n) #this is the target of the movement
-    while target.root
+    lca = find_lca(root, subtree, target)
+    while target.root || lca == target || lca == subtree || target == subtree
         n = rand(available)
         target = find_num(root, n)
+        lca = find_lca(root, subtree, target)
     end # while
     
-    perform_spr(root, tn, target)
+    perform_spr(root, subtree, target)
     return root
 end #func
 
@@ -94,9 +96,11 @@ function perform_spr(root::T,subtree::T) where T <: GeneralNode
     available = [n.num for n in post_order(root)]
     n = rand(available)
     target::T = find_num(root, n) #this is the target of the movement
-    while target.root
+    lca = find_lca(root, subtree, target)
+    while target.root || lca == target || lca == subtree || target == subtree
         n = rand(available)
         target = find_num(root, n)
+        lca = find_lca(root, subtree, target)
     end # while
     
     return perform_spr(root, subtree, target)
