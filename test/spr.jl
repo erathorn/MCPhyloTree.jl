@@ -7,9 +7,11 @@
 
     @test false == check_binary(error_tree)
     @test false == check_binary(error_tree_not_binary)
-    @test_throws ErrorException MCPhyloTree.SPR(error_tree)
+    @test_throws ArgumentError MCPhyloTree.SPR(error_tree)
     @test true == check_binary(tree_binary_two)
     spr_binary = MCPhyloTree.SPR(binary_tree)
+    @test_throws ArgumentError SPR(error_tree_not_binary)
+   
 
     @test length(Set([n.num for n in post_order(spr_binary)])) == length(Set([n.num for n in post_order(binary_tree)]))
 
