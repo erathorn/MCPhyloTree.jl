@@ -88,7 +88,3 @@ end
     @test newick(nutree) == "(B:1.0,C:1.0,((D:1.0,E:1.0)F:1.0,A:1.0)G:1.0)H:1.0;"
 end
 
-@testset "SPR_error" begin
-    tree2 = ParseNewick("(A,B,(C,(D,I,E)F)G)H;")
-    @test_throws ArgumentError SPR(tree2)
-end
