@@ -167,7 +167,7 @@ function get_bipartitions(tree::T)::Vector{Tuple} where T <:AbstractNode
         outset = String[]
         inset = sort([i.name for i in get_leaves(elem)])
         outset = setdiff(all_leaves, inset)
-        @inbounds bt[ind] = (join(sort(inset),","), join(sort(outset),","))
+        @inbounds bt[node.num] = (join(sort(inset),","), join(sort(outset),","))
     end # for
     bt
 end
@@ -189,7 +189,7 @@ function get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:Gen
         for leaf in get_leaves(node)
             bit_vector[leaf.num] = 1
         end # for
-        @inbounds bt[ind] = bit_vector
+        @inbounds bt[node.num] = bit_vector
     end # for
     bt
 end
