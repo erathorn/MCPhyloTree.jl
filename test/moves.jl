@@ -40,6 +40,22 @@ end
 
     @test l == l2
     @test MCPhyloTree.RF_int(tree, tr2)[1] == 2
+
+    ## NNI with root
+    @test NNI!(tr2, tr2.num, true) == 0
+
+    ## NNI without target direction
+    tr2 = deepcopy(tree)
+
+    res = NNI!(tr2, 10)
+
+    l = tree_length(tree)
+    l2 = tree_length(tr2)
+
+    @test l == l2
+    @test MCPhyloTree.RF_int(tree, tr2)[1] == 2
+    
+
 end
 
 @testset "move" begin
@@ -71,3 +87,4 @@ end
     nutree = MCPhyloTree.perform_spr(tree2,subtree,target)
     @test newick(nutree) == "(B:1.0,C:1.0,((D:1.0,E:1.0)F:1.0,A:1.0)G:1.0)H:1.0;"
 end
+

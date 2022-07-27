@@ -101,7 +101,7 @@ Returns a reference to the desired Node.
 """
 function find_binary(root::T, bin::String)::T where T<:AbstractNode
     rv = root
-    for i in split(bin[1:end],",")[2:end]
+    for i in split(bin,",")[2:end]
         rv = rv.children[parse(Int64, i)+1]
     end
     rv
