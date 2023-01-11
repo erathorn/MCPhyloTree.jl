@@ -312,7 +312,7 @@ function find_common_clusters(ref_tree::T, tree::T) where T<:AbstractNode
                                     append!(cluster, clusters[child])
             end # for
             clusters[ref_node] = cluster
-            if ref_node.root == true || ref_node == get_mother(ref_node).children[1]
+            if isroot(ref_node) || ref_node == get_mother(ref_node).children[1]
                 last_index = leaves_dict[last(cluster)][1]
                 first_index = leaves_dict[first(cluster)][1]
                 cluster_dict[(first_index, last_index)] = last_index

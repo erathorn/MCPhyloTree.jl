@@ -8,7 +8,7 @@ using DataStructures
 using RecipesBase
 using Random
 @reexport using AbstractTrees
-import AbstractTrees: children
+import AbstractTrees: children, parent, ParentLinks, childtype
 
 ### Get Files
 

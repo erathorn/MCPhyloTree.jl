@@ -20,14 +20,14 @@ function NNI!(root::T, target::T, lor::Bool)::Int64  where T<:AbstractNode
         return 0
     end # if
 
-    parent::T = get_mother(target)
+    ancestor::T = get_mother(target)
     sister::T = get_sister(target)
 
     ychild::T = remove_child!(target, lor)
-    xchild::T = remove_child!(parent, sister)
+    xchild::T = remove_child!(ancestor, sister)
 
     add_child!(target, sister)
-    add_child!(parent, ychild)
+    add_child!(ancestor, ychild)
 
     set_binary!(root)
 

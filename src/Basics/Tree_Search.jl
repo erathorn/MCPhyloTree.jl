@@ -170,8 +170,8 @@ Returns reference to root Node of the tree.
 * `node` : Node in Tree of interest.
 """
 function find_root(node::T)::T where T <: GeneralNode
-    while node.root == false
-        node = get_mother(node)
+    while !isroot(node)
+        node = parent(node)
     end # while
     return node
 end
