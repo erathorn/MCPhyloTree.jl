@@ -66,7 +66,7 @@ IEEE/ACM Transactions on Computational Biology and Bioinformatics, 8:2-13, 2011.
 function geodesic(tree1::T, tree2::T; verbose=false)::Float64 where T<:GeneralNode
     trees::Vector{T} = [tree1, tree2]
     leaf_contribution²::Float64 = 0.0
-    leaves::Vector{Vector{T}} = get_leaves.(trees)
+    leaves = get_leaves.(trees)
     leaf_names::Vector{Vector{String}} = [[leaf.name for leaf in leaves[i]] for i in 1:2] 
     perms::Vector{Vector{Int64}} = sortperm.(leaf_names)
     leaf_vecs::Vector{Vector{String}} = [leaf_names[i][perms[i]] for i in 1:2]
@@ -184,7 +184,8 @@ Returns a vector containing BitVectors representing the splits.
 function get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:GeneralNode
     
     bt = Vector{BitVector}(undef, treesize(tree)-1)
-    l::Int64 = length(get_leaves(tree))
+    #ToDo: Ugly
+    l::Int64 = length(collect(get_leaves(tree)))
     for node in post_order(tree)
         bit_vector::BitVector = falses(l)
         for leaf in get_leaves(node)

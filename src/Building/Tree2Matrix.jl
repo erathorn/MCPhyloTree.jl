@@ -78,7 +78,8 @@ Returns an Array of Real numbers.
 
 """
 function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:AbstractNode,T<:Real}
-    leaves::Vector{N} = sort(get_leaves(tree), by = x->x.num)
+    # ToDo: Ugly
+    leaves::Vector{N} = sort(collect(get_leaves(tree)), by = x->x.num)
     ll = length(leaves)
     covmat = zeros(T, ll, ll)
     
@@ -117,7 +118,8 @@ end
 
 
 function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:AbstractNode}
-    leaves::Vector{G} = get_leaves(root)
+    #ToDo: ugly
+    leaves::Vector{G} = collect(get_leaves(root))
     out = zeros(length(leaves), n)
     for (i, leave) in enumerate(leaves)
         mother = leave

@@ -76,10 +76,11 @@ Returns vector of leaf Nodes.
 
 * `root` : root Node of tree.
 """
-function get_leaves(root::T)::Vector{T} where T<:AbstractNode
-    t::Vector{T} = []
-    get_leaves(root, t)
-    return t
+function get_leaves(root::T) where T<:AbstractNode
+    #t::Vector{T} = []
+    #get_leaves(root, t)
+    #return t
+    Leaves(root)
 end # function post_order
 
 function children(n::T)::Vector{T} where T <:GeneralNode

@@ -54,7 +54,7 @@ end
     tree = ParseNewick(nstring)
     
     @test gs_tree.height == tree.height
-    @test length(get_leaves(tree)) == Nleaves
+    @test length(collect(get_leaves(tree))) == Nleaves
     @test RF(gs_tree, tree) == 0
 end
 

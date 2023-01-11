@@ -44,9 +44,14 @@ end
 
 #################### Base functionality ####################
 
-Base.:(==)(x::T, y::T) where T<:AbstractNode = x.num == y.num
-Base.size(x::T) where T<:AbstractNode = treesize(x)
-Base.length(x::T) where T<:AbstractNode = x.nchild
+Base.:(==)(x::T, y::T) where T<:GeneralNode = x.num == y.num
+Base.size(x::T) where T<:GeneralNode = treesize(x)
+Base.length(x::T) where T<:GeneralNode = x.nchild
+
+# function treesize(x::T) where T<:GeneralNode
+
+# end
+
 
 function Base.summary(io::IO, d::N) where N <: GeneralNode
     summary(io, d.name)
@@ -72,3 +77,7 @@ function showall(io::IO, d::N) where N <: GeneralNode
   print(io, "\nbinary:\n")
   show(io, d.binary)
 end
+
+AbstractTrees.ParentLinks(::Type{GeneralNode}) = AbstractTrees.StoredParents()
+AbstractTrees.ChildIndexing(::Type{GeneralNode}) = AbstractTrees.IndexedChildren()
+parent(t::GeneralNode) = get_mother(t)
