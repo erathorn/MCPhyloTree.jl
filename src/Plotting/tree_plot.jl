@@ -228,7 +228,7 @@ function _findxy(root::T)::Tuple{Dict{T, Float64}, Dict{T, Float64}, Vector{Stri
 
     # root_name = root.name / num
     height = Dict(tip => float(i) for (i, tip) in enumerate(x for x in get_leaves(root)))
-    nnodes = length(post_order(root))
+    nnodes = treesize(root)
     sizehint!(height, nnodes)
     findheights!(root)
 

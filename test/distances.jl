@@ -89,7 +89,7 @@ end
 
     @testset "geo_avg" begin
         tree = ParseNewick("(((B:1,A:1)C:3,(D:1,E:1)F:1)G:1);")
-        nodes = post_order(tree)
+        nodes = collect(post_order(tree))
         @test MCPhyloTree.geo_avg(nodes) == 4.0
     end
 end # testset

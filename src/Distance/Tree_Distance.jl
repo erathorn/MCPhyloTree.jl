@@ -159,7 +159,8 @@ Get a vector of all bipartions of `tree`.
 Returns a vector containing tuples of sets representing the bipartitions.
 """
 function get_bipartitions(tree::T)::Vector{Tuple} where T <:AbstractNode
-    po_vect= post_order(tree)[1:end-1]
+    # ToDo: Ugly
+    po_vect= collect(post_order(tree))[1:end-1]
     bt = Vector{Tuple}(undef, length(po_vect))
     all_leaves = [n.name for n in get_leaves(tree)]
     for ind in eachindex(po_vect)
@@ -181,15 +182,19 @@ Get all bipartitions of `tree`.
 Returns a vector containing BitVectors representing the splits.
 """
 function get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:GeneralNode
-    po_vect= post_order(tree)[1:end-1]
-    bt = Vector{BitVector}(undef, length(po_vect))
+    
+    bt = Vector{BitVector}(undef, treesize(tree)-1)
     l::Int64 = length(get_leaves(tree))
-    for node in po_vect
+    for node in post_order(tree)
         bit_vector::BitVector = falses(l)
         for leaf in get_leaves(node)
             bit_vector[leaf.num] = 1
         end # for
-        @inbounds bt[node.num] = bit_vector
+        # ToDo: Ugly
+        if node.num <= treesize(tree)-1
+            @inbounds bt[node.num] = bit_vector
+        end
+        
     end # for
     bt
 end

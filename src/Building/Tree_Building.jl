@@ -234,15 +234,15 @@ Returns cost of the most parsimonius reconstruction.
 * `gap` : optional identifier for gaps
 """
 function parsimony(tree::N, char::Dict{String,String}; gap::String="-")::Float64 where N<: GeneralNode
-      po = post_order(tree)
+      #po = 
       states = filter(x -> x != "-", unique(collect(values(char))))
       nStates = length(states)
       if nStates == 0
             return 0.0
       end
-      nNodes = length(po)
+      nNodes = treesize(tree)
       costMatrix = zeros(nNodes, nStates) .- 1
-      for node in po
+      for node in post_order(tree)
             if node.nchild == 0
                   # i am a leave node
                   s = char[node.name]

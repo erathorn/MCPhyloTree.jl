@@ -161,9 +161,8 @@ end
 Force an ultrametric version of the tree.
 """
 function force_ultrametric!(root::T) where T<:AbstractNode
-    po::Vector{T} = post_order(root)
-    node2max_depth = zeros(UInt32, length(po))
-    for node in po
+    node2max_depth = zeros(UInt32, treesize(root))
+    for node in post_order(root)
         if node.nchild != 0
             mv = -1
             for child in node.children
@@ -179,7 +178,7 @@ function force_ultrametric!(root::T) where T<:AbstractNode
 
     node2dist = zeros(Float64, size(node2max_depth))
     tl = tree_height(root)
-    nblv = zeros(Float64,length(po))
+    nblv = zeros(Float64,treesize(root))
     for node in level_order(root)
         if node.root != true
             m = get_mother(node)
@@ -268,7 +267,7 @@ end # function node_height
 
 
 function node_height_vec(root::T)::Vector{Float64} where T<:AbstractNode
-    t = zeros(length(post_order(root)))
+    t = zeros(treesize(root))
     node_height_vec(root, t)
     t
 end # function node_height
@@ -428,7 +427,7 @@ end # update_tree
 This function returns a random node from the tree.
 """
 function random_node(root::T)::T  where T<:AbstractNode
-    post_order_trav = post_order(root)
+    post_order_trav = collect(post_order(root))
     return rand(post_order_trav)
 end # function random_node
 
@@ -443,7 +442,7 @@ Get the vector of branch lengths of the tree.
 """
 function get_branchlength_vector(root::N)::Vector{Float64}  where {N <:AbstractNode}
     if length(root.blv) == 0
-        root.blv = zeros(length(post_order(root))-1)
+        root.blv = zeros(treesize(root)-1)
     end
     get_branchlength_vector(root, root.blv)
     return root.blv
@@ -484,7 +483,7 @@ function set_branchlength_vector!(root::N, blenvec::Array{T}) where {N<:Abstract
     nothing
 end # function set_branchlength_vector!
 
-
+#= 
 """
     get_sum_seperate_length!(root::T)::Vector{Float64}  where T<:AbstractNode
 
@@ -494,7 +493,7 @@ branches leading to the leave nodes.
 function get_sum_seperate_length!(root::T)::Vector{Float64}  where T<:AbstractNode
     return get_sum_seperate_length!(post_order(root))
 end # function get_sum_seperate_length!
-
+ =#
 
 """
     get_sum_seperate_length!(post_order::Vector{T})::Vector{Float64}  where T<:AbstractNode
@@ -502,12 +501,12 @@ end # function get_sum_seperate_length!
 This function gets the sum of the branch lengths of the internal branches and the
 branches leading to the leave nodes.
 """
-function get_sum_seperate_length!(post_order::Vector{T})::Vector{Float64}  where T<:AbstractNode
-    res_int::Float64 = 0.0
-    res_leave::Float64 = 0.0
-    res_int_log::Float64 = 0.0
-    res_leave_log::Float64 = 0.0
-    @simd for node in post_order
+function get_sum_seperate_length!(root::AbstractNode{T})::Vector{T}  where T<:Real
+    res_int::T = 0.0
+    res_leave::T = 0.0
+    res_int_log::T = 0.0
+    res_leave_log::T = 0.0
+    for node in post_order(root)
         if node.nchild !== 0
             # internal branches
             if !node.root
@@ -523,13 +522,13 @@ function get_sum_seperate_length!(post_order::Vector{T})::Vector{Float64}  where
     return [res_int, res_leave, res_int_log, res_leave_log]
 end # function get_sum_seperate_length!
 
-function internal_external_map(root::T)::Vector{Int64}  where T<:AbstractNode
-    internal_external_map(post_order(root))
-end
+#function internal_external_map(root::T)::Vector{Int64}  where T<:AbstractNode
+#    internal_external_map(post_order(root))
+#end
 
-function internal_external_map(post_order::Vector{T})::Vector{Int64}  where T<:AbstractNode
-    my_map::Vector{Int64} = zeros(Int64, length(post_order)-1)
-    for node in post_order
+function internal_external_map(root::T)::Vector{Int64}  where T<:AbstractNode
+    my_map::Vector{Int64} = zeros(Int64, treesize(root)-1)
+    for node in post_order(root)
         if !node.root
             if node.nchild != 0
                 my_map[node.num] = 1
@@ -578,11 +577,11 @@ function find_lca(tree::T, node1::T, node2::T)::T  where T<:AbstractNode
 end
 
 """
-    check_binary(root::GeneralNode)::Bool
+    check_binary(root::AbstractNode)::Bool
 
 checks to see if given tree is binary; returns true if properly formatted and false otherwise
 """
-function check_binary(root::GeneralNode)::Bool
+function check_binary(root::AbstractNode)::Bool
     check_binary_int(root, true)
 end #function
 

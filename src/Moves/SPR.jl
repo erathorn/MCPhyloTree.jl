@@ -17,7 +17,7 @@ Performs SPR on tree in place. Takes reference to root of tree;
 Returns reference to root of altered tree. Throws error if tree is improperly formatted.
 """
 function SPR!(root::T)::T where T <:AbstractNode
-    if length(post_order(root)) <= 3
+    if treesize(root) <= 3
         throw(ArgumentError("The tree is too small for SPR"))
     end #if
     check_binary(root) || throw(ArgumentError("Not yet implemented for not binary trees"))

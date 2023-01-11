@@ -1,5 +1,5 @@
 
-abstract type AbstractNode end
+#abstract type AbstractNode end
 
 """
     Node
@@ -10,7 +10,7 @@ stored in the node.
 * `inc_length` specifies the length of the incomming branch.
 * `binary` specifies the path from the root to the Node. `1` and `0` represent left and right turns respectively.
 """
-mutable struct GeneralNode{R<:Real, I<:Integer} <: AbstractNode
+mutable struct GeneralNode{R<:Real, I<:Integer} <: AbstractNode{R}
     name::String
     mother::Union{GeneralNode{R,I}, Missing}
     children::Vector{GeneralNode{R,I}}
@@ -45,7 +45,7 @@ end
 #################### Base functionality ####################
 
 Base.:(==)(x::T, y::T) where T<:AbstractNode = x.num == y.num
-Base.size(x::T) where T<:AbstractNode = size(post_order(x))
+Base.size(x::T) where T<:AbstractNode = treesize(x)
 Base.length(x::T) where T<:AbstractNode = x.nchild
 
 function Base.summary(io::IO, d::N) where N <: GeneralNode

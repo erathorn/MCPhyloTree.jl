@@ -2,10 +2,13 @@
 module MCPhyloTree
 
 # load necessary packages
+using Reexport
 using Statistics
 using DataStructures
 using RecipesBase
 using Random
+@reexport using AbstractTrees
+import AbstractTrees: children
 
 ### Get Files
 
@@ -47,7 +50,8 @@ include("Plotting/tree_plot.jl")
 include("Plotting/ascii.jl")
 
 # Export Type
-export AbstractNode, GeneralNode, Node
+#export #AbstractNode, 
+export GeneralNode, Node
 
 export add_child!,
     delete_node!,

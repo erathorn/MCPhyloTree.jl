@@ -10,12 +10,12 @@ Returns Tuple containing the matrix and a vector of names.
 """
 function to_df(root::GeneralNode)::Tuple{Array{Float64},Vector{String}}
 
-    post_order_iteration = post_order(root)
+    #post_order_iteration = post_order(root)
 
-    name_list = [i.name for i in post_order_iteration]
-    num_list = [i.num for i in post_order_iteration]
-    temp_ar = zeros(Float64, (length(post_order_iteration), length(post_order_iteration)))
-    for i in post_order_iteration
+    name_list = [i.name for i in  post_order(root)]
+    num_list = [i.num for i in  post_order(root)]
+    temp_ar = zeros(Float64, (treesize(root), treesize(root)))
+    for i in  post_order(root)
         if i.nchild != 0
             ind = findfirst(isequal(i.num), num_list)
             for j in i.children

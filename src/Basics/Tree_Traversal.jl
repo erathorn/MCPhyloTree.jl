@@ -33,10 +33,11 @@ Returns vector of Nodes.
 
 * `root` : root Node of tree.
 """
-function post_order(root::T)::Vector{T} where T<:AbstractNode
-    t::Vector{T} = []
-    post_order(root, t)
-    return t
+function post_order(root::T) where T<:AbstractNode
+    return PostOrderDFS(root)
+    #t::Vector{T} = []
+    #post_order(root, t)
+    #return t
 end # function post_order
 
 """
@@ -81,7 +82,9 @@ function get_leaves(root::T)::Vector{T} where T<:AbstractNode
     return t
 end # function post_order
 
-
+function children(n::T)::Vector{T} where T <:GeneralNode
+    n.children
+end
 
 
 #################### Pre order traversal ####################
@@ -119,10 +122,11 @@ Returns vector of Nodes.
 
 * `root` : root Node of tree.
 """
-function pre_order(root::T)::Vector{T} where T<:AbstractNode
-    t::Vector{T} = []
-    pre_order(root, t)
-    return t
+function pre_order(root::T) where T<:AbstractNode
+    PreOrderDFS(root)
+    #t::Vector{T} = []
+    #pre_order(root, t)
+    #return t
 end # function pre_order
 
 #################### Level order traversal ####################
@@ -136,13 +140,14 @@ Returns Array of Nodes.
 
 * `node` : root Node of tree.
 """
-function level_order(node::T)::Array{T} where T<:AbstractNode
-    level = 1
-    stack::Array{T} = []
-    while level_traverse(node, level, stack)
-        level += 1
-    end # while
-    stack
+function level_order(node::T) where T<:AbstractNode
+    StatelessBFS(node)
+    #level = 1
+    #stack::Array{T} = []
+    #while level_traverse(node, level, stack)
+    #    level += 1
+    #end # while
+    #stack
 end # function level_order
 
 """

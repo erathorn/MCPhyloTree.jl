@@ -66,14 +66,14 @@ end
     root = find_by_name(tree,"G")
     add_child!(root,to_add)
     @test root.children[end].name == "no_name"
-    @test length(post_order(tree))==8
+    @test treesize(tree)==8
 
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
     to_add = ParseNewick("no_name;")
     leaf = find_by_name(tree,"D")
     add_child!(leaf,to_add)
     @test leaf.children[end].name == "no_name"
-    @test length(post_order(tree))==8
+    @test treesize(tree)==8
 
 
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
@@ -82,7 +82,7 @@ end
     add_child!(mid,to_add)
 
     @test mid.children[end].name == "no_name"
-    @test length(post_order(tree))==8
+    @test treesize(tree)==8
 
 
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
@@ -91,7 +91,7 @@ end
     add_child!(mid,to_add, 1)
 
     @test mid.children[1].name == "no_name"
-    @test length(post_order(tree))==8
+    @test treesize(tree)==8
 
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
     to_add = ParseNewick("no_name;")
@@ -105,7 +105,7 @@ end
     add_child!(mid,to_add, 4)
     
     @test mid.children[4].name == "no_name"
-    @test length(post_order(tree))==8
+    @test treesize(tree)==8
 
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
     to_add = ParseNewick("no_name;")
@@ -113,7 +113,7 @@ end
     add_child!(mid,to_add, 2)
 
     @test mid.children[2].name == "no_name"
-    @test length(post_order(tree))==8
+    @test treesize(tree)==8
 
 
 
@@ -125,20 +125,20 @@ end
     remove_child!(mother,true)
     @test length(mother.children) == 1
     @test mother.children[1].name == "B"
-    @test length(post_order(tree)) == 6
+    @test treesize(tree) == 6
 
     tree = ParseNewick("((A,B)C,(D,E)F)G;")
     mother = find_by_name(tree,"C")
     remove_child!(mother,false)
     @test length(mother.children) == 1
     @test mother.children[1].name == "A"
-    @test length(post_order(tree)) == 6
+    @test treesize(tree) == 6
 
     tree = ParseNewick("((A,B)C,(D,E)F)G;")
     remove_child!(tree,true)
     @test tree.children[1].name == "F"
     @test length(tree.children) == 1
-    @test length(post_order(tree)) == 4
+    @test treesize(tree) == 4
 
 end
 
@@ -149,7 +149,7 @@ end
     remove_child!(mother,to_remove)
     @test length(mother.children) == 1
     @test mother.children[1].name == "B"
-    @test length(post_order(tree)) == 6
+    @test treesize(tree) == 6
 
     tree = ParseNewick("((A,B)C,(D,E)F)G;")
     mother = find_by_name(tree,"C")
@@ -157,14 +157,14 @@ end
     remove_child!(mother,to_remove)
     @test length(mother.children) == 1
     @test mother.children[1].name == "A"
-    @test length(post_order(tree)) == 6
+    @test treesize(tree) == 6
 
     tree = ParseNewick("((A,B)C,(D,E)F)G;")
     to_remove = find_by_name(tree,"C")
     remove_child!(tree,to_remove)
     @test tree.children[1].name == "F"
     @test length(tree.children) == 1
-    @test length(post_order(tree)) == 4
+    @test treesize(tree) == 4
 end
 
 @testset "tree_length" begin
