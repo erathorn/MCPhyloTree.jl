@@ -102,7 +102,7 @@ function from_df(df::Array{T,2}, name_list::Vector{String})::GeneralNode{T, Int6
     i::Int = 0
     # find the root
     for (ind, n) in enumerate(node_list)
-        if isroot(n)#n.root == true
+        if isroot(n)
             i = ind
             break
         end # end if

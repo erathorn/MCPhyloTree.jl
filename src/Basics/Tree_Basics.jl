@@ -108,7 +108,7 @@ mother node.
 * `node` : Node to be deleted.
 """
 function delete_node!(node::T)::Nothing where T<:AbstractNode
-    if node.root == true
+    if isroot(node)
         throw(ArgumentError("Cannot remove root node"))
     end
     mother = get_mother(node)
@@ -180,7 +180,7 @@ function force_ultrametric!(root::T) where T<:AbstractNode
     tl = tree_height(root)
     nblv = zeros(Float64,treesize(root))
     for node in level_order(root)
-        if node.root != true
+        if !isnroot(node)
             m = get_mother(node)
             nv = (tl - node2dist[m.num])/node2max_depth[node.num]
 
@@ -216,7 +216,7 @@ function tree_length(root::T, tl::Float64)::Float64 where T<:AbstractNode
         tl = tree_length(child, tl)
     end
     #end # if
-    if root.root !== true
+    if !isroot(node)
         tl += root.inc_length
     end
 
@@ -282,7 +282,7 @@ leaf farthest from the root has a node age of 0, and the root node is the 'oldes
 """
 function node_age(node::GeneralNode)::Float64
     depth::Float64 = 0
-    while !node.root
+    while !isroot(node)
         depth += node.inc_length
         node = node.mother
     end
@@ -364,7 +364,7 @@ root to this node via the binary representation of the node.
 A left turn is a 1 in binary and a right turn a 0.
 """
 function set_binary!(root::T)::Nothing  where T <: GeneralNode
-    if root.root
+    if isroot(root)
         root.binary = "1"
     end # if
     if root.nchild != 0
@@ -458,7 +458,7 @@ function get_branchlength_vector(root::N, out_vec::Vector{T})::Nothing where {N<
     for child in root.children
         get_branchlength_vector(child, out_vec)
     end
-    if !root.root
+    if !isroot(root)
         out_vec[root.num] = root.inc_length
     end
     nothing
@@ -477,7 +477,7 @@ function set_branchlength_vector!(root::N, blenvec::Array{T}) where {N<:Abstract
         set_branchlength_vector!(child, blenvec)
     end
 
-    @views if root.root !== true
+    @views if !isroot(root)
         root.inc_length = blenvec[root.num]
     end
     nothing
@@ -509,7 +509,7 @@ function get_sum_seperate_length!(root::AbstractNode{T})::Vector{T}  where T<:Re
     for node in post_order(root)
         if node.nchild !== 0
             # internal branches
-            if !node.root
+            if !isroot(node)
                 res_int += node.inc_length
                 res_int_log += log(node.inc_length)
             end
@@ -529,7 +529,7 @@ end # function get_sum_seperate_length!
 function internal_external_map(root::T)::Vector{Int64}  where T<:AbstractNode
     my_map::Vector{Int64} = zeros(Int64, treesize(root)-1)
     for node in post_order(root)
-        if !node.root
+        if !isroot(node)
             if node.nchild != 0
                 my_map[node.num] = 1
             end
@@ -589,7 +589,7 @@ function check_binary_int(root::AbstractNode, state::Bool)::Bool
     for child in root.children
         state &=check_binary_int(child, state)
     end
-    if root.root && root.nchild == 3
+    if isroot(root) && root.nchild == 3
         state &= true
     elseif root.nchild !=0 && root.nchild != 2
         state &= false

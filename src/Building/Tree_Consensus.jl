@@ -139,7 +139,7 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
     for tree in trees
         temp_bit_vectors = Dict{T, BitVector}()
         for node in post_order(tree)
-            if node.root
+            if isroot(node)
                 continue
             elseif node.nchild == 0
                 bit_vector = falses(l)
@@ -488,8 +488,8 @@ function check_node!(ref_node::T, leaves::Vector{T},
             try marked_nodes[ref_node.num] = true catch; end # try
             return
         end # if
-        !xleft.root && delete!(left_path, node_depth(get_mother(xleft)))
-        !xright.root && delete!(right_path, node_depth(get_mother(xright)))
+        !isroot(xleft) && delete!(left_path, node_depth(get_mother(xleft)))
+        !isroot(root) && delete!(right_path, node_depth(get_mother(xright)))
         depth_left = node_depth(xleft)
         depth_right = node_depth(xright)
         depth = depth_left >= depth_right
@@ -667,7 +667,7 @@ descendant. Also returns the path from the leaf to the mother of that node.
 function x_left(node::T)::Tuple{T, Vector{T}} where T<:AbstractNode
     path::Vector{T} = [node]
     while true
-        if node.root
+        if isroot(node)
             return node, path
         else
             mother = get_mother(node)
@@ -692,7 +692,7 @@ descendant. Also returns the path from the leaf to the mother of that node.
 function x_right(node::T)::Tuple{T, Vector{T}} where T<:AbstractNode
     path::Vector{T} = [node]
     while true
-        if node.root
+        if isroot(node)
             return node, path
         else
             mother = get_mother(node)

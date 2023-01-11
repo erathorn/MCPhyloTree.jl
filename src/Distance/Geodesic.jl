@@ -135,7 +135,7 @@ function get_common_edges(tree1::T, tree2::T)::Vector{Tuple{T, T}} where T<:Gene
     #bp::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
 
     for node in post_order(tree1)
-        (node.nchild == 0 || node.root) && continue
+        (node.nchild == 0 || isroot(node)) && continue
         # get the split of the current node represented as a BitVector
         split::BitVector = get_split(node, l)
         # if the same split exits in both trees, then we found a common node

@@ -89,7 +89,7 @@ function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:AbstractNo
             covmat[ind,jnd] =  reduce(+, @view blv[get_path(tree, itm)])
         else
             lca = find_lca(tree, itm, leaves[jnd])
-            if !lca.root
+            if !isroot(lca)
                 tmp = reduce(+, @view blv[get_path(tree, lca)])
                 covmat[ind,jnd] = covmat[jnd,ind] = tmp    
             end # if
@@ -123,7 +123,7 @@ function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:Abst
     out = zeros(length(leaves), n)
     for (i, leave) in enumerate(leaves)
         mother = leave
-        while !mother.root
+        while !isroot(mother)
             out[i, mother.num] = 1.0
             mother = get_mother(mother)
         end
