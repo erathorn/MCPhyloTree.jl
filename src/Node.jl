@@ -78,6 +78,10 @@ function showall(io::IO, d::N) where N <: GeneralNode
   show(io, d.binary)
 end
 
+function children(n::T)::Vector{T} where T <:GeneralNode
+    n.children
+end
+
 ParentLinks(::Type{GeneralNode}) = AbstractTrees.StoredParents()
 #AbstractTrees.ChildIndexing(::Type{GeneralNode}) = AbstractTrees.IndexedChildren()
 function parent(t::T) where T<:GeneralNode
