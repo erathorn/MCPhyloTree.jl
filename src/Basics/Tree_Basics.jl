@@ -180,8 +180,8 @@ function force_ultrametric!(root::T) where T<:AbstractNode
     tl = tree_height(root)
     nblv = zeros(Float64,treesize(root))
     for node in level_order(root)
-        if !isnroot(node)
-            m = get_mother(node)
+        if !isroot(node)
+            m = parent(node)
             nv = (tl - node2dist[m.num])/node2max_depth[node.num]
 
             nblv[node.num] = nv
@@ -211,12 +211,12 @@ This function does the internal tree length recursion
 """
 function tree_length(root::T, tl::Float64)::Float64 where T<:AbstractNode
 
-    #if length(root.children) != 0
+    
     for child in root.children
         tl = tree_length(child, tl)
     end
-    #end # if
-    if !isroot(node)
+    
+    if !isroot(root)
         tl += root.inc_length
     end
 

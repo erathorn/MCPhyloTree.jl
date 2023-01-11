@@ -488,8 +488,8 @@ function check_node!(ref_node::T, leaves::Vector{T},
             try marked_nodes[ref_node.num] = true catch; end # try
             return
         end # if
-        !isroot(xleft) && delete!(left_path, node_depth(get_mother(xleft)))
-        !isroot(root) && delete!(right_path, node_depth(get_mother(xright)))
+        !isroot(xleft) && delete!(left_path, node_depth(parent(xleft)))
+        !isroot(xright) && delete!(right_path, node_depth(parent(xright)))
         depth_left = node_depth(xleft)
         depth_right = node_depth(xright)
         depth = depth_left >= depth_right
