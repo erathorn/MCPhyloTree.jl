@@ -170,8 +170,7 @@ function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
                              )::Vector{Tuple{T, T}} where T<:GeneralNode
 
     trees::Tuple{T, T} = (tree1, tree2)
-    # ToDo: ugly
-    num_nodes::Vector{Int64} = [length(collect(post_order(t))) for t in trees]
+    num_nodes::Vector{Int64} = [treesize(t) for t in trees]
     leaves::Vector{Vector{T}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     (num_edges[1] <= 0 || num_edges[2] <= 0) && return []
@@ -232,8 +231,7 @@ called in the function `geodesic` after the common edges have been removed.
 """
 function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:GeneralNode
     trees::Tuple{T, T} = (tree1, tree2)
-    # ToDo: ugly
-    num_nodes::Vector{Int64} = [length(collect(post_order(t))) for t in trees]
+    num_nodes::Vector{Int64} = [treesize(t) for t in trees]
     leaves::Vector{Vector{T}} = [sort!(get_leaves(t), by=x->x.name) for t in trees]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     rs::RatioSequence = RatioSequence()
