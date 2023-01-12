@@ -11,7 +11,7 @@ function Base.getindex(n::T, ind::Int) where T<:TreeIterator{<:GeneralNode}
         ind == ct && return node
         ct += 1
     end
-    throw(BoundsError)
+    throw(BoundsError("Index $ind is out of bounds for tree with $(treesize(n.root)) nodes."))
 end
 
 #################### Post order traversal ####################
