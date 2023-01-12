@@ -48,17 +48,15 @@ Returns an Array of Floats.
 * `tree` : root node of tree used to perform caclulcation.
 """
 function to_distance_matrix(tree::T)::Array{Float64,2} where {T<:AbstractNode}
-    leaves::Vector{T} = get_leaves(tree)
-    ll = length(leaves)
+    leaves = get_leaves(tree)
+    ll = mapreduce(x->1, +, leaves)
     distance_mat = zeros(Float64, ll, ll)
-    for i = 1:ll
-        for j = 1:ll
-            if i > j
-                d = node_distance(tree, leaves[i], leaves[j])
-                distance_mat[i, j] = d
-                distance_mat[j, i] = d
-            end # if
-        end # for
+    for i = 1:ll, j = 1:ll
+        if i > j
+            d = node_distance(tree, leaves[i], leaves[j])
+            distance_mat[i, j] = d
+            distance_mat[j, i] = d
+        end # if
     end #for
     distance_mat
 end # function to_distance_matrix
@@ -78,7 +76,6 @@ Returns an Array of Real numbers.
 
 """
 function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:AbstractNode,T<:Real}
-    # ToDo: Ugly
     leaves::Vector{N} = sort(collect(get_leaves(tree)), by = x->x.num)
     ll = length(leaves)
     covmat = zeros(T, ll, ll)
@@ -112,16 +109,15 @@ Returns leave incidence matrix.
 * `root` : Root node of the tree
 """
 function leave_incidence_matrix(root::G)::Matrix{Float64} where {G<:AbstractNode}
-    n = length(get_branchlength_vector(root))
+    n = treesize(root)-1
     leave_incidence_matrix(root, n)
 end
 
 
 function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:AbstractNode}
-    #ToDo: ugly
-    leaves::Vector{G} = collect(get_leaves(root))
-    out = zeros(length(leaves), n)
-    for (i, leave) in enumerate(leaves)
+    
+    out = zeros(sum(map(x->1 , Leaves(root))), n)
+    for (i, leave) in enumerate(get_leaves(root))
         mother = leave
         while !isroot(mother)
             out[i, mother.num] = 1.0

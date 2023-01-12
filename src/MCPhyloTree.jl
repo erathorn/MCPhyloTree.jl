@@ -9,7 +9,7 @@ using RecipesBase
 using Random
 @reexport using AbstractTrees
 import AbstractTrees: children, parent, ParentLinks, childtype
-
+import Base: getindex, lastindex, length
 ### Get Files
 
 # Type

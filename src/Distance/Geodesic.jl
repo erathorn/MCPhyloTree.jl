@@ -128,8 +128,7 @@ function get_common_edges(tree1::T, tree2::T)::Vector{Tuple{T, T}} where T<:Gene
 
     common_edges::Vector{Tuple{T, T}} = []
     tree_splits::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
-    # ToDo: Ugly
-    l = length(collect(get_leaves(tree1)))
+    l = mapreduce(x->1, +, get_leaves(tree1))
     nodes_tree2::Vector{T} = collect(post_order(tree2))
     sort!(nodes_tree2, by = x -> x.num)
     #bp::Vector{BitVector} = get_bipartitions_as_bitvectors(tree2)
@@ -172,7 +171,6 @@ function split_on_common_edge(tree1::T, tree2::T; non_common_edges=[]
 
     trees::Tuple{T, T} = (tree1, tree2)
     num_nodes::Vector{Int64} = [treesize(t) for t in trees]
-    #ToDo: Ugly
     leaves::Vector{Vector{T}} = [sort!(collect(get_leaves(t)), by=x->x.name) for t in trees]
     num_edges::Vector{Int64} = [num_nodes[i] - length(leaves[i]) - 1 for i in 1:2]
     (num_edges[1] <= 0 || num_edges[2] <= 0) && return []
@@ -253,17 +251,16 @@ function get_geodesic_nocommon_edges(tree1::T, tree2::T)::Geodesic where T<:Gene
     end # if
 
     if num_edges[1] == 1 || num_edges[2] == 1
-        # ToDo: Ugly
-        internal_nodes1 = filter!(x -> x.nchild != 0, collect(post_order(tree1))[1:end-1])
-        internal_nodes2 = filter!(x -> x.nchild != 0, collect(post_order(tree2))[1:end-1])
+        internal_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+        internal_nodes2 = filter!(x -> x.nchild != 0, post_order(tree2)[1:end-1])
 		push!(rs.ratios, Ratio(internal_nodes1, internal_nodes2))
 		return Geodesic(rs)
 	end # if
 
     leaf_dict::Dict{String, Int64} = Dict(leaf.name => leaf.num for leaf in leaves[1])
-    # ToDo: Ugly
-    int_nodes1 = filter!(x -> x.nchild != 0, collect(post_order(tree1))[1:end-1])
-    int_nodes2 = filter!(x -> x.nchild != 0, collect(post_order(tree2))[1:end-1])
+    
+    int_nodes1 = filter!(x -> x.nchild != 0, post_order(tree1)[1:end-1])
+    int_nodes2 = filter!(x -> x.nchild != 0, post_order(tree2)[1:end-1])
     incidence_matrix::BitMatrix =  get_incidence_matrix(int_nodes1, int_nodes2, leaf_dict)
 
     graph::BipartiteGraph = build_bipartite_graph(incidence_matrix,

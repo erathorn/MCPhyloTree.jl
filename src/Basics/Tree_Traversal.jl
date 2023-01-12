@@ -1,4 +1,19 @@
 
+#################### Generics ####################
+const fulltreeit = Union{PostOrderDFS, PreOrderDFS, StatelessBFS}
+
+Base.length(n::T) where T<:fulltreeit = treesize(n.root)
+Base.lastindex(n::T) where T<:fulltreeit = treesize(n.root)
+Base.getindex(n::T, itr) where T<:TreeIterator{<:GeneralNode} = [n[i] for i in itr]
+function Base.getindex(n::T, ind::Int) where T<:TreeIterator{<:GeneralNode}
+    ct = 1
+    for node in n
+        ind == ct && return node
+        ct += 1
+    end
+    throw(BoundsError)
+end
+
 #################### Post order traversal ####################
 
 """
