@@ -16,13 +16,6 @@ function update_ndesc!(node::N, val::Int)::Nothing where N <:GeneralNode
     end
 end
 
-function set_ndesc!(root::N)::Nothing where N<:GeneralNode
-    #for node in post_order(root)
-    #    node.n_desc = node.nchild == 0 ? 0 : sum(n.n_desc for n in node.children) + node.nchild
-    #end
-    nothing
-end
-
 """
     add_child!(mother_node::N, child::N)::Nothing where N <: GeneralNode
 
@@ -428,7 +421,6 @@ fields.
 function initialize_tree!(root::GeneralNode; height::Bool=true)
     set_binary!(root)
     number_nodes!(root)
-    set_ndesc!(root)
     height && tree_height(root)
 end # initialize_tree
 
