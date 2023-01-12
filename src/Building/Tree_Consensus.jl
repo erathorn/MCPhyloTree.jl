@@ -196,6 +196,7 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
                         end # if
                     end # for
                     insert && insert_node!(node, children)
+                    delete!(num, children)
                     number_nodes!(greedy_consensus_tree)
                     break
                 end # if

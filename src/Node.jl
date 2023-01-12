@@ -45,7 +45,6 @@ end
 
 #################### Base functionality ####################
 
-Base.:(==)(x::T, y::T) where T<:GeneralNode = x.num == y.num
 Base.size(x::T) where T<:GeneralNode = treesize(x)
 Base.length(x::T) where T<:GeneralNode = x.nchild
 
