@@ -10,12 +10,12 @@ Returns Tuple containing the matrix and a vector of names.
 """
 function to_df(root::GeneralNode)::Tuple{Array{Float64},Vector{String}}
 
-    post_order_iteration = post_order(root)
+    #post_order_iteration = post_order(root)
 
-    name_list = [i.name for i in post_order_iteration]
-    num_list = [i.num for i in post_order_iteration]
-    temp_ar = zeros(Float64, (length(post_order_iteration), length(post_order_iteration)))
-    for i in post_order_iteration
+    name_list = [i.name for i in  post_order(root)]
+    num_list = [i.num for i in  post_order(root)]
+    temp_ar = zeros(Float64, (treesize(root), treesize(root)))
+    for i in  post_order(root)
         if i.nchild != 0
             ind = findfirst(isequal(i.num), num_list)
             for j in i.children
@@ -48,17 +48,15 @@ Returns an Array of Floats.
 * `tree` : root node of tree used to perform caclulcation.
 """
 function to_distance_matrix(tree::T)::Array{Float64,2} where {T<:AbstractNode}
-    leaves::Vector{T} = get_leaves(tree)
-    ll = length(leaves)
+    leaves = get_leaves(tree)
+    ll = mapreduce(x->1, +, leaves)
     distance_mat = zeros(Float64, ll, ll)
-    for i = 1:ll
-        for j = 1:ll
-            if i > j
-                d = node_distance(tree, leaves[i], leaves[j])
-                distance_mat[i, j] = d
-                distance_mat[j, i] = d
-            end # if
-        end # for
+    for i = 1:ll, j = 1:ll
+        if i > j
+            d = node_distance(tree, leaves[i], leaves[j])
+            distance_mat[i, j] = d
+            distance_mat[j, i] = d
+        end # if
     end #for
     distance_mat
 end # function to_distance_matrix
@@ -78,7 +76,7 @@ Returns an Array of Real numbers.
 
 """
 function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:AbstractNode,T<:Real}
-    leaves::Vector{N} = sort(get_leaves(tree), by = x->x.num)
+    leaves::Vector{N} = sort(collect(get_leaves(tree)), by = x->x.num)
     ll = length(leaves)
     covmat = zeros(T, ll, ll)
     
@@ -88,7 +86,7 @@ function to_covariance(tree::N, blv::Vector{T})::Array{T,2} where {N<:AbstractNo
             covmat[ind,jnd] =  reduce(+, @view blv[get_path(tree, itm)])
         else
             lca = find_lca(tree, itm, leaves[jnd])
-            if !lca.root
+            if !isroot(lca)
                 tmp = reduce(+, @view blv[get_path(tree, lca)])
                 covmat[ind,jnd] = covmat[jnd,ind] = tmp    
             end # if
@@ -111,17 +109,17 @@ Returns leave incidence matrix.
 * `root` : Root node of the tree
 """
 function leave_incidence_matrix(root::G)::Matrix{Float64} where {G<:AbstractNode}
-    n = length(get_branchlength_vector(root))
+    n = treesize(root)-1
     leave_incidence_matrix(root, n)
 end
 
 
 function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:AbstractNode}
-    leaves::Vector{G} = get_leaves(root)
-    out = zeros(length(leaves), n)
-    for (i, leave) in enumerate(leaves)
+    
+    out = zeros(sum(map(x->1 , get_leaves(root))), n)
+    for (i, leave) in enumerate(get_leaves(root))
         mother = leave
-        while !mother.root
+        while !isroot(mother)
             out[i, mother.num] = 1.0
             mother = get_mother(mother)
         end

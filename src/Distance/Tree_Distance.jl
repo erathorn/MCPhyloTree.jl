@@ -66,7 +66,7 @@ IEEE/ACM Transactions on Computational Biology and Bioinformatics, 8:2-13, 2011.
 function geodesic(tree1::T, tree2::T; verbose=false)::Float64 where T<:GeneralNode
     trees::Vector{T} = [tree1, tree2]
     leaf_contribution²::Float64 = 0.0
-    leaves::Vector{Vector{T}} = get_leaves.(trees)
+    leaves = get_leaves.(trees)
     leaf_names::Vector{Vector{String}} = [[leaf.name for leaf in leaves[i]] for i in 1:2] 
     perms::Vector{Vector{Int64}} = sortperm.(leaf_names)
     leaf_vecs::Vector{Vector{String}} = [leaf_names[i][perms[i]] for i in 1:2]
@@ -117,14 +117,14 @@ function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:Abstr
     
     for bp in bp_t1
         found1 = find_lca(tree1, String.(split(bp[1], ",")))
-        if found1.root
+        if isroot(found1)
             found1 = find_lca(tree1, String.(split(bp[2], ",")))
         end
         
         ind = findfirst(isequal(bp), bp_t2)
         if !isnothing(ind)
             found2 = find_lca(tree2, String.(split(bp[1], ",")))
-            if found2.root
+            if isroot(found2)
                 found2 = find_lca(tree2, String.(split(bp[2], ",")))
             end
             T1andT2 += (found1.inc_length - found2.inc_length)^2
@@ -137,7 +137,7 @@ function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:Abstr
     # only nodes which are present in the second tree are left in bp_t2
     for bp in bp_t2
         found2 = find_lca(tree2, String.(split(bp[1], ",")))
-        if found2.root
+        if isroot(root)
             found2 = find_lca(tree2, String.(split(bp[2], ",")))
         end
         T2minusT1 += found2.inc_length^2
@@ -181,15 +181,16 @@ Get all bipartitions of `tree`.
 Returns a vector containing BitVectors representing the splits.
 """
 function get_bipartitions_as_bitvectors(tree::T)::Vector{BitVector} where T<:GeneralNode
-    po_vect= post_order(tree)[1:end-1]
-    bt = Vector{BitVector}(undef, length(po_vect))
-    l::Int64 = length(get_leaves(tree))
-    for node in po_vect
+    
+    bt = Vector{BitVector}(undef, treesize(tree)-1)
+    l::Int64 = mapreduce(x->1, + , get_leaves(tree))
+    for node in post_order(tree)[1:end-1]
         bit_vector::BitVector = falses(l)
         for leaf in get_leaves(node)
             bit_vector[leaf.num] = 1
         end # for
         @inbounds bt[node.num] = bit_vector
+        
     end # for
     bt
 end

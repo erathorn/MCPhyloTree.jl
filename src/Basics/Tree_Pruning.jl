@@ -30,21 +30,21 @@ In-place version of prune_tree.
 function prune_tree!(root::T, node_names::Vector{String})::Nothing where T<:AbstractNode
     nodes = post_order(root)
     names = [node.name for node in nodes]
-    nodes_to_prune = Vector{T}()
+    nodes_to_prune = Vector{String}()
     for name in node_names
-        indeces = findall(x->x == name, names)
-        if length(indeces) > 1
+        indices = findall(x->x == name, names)
+        if length(indices) > 1
             throw(ArgumentError("Multiple nodes are named \"$name\""))
-        elseif length(indeces) == 0
+        elseif length(indices) == 0
             print("Warning: No node named \"$name\" in tree")
         else
-            push!(nodes_to_prune, nodes[indeces[1]])
+            push!(nodes_to_prune, name)
         end # if/else
     end # for
     if length(nodes_to_prune) == 0
         throw(ArgumentError("None of the node names correspond to a node in the tree"))
     end # if
-    prune_tree!(root, nodes_to_prune)
+    prune_tree!(root, find_by_name.(Ref(root), nodes_to_prune))
 end
 
 

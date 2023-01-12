@@ -16,7 +16,7 @@ function slide!(root::T) where {T<:AbstractNode}
     n = rand(available)
     target::T = find_num(root, n)
 
-    while target.nchild == 0 || target.root
+    while target.nchild == 0 || isroot(target)
         n = rand(available)
         target = find_num(root, n)
     end
@@ -129,7 +129,7 @@ function change_edge_length!(root::T) where {T<:AbstractNode}
     available = [node.num for node in post_order(root)]
     n = rand(available)
     target::T = find_num(root, n)
-    while target.root
+    while isroot(target)
         n = rand(available)
         target = find_num(root, n)
     end

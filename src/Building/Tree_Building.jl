@@ -102,7 +102,7 @@ function from_df(df::Array{T,2}, name_list::Vector{String})::GeneralNode{T, Int6
     i::Int = 0
     # find the root
     for (ind, n) in enumerate(node_list)
-        if n.root == true
+        if isroot(n)
             i = ind
             break
         end # end if
@@ -172,13 +172,7 @@ function cov2tree(covmat::Array{<:T, 2}, names::Vector{<:AbstractString}, number
     elseif any(covmat .< 0.0)
         covmat[covmat .< 0] .= 0.0
     end
-    try
-        cov2tree_int(covmat, names, numbers, tol=tol)
-    catch
-        println(covmat)
-    end
-        
-        
+    cov2tree_int(covmat, names, numbers, tol=tol)        
 end
 
 function cov2tree_int(covmat::Array{R, 2}, names::Vector{<:AbstractString}, numbers; tol::Real=1e-7)::GeneralNode{R, Int64} where R<:Real
@@ -234,15 +228,15 @@ Returns cost of the most parsimonius reconstruction.
 * `gap` : optional identifier for gaps
 """
 function parsimony(tree::N, char::Dict{String,String}; gap::String="-")::Float64 where N<: GeneralNode
-      po = post_order(tree)
+      #po = 
       states = filter(x -> x != "-", unique(collect(values(char))))
       nStates = length(states)
       if nStates == 0
             return 0.0
       end
-      nNodes = length(po)
+      nNodes = treesize(tree)
       costMatrix = zeros(nNodes, nStates) .- 1
-      for node in po
+      for node in post_order(tree)
             if node.nchild == 0
                   # i am a leave node
                   s = char[node.name]

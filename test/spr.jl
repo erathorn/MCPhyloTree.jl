@@ -17,7 +17,7 @@
 
     @test round(tree_length(binary_tree);digits=3) == round(tree_length(spr_binary);digits=3)
 
-    @test length(post_order(spr_binary)) == length(post_order(binary_tree))
+    @test treesize(spr_binary) == treesize(binary_tree)
 
     spr_binary_two = MCPhyloTree.SPR(tree_binary_two)
 
@@ -25,7 +25,7 @@
 
     @test round(tree_length(tree_binary_two);digits=3) == round(tree_length(spr_binary_two);digits=3)
 
-    @test length(post_order(spr_binary_two)) == length(post_order(tree_binary_two))
+    @test treesize(spr_binary_two) == treesize(tree_binary_two)
 
 
 
@@ -33,5 +33,5 @@
 
     @test length(Set([n.num for n in post_order(spr_binary_risky)])) == length(Set([n.num for n in post_order(binary_tree)]))
     @test round(tree_length(spr_binary_risky);digits=3) == round(tree_length(spr_binary);digits=3)
-    @test length(post_order(spr_binary_risky)) == length(post_order(binary_tree))
+    @test treesize(spr_binary_risky) == treesize(binary_tree)
 end

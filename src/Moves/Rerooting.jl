@@ -19,7 +19,7 @@ end
 
 
 function recursive_invert(old_mother::T, old_daughter::T)::T where T
-    if old_mother.root == true
+    if isroot(old_mother)
         # arrived at the root
         od = remove_child!(old_mother, old_daughter)
         add_child!(od, old_mother)

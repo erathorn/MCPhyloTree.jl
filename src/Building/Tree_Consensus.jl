@@ -30,7 +30,7 @@ function majority_consensus_tree(trees::Vector{T}, percentage::Float64=0.5
 
     merged_tree = deepcopy(trees[1])
     check_leafsets(trees)
-    nodes = post_order(merged_tree)
+    nodes = collect(post_order(merged_tree))
     # save leaf ranks to order the resulting tree in the end
     leaf_ranks = get_leaf_ranks(nodes)
     node_counts = convert(Vector{Int64}, ones(length(nodes)))
@@ -61,9 +61,8 @@ function majority_consensus_tree(trees::Vector{T}, percentage::Float64=0.5
     # find clusters of the final tree in the other tree, store inc_length and count
     set_node_stats!(merged_tree, trees, true, percentage)
     # order the resulting tree
-    nodes = post_order(merged_tree)
     cluster_start_indeces = Dict{T, Int64}()
-    for node in nodes
+    for node in post_order(merged_tree)
         if node.nchild != 0
             cluster_start_indeces[node] = cluster_start_indeces[node.children[1]]
         else
@@ -91,7 +90,7 @@ https://dl.acm.org/doi/pdf/10.1145/2925985
 function loose_consensus_tree(trees::Vector{T})::T where T<:AbstractNode
     r_tree = trees[1]
     check_leafsets(trees)
-    nodes = post_order(r_tree)
+    nodes = collect(post_order(r_tree))
     # save leaf ranks to order the resulting tree in the end
     leaf_ranks = get_leaf_ranks(nodes)
     for i in 2:length(trees)
@@ -104,9 +103,8 @@ function loose_consensus_tree(trees::Vector{T})::T where T<:AbstractNode
     end
     set_node_stats!(r_tree, trees, false)
     # order the resulting tree
-    nodes = post_order(r_tree)
     cluster_start_indeces = Dict{T, Int64}()
-    for node in nodes
+    for node in post_order(r_tree)
         if node.nchild != 0
             cluster_start_indeces[node] = cluster_start_indeces[node.children[1]]
         else
@@ -134,14 +132,14 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
     leafset = Set([n.name for n in get_leaves(trees[1])])
     l = length(leafset)
     check_leafsets(trees)
-    nodes = post_order(trees[1])
+    nodes = collect(post_order(trees[1]))
     # PSEUDOCODE Step 1
     leaf_ranks = get_leaf_ranks(nodes)
     bit_vectors = Vector{BitVector}()
     for tree in trees
         temp_bit_vectors = Dict{T, BitVector}()
         for node in post_order(tree)
-            if node.root
+            if isroot(node)
                 continue
             elseif node.nchild == 0
                 bit_vector = falses(l)
@@ -158,7 +156,7 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
         append!(bit_vectors, values(temp_bit_vectors))
     end # for
     # PSEUDOCODE Step 2
-    sort!(bit_vectors, alg=QuickSort)
+    sort!(bit_vectors, alg=MergeSort)
     # PSEUDOCODE Step 3
     cluster_queue = count_cluster_occurences(bit_vectors)
     # PSEUDOCODE Step 4
@@ -176,18 +174,16 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
         # cluster. It also stores the number of leaf nodes of the node.
         num = Dict{T, Vector{Int64}}()
         for node in post_order(greedy_consensus_tree)
-            if node.nchild == 0
+            if node.n_desc == 0
                 cluster[leaf_ranks[node.name]] == 1 ? num[node] = [1, 1] :
                                                       num[node] = [0, 1]
             else
                 num[node] = [sum([num[child][1] for child in node.children])]
                 n_leaves = 0
                 for child in node.children
-                    length(num[child]) != 2 && show(num)
                     n_leaves += num[child][2]
                 end # for
                 push!(num[node], n_leaves)
-                length(num[node]) != 2 && show(num)
                 children = Vector{T}()
                 if num[node][1] == cluster_length
                     insert = true
@@ -200,6 +196,7 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
                         end # if
                     end # for
                     insert && insert_node!(node, children)
+                    delete!(num, children)
                     number_nodes!(greedy_consensus_tree)
                     break
                 end # if
@@ -252,12 +249,12 @@ non-majority clusters (handled by the 'majority' boolean).
 function set_node_stats!(main_tree::T, trees::Vector{T}, majority::Bool,
                          percentage::Float64=0.0)::Nothing where T <: GeneralNode
 
-    nodes = level_order(main_tree)
-    count_dict = Dict(zip([n.num for n in nodes], zeros(Int64, length(nodes))))
+    #nodes = level_order(main_tree)
+    count_dict = Dict(zip([n.num for n in level_order(main_tree)], zeros(Int64, treesize(main_tree))))
     inc_length_dict = Dict{Int64, Vector{Float64}}()
     for tree in trees
         is_common_cluster = find_common_clusters(tree, main_tree)
-        for node in nodes
+        for node in level_order(main_tree)
             if is_common_cluster[node.num][1]
                 count_dict[node.num] += 1
                 try
@@ -270,7 +267,7 @@ function set_node_stats!(main_tree::T, trees::Vector{T}, majority::Bool,
     end # for
     half = length(trees) * percentage
     # delete non-majority clusters
-    for node in nodes
+    for node in level_order(main_tree)
         if majority && count_dict[node.num] <= half
             delete_node!(node)
         else
@@ -299,12 +296,11 @@ Returns dictionary.
 
 """
 function find_common_clusters(ref_tree::T, tree::T) where T<:AbstractNode
-    ref_nodes = post_order(ref_tree)
     leaves_dict = Dict{String, Tuple{Int64, Float64}}()
     clusters = Dict{T, Vector{String}}()
     cluster_dict = Dict{Tuple{Int64, Int64}, Int64}()
     dict_count = 1
-    for ref_node in ref_nodes
+    for ref_node in post_order(ref_tree)
         if ref_node.nchild == 0
             leaves_dict[ref_node.name] = (dict_count, ref_node.inc_length)
             dict_count += 1
@@ -315,7 +311,7 @@ function find_common_clusters(ref_tree::T, tree::T) where T<:AbstractNode
                                     append!(cluster, clusters[child])
             end # for
             clusters[ref_node] = cluster
-            if ref_node.root == true || ref_node == get_mother(ref_node).children[1]
+            if isroot(ref_node) || ref_node == get_mother(ref_node).children[1]
                 last_index = leaves_dict[last(cluster)][1]
                 first_index = leaves_dict[first(cluster)][1]
                 cluster_dict[(first_index, last_index)] = last_index
@@ -333,8 +329,8 @@ function find_common_clusters(ref_tree::T, tree::T) where T<:AbstractNode
     is_common_cluster = Dict{Int64, Tuple{Bool, Union{Float64, Missing}}}()
     clusters = Dict{T, Vector{String}}()
     leaf_count = 0
-    nodes = post_order(tree)
-    for node in nodes
+    
+    for node in post_order(tree)
         if node.nchild == 0
             leaf_count += 1
             try
@@ -384,7 +380,7 @@ Returns root node of edited tree.
 """
 function one_way_compatible(ref_tree::T, tree::T)::T where T <: GeneralNode
     ref_tree_copy = deepcopy(ref_tree)
-    ref_nodes = post_order(ref_tree_copy)
+    ref_nodes = collect(post_order(ref_tree_copy))
     cluster_start_indeces = get_cluster_start_indeces(ref_nodes, tree)
     leaves::Vector{T} = order_tree!(tree, cluster_start_indeces; height=false)
     leaf_ranks_reverse = Dict(node.name => ind for (ind, node) in enumerate(leaves))
@@ -419,7 +415,7 @@ of nodes that were added.
 * `tree` : tree used to determine common clusters.
 """
 function merge_trees!(ref_tree::T, tree::T)::Vector{T} where T<:AbstractNode
-    ref_nodes = post_order(ref_tree)
+    ref_nodes = collect(post_order(ref_tree))
     cluster_start_indeces = get_cluster_start_indeces(ref_nodes, tree)
     leaves::Vector{T} = order_tree!(tree, cluster_start_indeces; height=false)
     leaf_ranks_reverse = Dict(node.name => ind for (ind, node) in enumerate(leaves))
@@ -491,8 +487,8 @@ function check_node!(ref_node::T, leaves::Vector{T},
             try marked_nodes[ref_node.num] = true catch; end # try
             return
         end # if
-        !xleft.root && delete!(left_path, node_depth(get_mother(xleft)))
-        !xright.root && delete!(right_path, node_depth(get_mother(xright)))
+        !isroot(xleft) && delete!(left_path, node_depth(parent(xleft)))
+        !isroot(xright) && delete!(right_path, node_depth(parent(xright)))
         depth_left = node_depth(xleft)
         depth_right = node_depth(xright)
         depth = depth_left >= depth_right
@@ -542,8 +538,8 @@ function get_cluster_start_indeces(ref_nodes::Vector{T}, tree::T
     leaf_ranks = get_leaf_ranks(ref_nodes)
     leaves = Vector{T}()
     cluster_start_indeces = Dict{T, Int64}()
-    nodes = post_order(tree)
-    for node in nodes
+    #nodes = 
+    for node in post_order(tree)
         if node.nchild != 0
             for leaf in leaves
                 path = split(node.binary, ",")
@@ -670,7 +666,7 @@ descendant. Also returns the path from the leaf to the mother of that node.
 function x_left(node::T)::Tuple{T, Vector{T}} where T<:AbstractNode
     path::Vector{T} = [node]
     while true
-        if node.root
+        if isroot(node)
             return node, path
         else
             mother = get_mother(node)
@@ -695,7 +691,7 @@ descendant. Also returns the path from the leaf to the mother of that node.
 function x_right(node::T)::Tuple{T, Vector{T}} where T<:AbstractNode
     path::Vector{T} = [node]
     while true
-        if node.root
+        if isroot(node)
             return node, path
         else
             mother = get_mother(node)

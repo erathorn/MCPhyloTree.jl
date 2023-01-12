@@ -42,7 +42,7 @@ Recipe that handles plotting of MCPhylo Trees. Takes the root node as input.
     tipannotations = map(x->(d[x] + adj, h[x], x.name), get_leaves(root))
     x, y = Float64[], Float64[]
     for node ∈ pre_order(root)
-        if !node.root
+        if !isroot(node)
             m = get_mother(node)
             push!(x, d[m], d[m], d[node], NaN)
             push!(y, h[m], h[node], h[node], NaN)
@@ -228,7 +228,7 @@ function _findxy(root::T)::Tuple{Dict{T, Float64}, Dict{T, Float64}, Vector{Stri
 
     # root_name = root.name / num
     height = Dict(tip => float(i) for (i, tip) in enumerate(x for x in get_leaves(root)))
-    nnodes = length(post_order(root))
+    nnodes = treesize(root)
     sizehint!(height, nnodes)
     findheights!(root)
 

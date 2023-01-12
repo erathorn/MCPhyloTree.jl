@@ -1,5 +1,5 @@
 
-abstract type AbstractNode end
+#abstract type AbstractNode end
 
 """
     Node
@@ -10,7 +10,7 @@ stored in the node.
 * `inc_length` specifies the length of the incomming branch.
 * `binary` specifies the path from the root to the Node. `1` and `0` represent left and right turns respectively.
 """
-mutable struct GeneralNode{R<:Real, I<:Integer} <: AbstractNode
+mutable struct GeneralNode{R<:Real, I<:Integer} <: AbstractNode{R}
     name::String
     mother::Union{GeneralNode{R,I}, Missing}
     children::Vector{GeneralNode{R,I}}
@@ -22,6 +22,7 @@ mutable struct GeneralNode{R<:Real, I<:Integer} <: AbstractNode
     height::R
     IntExtMap::Vector{I}
     blv::Vector{R}
+    n_desc::I
     stats::Dict{String, Float64}
 end # struct Node
 
@@ -30,23 +31,27 @@ end # struct Node
 This function will initialize an empty node.
 """
 function Node()::GeneralNode{Float64, Int64}
-        GeneralNode("no_name", missing, GeneralNode{Float64, Int64}[], 0, true, 1.0, "0",1, 1.0,Int64[], Float64[], Dict{String, Float64}())
+        GeneralNode("no_name", missing, GeneralNode{Float64, Int64}[], 0, true, 1.0, "0",1, 1.0,Int64[], Float64[], 0, Dict{String, Float64}())
 end
 
 
 function Node(name::String)::GeneralNode{Float64, Int64}
-        GeneralNode(name, missing, GeneralNode{Float64, Int64}[], 0, true, 1.0, "0", 1, 1.0, Int64[], Float64[], Dict{String, Float64}())
+        GeneralNode(name, missing, GeneralNode{Float64, Int64}[], 0, true, 1.0, "0", 1, 1.0, Int64[], Float64[],0, Dict{String, Float64}())
 end
 
 function Node(name::String, inc_len::T)::GeneralNode{T, Int64} where T<:Real
-    GeneralNode(name, missing, GeneralNode{T, Int64}[], 0, true, inc_len, "0", 1, 1.0, Int64[], Float64[], Dict{String, Float64}())
+    GeneralNode(name, missing, GeneralNode{T, Int64}[], 0, true, inc_len, "0", 1, 1.0, Int64[], Float64[], 0, Dict{String, Float64}())
 end
 
 #################### Base functionality ####################
 
-Base.:(==)(x::T, y::T) where T<:AbstractNode = x.num == y.num
-Base.size(x::T) where T<:AbstractNode = size(post_order(x))
-Base.length(x::T) where T<:AbstractNode = x.nchild
+Base.size(x::T) where T<:GeneralNode = treesize(x)
+Base.length(x::T) where T<:GeneralNode = x.nchild
+
+ function treesize(x::T) where T<:GeneralNode
+    x.n_desc + 1
+ end
+
 
 function Base.summary(io::IO, d::N) where N <: GeneralNode
     summary(io, d.name)
@@ -72,3 +77,16 @@ function showall(io::IO, d::N) where N <: GeneralNode
   print(io, "\nbinary:\n")
   show(io, d.binary)
 end
+
+function children(n::T)::Vector{T} where T <:GeneralNode
+    n.children
+end
+
+ParentLinks(::Type{<:GeneralNode}) = AbstractTrees.StoredParents()
+
+function parent(t::T) where T<:GeneralNode
+    ismissing(t.mother) ? nothing : t.mother
+end
+
+childtype(::Type{T}) where {T <: GeneralNode} = T
+childtype(node::T)  where {T <: GeneralNode} = T

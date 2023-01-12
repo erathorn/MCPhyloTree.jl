@@ -49,6 +49,16 @@ end
           "((D:5.0,E:5.0)F:5.0,(B:5.0,A:5.0,X:1.0,Y:1.0,Z:1.0)C:9.0)G:5.0;"
 end
 
+@testset "distance matrix" begin
+    target_mat =  [
+        0.0  10.0  24.0  24.0
+        10.0   0.0  24.0  24.0
+        24.0  24.0   0.0  10.0
+        24.0  24.0  10.0   0.0]
+    tree = ParseNewick("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")    
+    @test all(to_distance_matrix(tree) .== target_mat)
+end
+
 @testset "to_df" begin
     tree = ParseNewick("((B:5,A:5)C:9,(D:5,E:5)F:5)G:5;")
     target_arr = [
@@ -116,7 +126,6 @@ end
     @test check_binary(tree)
 
     tree = create_tree_from_leaves(l, false)
-    @show !check_binary(tree)
     @test tree.nchild == 3
     @test check_binary(tree)
 end
