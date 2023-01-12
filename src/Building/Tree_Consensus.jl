@@ -156,7 +156,7 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
         append!(bit_vectors, values(temp_bit_vectors))
     end # for
     # PSEUDOCODE Step 2
-    sort!(bit_vectors, alg=QuickSort)
+    sort!(bit_vectors, alg=MergeSort)
     # PSEUDOCODE Step 3
     cluster_queue = count_cluster_occurences(bit_vectors)
     # PSEUDOCODE Step 4
