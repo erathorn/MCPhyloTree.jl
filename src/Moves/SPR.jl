@@ -131,6 +131,5 @@ function perform_spr(root::T,subtree::T,target::T) where T <: GeneralNode
     add_child!(target_mother, tn_mother)
     add_child!(tn_mother, target)
     set_binary!(root)
-    set_ndesc!(root)
     return root
 end #func

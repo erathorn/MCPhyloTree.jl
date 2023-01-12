@@ -126,7 +126,6 @@ end
     @test check_binary(tree)
 
     tree = create_tree_from_leaves(l, false)
-    @show !check_binary(tree)
     @test tree.nchild == 3
     @test check_binary(tree)
 end

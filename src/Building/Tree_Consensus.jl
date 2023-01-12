@@ -174,18 +174,16 @@ function greedy_consensus_tree(trees::Vector{T})::T where T <: GeneralNode
         # cluster. It also stores the number of leaf nodes of the node.
         num = Dict{T, Vector{Int64}}()
         for node in post_order(greedy_consensus_tree)
-            if node.nchild == 0
+            if node.n_desc == 0
                 cluster[leaf_ranks[node.name]] == 1 ? num[node] = [1, 1] :
                                                       num[node] = [0, 1]
             else
                 num[node] = [sum([num[child][1] for child in node.children])]
                 n_leaves = 0
                 for child in node.children
-                    length(num[child]) != 2 && show(num)
                     n_leaves += num[child][2]
                 end # for
                 push!(num[node], n_leaves)
-                length(num[node]) != 2 && show(num)
                 children = Vector{T}()
                 if num[node][1] == cluster_length
                     insert = true
