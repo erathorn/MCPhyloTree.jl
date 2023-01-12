@@ -172,13 +172,7 @@ function cov2tree(covmat::Array{<:T, 2}, names::Vector{<:AbstractString}, number
     elseif any(covmat .< 0.0)
         covmat[covmat .< 0] .= 0.0
     end
-    try
-        cov2tree_int(covmat, names, numbers, tol=tol)
-    catch
-        println(covmat)
-    end
-        
-        
+    cov2tree_int(covmat, names, numbers, tol=tol)        
 end
 
 function cov2tree_int(covmat::Array{R, 2}, names::Vector{<:AbstractString}, numbers; tol::Real=1e-7)::GeneralNode{R, Int64} where R<:Real

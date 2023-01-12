@@ -83,8 +83,8 @@ function children(n::T)::Vector{T} where T <:GeneralNode
     n.children
 end
 
-ParentLinks(::Type{GeneralNode}) = AbstractTrees.StoredParents()
-#AbstractTrees.ChildIndexing(::Type{GeneralNode}) = AbstractTrees.IndexedChildren()
+ParentLinks(::Type{<:GeneralNode}) = AbstractTrees.StoredParents()
+
 function parent(t::T) where T<:GeneralNode
     ismissing(t.mother) ? nothing : t.mother
 end

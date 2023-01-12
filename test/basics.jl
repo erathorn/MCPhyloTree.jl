@@ -14,6 +14,8 @@
     @test isa(n, GeneralNode{Float64, Int64})
     @test n.name == "Name"
     @test n.inc_length == 0.75
+
+    @test ParentLinks(typeof(n)) == StoredParents()
 end
 
 @testset "Newick_Letters" begin
