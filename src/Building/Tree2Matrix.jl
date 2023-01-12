@@ -116,7 +116,7 @@ end
 
 function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:AbstractNode}
     
-    out = zeros(sum(map(x->1 , Leaves(root))), n)
+    out = zeros(sum(map(x->1 , get_leaves(root))), n)
     for (i, leave) in enumerate(get_leaves(root))
         mother = leave
         while !isroot(mother)
