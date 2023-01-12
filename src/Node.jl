@@ -22,6 +22,7 @@ mutable struct GeneralNode{R<:Real, I<:Integer} <: AbstractNode{R}
     height::R
     IntExtMap::Vector{I}
     blv::Vector{R}
+    n_desc::I
     stats::Dict{String, Float64}
 end # struct Node
 
@@ -30,16 +31,16 @@ end # struct Node
 This function will initialize an empty node.
 """
 function Node()::GeneralNode{Float64, Int64}
-        GeneralNode("no_name", missing, GeneralNode{Float64, Int64}[], 0, true, 1.0, "0",1, 1.0,Int64[], Float64[], Dict{String, Float64}())
+        GeneralNode("no_name", missing, GeneralNode{Float64, Int64}[], 0, true, 1.0, "0",1, 1.0,Int64[], Float64[], 0, Dict{String, Float64}())
 end
 
 
 function Node(name::String)::GeneralNode{Float64, Int64}
-        GeneralNode(name, missing, GeneralNode{Float64, Int64}[], 0, true, 1.0, "0", 1, 1.0, Int64[], Float64[], Dict{String, Float64}())
+        GeneralNode(name, missing, GeneralNode{Float64, Int64}[], 0, true, 1.0, "0", 1, 1.0, Int64[], Float64[],0, Dict{String, Float64}())
 end
 
 function Node(name::String, inc_len::T)::GeneralNode{T, Int64} where T<:Real
-    GeneralNode(name, missing, GeneralNode{T, Int64}[], 0, true, inc_len, "0", 1, 1.0, Int64[], Float64[], Dict{String, Float64}())
+    GeneralNode(name, missing, GeneralNode{T, Int64}[], 0, true, inc_len, "0", 1, 1.0, Int64[], Float64[], 0, Dict{String, Float64}())
 end
 
 #################### Base functionality ####################
@@ -48,9 +49,9 @@ Base.:(==)(x::T, y::T) where T<:GeneralNode = x.num == y.num
 Base.size(x::T) where T<:GeneralNode = treesize(x)
 Base.length(x::T) where T<:GeneralNode = x.nchild
 
-# function treesize(x::T) where T<:GeneralNode
-
-# end
+ function treesize(x::T) where T<:GeneralNode
+    x.n_desc + 1
+ end
 
 
 function Base.summary(io::IO, d::N) where N <: GeneralNode

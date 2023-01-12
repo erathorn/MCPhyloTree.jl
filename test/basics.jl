@@ -62,6 +62,7 @@ end
 
 @testset "add_child!" begin
     tree = ParseNewick("(A,B,(C,D,E)F)G;")
+    @test treesize(tree) == 7
     to_add = ParseNewick("no_name;")
     root = find_by_name(tree,"G")
     add_child!(root,to_add)
@@ -369,4 +370,11 @@ end
     @test lines == ["   /-A", "-C|", "   \\-B"]
     @test biglines == ["      /-A", "   /C|", "  |   \\-B", "-G|", "  |   /-D", "   \\F|", "      \\-E"]
     @test singlelines == ["         /-A", "   /D -C|", "  |      \\-B", "-H|", "  |-F --E", "  |", "   \\-G"]
+end
+
+@testset "childtype" begin
+    test_node = Node()
+    @test childtype(test_node) == GeneralNode{Float64, Int}
+    @test childtype(typeof(test_node)) == GeneralNode{Float64, Int}
+
 end

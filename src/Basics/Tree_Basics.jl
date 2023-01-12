@@ -7,6 +7,22 @@ my_tree:
 
 #TODO: Automate export of automatically genereated funtions
 
+function update_ndesc!(node::N, val::Int)::Nothing where N <:GeneralNode
+    node.n_desc += val
+    if isroot(node)
+        nothing
+    else
+        update_ndesc!(parent(node), val)
+    end
+end
+
+function set_ndesc!(root::N)::Nothing where N<:GeneralNode
+    #for node in post_order(root)
+    #    node.n_desc = node.nchild == 0 ? 0 : sum(n.n_desc for n in node.children) + node.nchild
+    #end
+    nothing
+end
+
 """
     add_child!(mother_node::N, child::N)::Nothing where N <: GeneralNode
 
@@ -25,6 +41,7 @@ function add_child!(mother_node::N, child::N)::Nothing where N <: GeneralNode
     child.mother = mother_node
     mother_node.nchild += 1
     child.root = false
+    update_ndesc!(mother_node, child.n_desc +1)
     nothing
 end # function add_child
 
@@ -50,6 +67,7 @@ function add_child!(mother_node::N, child::N, child_position::Int64)::Nothing wh
     child.mother = mother_node
     mother_node.nchild += 1
     child.root = false
+    update_ndesc!(mother_node, child.n_desc +1)
     nothing
 end # function add_child
 
@@ -75,6 +93,7 @@ function remove_child!(mother_node::N, left::Bool)::N where N <: GeneralNode
         rv.mother= missing
     end # end if
     mother_node.nchild -= 1
+    update_ndesc!(mother_node, -(rv.n_desc+1))
     return rv
 end # function
 
@@ -94,7 +113,7 @@ function remove_child!(mother_node::N, child::N)::N where N<:AbstractNode
     ind = findfirst(x->x==child, mother_node.children)
     deleteat!(mother_node.children, ind)
     child.mother = missing
-
+    update_ndesc!(mother_node, -(child.n_desc+1))
     mother_node.nchild -= 1
     return child
 end # function
@@ -116,6 +135,7 @@ function delete_node!(node::T)::Nothing where T<:AbstractNode
         add_child!(mother, child, findfirst(x -> x == node, mother.children))
     end
     remove_child!(mother, node)
+    update_ndesc!(mother, -1)
     return nothing
 end
 
@@ -143,6 +163,7 @@ function insert_node!(mother::T, children::Vector{T})::T where T<:AbstractNode
         add_child!(inserted_node, child)
     end # for
     add_child!(mother, inserted_node, index)
+    update_ndesc!(mother, 1+inserted_node.n_desc)
     return inserted_node
 end
 
@@ -407,6 +428,7 @@ fields.
 function initialize_tree!(root::GeneralNode; height::Bool=true)
     set_binary!(root)
     number_nodes!(root)
+    set_ndesc!(root)
     height && tree_height(root)
 end # initialize_tree
 
