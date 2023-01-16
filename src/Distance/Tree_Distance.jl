@@ -137,7 +137,7 @@ function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:Abstr
     # only nodes which are present in the second tree are left in bp_t2
     for bp in bp_t2
         found2 = find_lca(tree2, String.(split(bp[1], ",")))
-        if isroot(root)
+        if isroot(found2)
             found2 = find_lca(tree2, String.(split(bp[2], ",")))
         end
         T2minusT1 += found2.inc_length^2
