@@ -119,8 +119,9 @@ function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:Abst
     out = zeros(maximum(i->i.num, get_leaves(root)), n)
     for leave in get_leaves(root)
         mother = leave
+        ln = leave.num
         while !isroot(mother)
-            out[leave.num, mother.num] = 1.0
+            out[ln, mother.num] = 1.0
             mother = get_mother(mother)
         end
     end
