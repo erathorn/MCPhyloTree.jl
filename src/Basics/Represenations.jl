@@ -30,7 +30,7 @@ function newick(root::T, newickstring::AbstractString) where T<:AbstractNode
             newickstring = string(newick(child,newickstring))
         end # for
         newickstring = chop(newickstring)
-        return string(newickstring,")", root.name, ":", root.inc_length,",")
+        return string(newickstring,")", root.name, ":", round(root.inc_length, digits=6),",")
 
     else
         # leave
