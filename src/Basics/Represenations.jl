@@ -34,7 +34,7 @@ function newick(root::T, newickstring::AbstractString) where T<:AbstractNode
 
     else
         # leave
-        return string(newickstring, root.name, ":", root.inc_length, ",")
+        return string(newickstring, root.name, ":", round(root.inc_length, digits=6), ",")
     end # if
 end
 
