@@ -54,8 +54,8 @@ end
     gs_tree = MCPhyloTree.create_tree_from_leaves(leave_list, true)
     nstring = newick(gs_tree)
     tree = ParseNewick(nstring)
-    
-    @test round(gs_tree.height, digits=5) ≈ round(tree.height, digits=5)
+    # rounding is necessary because newick() rounds for readability
+    @test round(gs_tree.height, digits=4) ≈ round(tree.height, digits=4)
     @test length(collect(get_leaves(tree))) == Nleaves
     @test RF(gs_tree, tree) == 0
 end

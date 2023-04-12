@@ -121,7 +121,7 @@ function leave_incidence_matrix(root::G, n::Int)::Matrix{Float64} where {G<:Abst
         mother = leave
         ln = leave.num
         while !isroot(mother)
-            out[ln, mother.num] = 1.0
+            @inbounds out[ln, mother.num] = 1.0
             mother = get_mother(mother)
         end
     end
