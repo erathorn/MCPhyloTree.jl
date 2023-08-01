@@ -103,7 +103,8 @@ export to_covariance,
     ladderize_tree,
     ladderize_tree!,
     create_tree_from_leaves,
-    cov2tree
+    cov2tree,
+    from_leave_incidence_matrix
 
 # Distance
 export RF, RF_weighted, BHV_bounds, geodesic

@@ -104,6 +104,13 @@ end
         0.0 0.0 0.0 1.0 0.0 1.0
     ]
     @test all(lm .== target)
+    blv = get_branchlength_vector(tree)
+    tree_build = from_leave_incidence_matrix(lm, ["A", "B", "D", "E"])
+    
+    @test RF(tree, tree_build) == 0
+    tree_build = from_leave_incidence_matrix(lm, ["A", "B", "D", "E"], blv)
+    @test all(blv .== get_branchlength_vector(tree_build))
+
 end
 
 
