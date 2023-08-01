@@ -283,7 +283,7 @@ function from_leave_incidence_matrix(lm::Matrix, names)
 end
 
 """
-    from_leave_incidence_matrix(lm::Matrix, names, blv::Vector{AbstractFloat})
+    from_leave_incidence_matrix(lm::Matrix, names, blv::Vector{<:AbstractFloat})
 
 Build the tree which is specified through a leave incidence matrix. The function ``leave_incidence_matrix``
 from this package creates such a matrix. This function additionally takes a vector of branch lengths, which
@@ -295,7 +295,7 @@ Returns the root node of the tree build from the matrix.
 * `names` : list of names for the leaves (in order of the rows)
 * `blv` : vector of branch lengths used for this tree
 """
-function from_leave_incidence_matrix(lm::Matrix, names, blv::Vector{AbstractFloat})
+function from_leave_incidence_matrix(lm::Matrix, names, blv::Vector{<:AbstractFloat})
     root = from_leave_incidence_recurser(hcat(lm,ones(eltype(lm), size(lm, 1))), names, -1)
     set_branchlength_vector!(root, blv)
     set_binary!(root)
