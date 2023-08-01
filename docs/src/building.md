@@ -24,6 +24,7 @@ Pages = ["Building/ParseNewick.jl"]
 MCPhyloTree.from_df
 MCPhyloTree.create_tree_from_leaves
 MCPhyloTree.cov2tree
+MCPhyloTree.from_leave_incidence_matrix
 ```
 
 ## Tree Estimation from Matrices
