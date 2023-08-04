@@ -31,7 +31,7 @@ Returns result of algorithm as integer.
 
 * `m2` : tree used to determine RF distance.
 """
-function RF(m1::M, m2::M)::Int where M<:Matrix
+function RF(m1::AbstractMatrix, m2::AbstractMatrix)::Int
     @assert size(m1) == size(m2)
     inter = length(intersect(eachcol(m1), eachcol(m2)))
     2*size(m1, 2) - 2 * inter
