@@ -19,6 +19,23 @@ function RF(tree1::T, tree2::T)::Int64 where T <: GeneralNode
     return r
 end
 
+"""
+    RF(m1::M, m2::M)::Int where M<:Matrix
+
+Calculate the Robinson-Foulds distance between the two trees, represented as
+leave incidedence matrices.
+
+Returns result of algorithm as integer.
+
+* `m1` : tree used to determine RF distance.
+
+* `m2` : tree used to determine RF distance.
+"""
+function RF(m1::M, m2::M)::Int where M<:Matrix
+    @assert size(m1) == size(m2)
+    inter = length(intersect(eachcol(m1), eachcol(m2)))
+    2*size(m1, 2) - 2 * inter
+end
 
 function RF_int(tree1::T, tree2::T)::Tuple{Int64, Int64} where T <: GeneralNode
     bt3 = get_bipartitions(tree1)
