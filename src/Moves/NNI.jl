@@ -112,27 +112,25 @@ function NNI!(lm_r::A) where A<:AbstractArray{<:Real, 2}
     NNI!(lm_r, rand(axes(lm, 2)))
 end
 
-function NNI!(lm_r::A, ind::Int) where A<:AbstractArray{<:Real, 2}
-    if sum(lm_r[:, ind]) == 1
+function NNI!(lm_r::A, target::Int) where A<:AbstractArray{<:Real, 2}
+    if sum(lm_r[:, target]) == 1
         return 0
     end
     lm = hcat(lm_r, ones(size(lm_r, 1))) 
-    _, mother = findmin(x->find_mother_helper(x, lm, ind), axes(lm, 2))
-    _, sister = findmax(x -> find_column_helper(x, lm, mother, ind), axes(lm, 2))
-    _, child = findmax(x->find_column_helper(x, lm, ind), axes(lm, 2))
-
+    _, mother = findmin(x->find_mother_helper(x, lm, target), axes(lm, 2))
+    sister = findfirst(x -> lm[:, x] == (lm[:, mother] .!= lm[:, target]), axes(lm, 2))
+    _, child1 = findmax(x->find_column_helper(x, lm, target), axes(lm, 2))
+    _, child2 = findmax(x->find_column_helper(x, lm, target, child1), axes(lm, 2))
+    child = rand() > 0.5 ? child1 : child2
     
     @inbounds for i in axes(lm, 1)
         if lm[i, child] == 1
-            lm[i, ind] = 0 # remove child from target
-            lm[i, mother] = 1 # add child to mother
+            lm[i, target] = 0 # remove child from target
         end
         if lm[i, sister] == 1
-            lm[i, mother] = 0 # remove sister from mother
-            lm[i, ind] = 1 # add sister to target
+            lm[i, target] = 1 # add sister to target
         end
     end
-
     lm_r .= lm[:, 1:end-1] 
     return 1
 end

@@ -323,9 +323,12 @@ function from_leave_incidence_recurser(lm, names, current_ind)
 
         # this is the column describing one node
         _, ind1 = findmax(x->find_column_helper(x, lm, current_ind), 1:size(lm, 2))
-       
+        _, mother = findmin(x->find_mother_helper(x, lm, ind1), axes(lm, 2))
+
+        ind2 = findfirst(x -> lm[:, x] == (lm[:, mother] .!= lm[:, ind1]), axes(lm, 2))
+        #_, ind2 = findmax(x -> find_column_helper(x, lm, mother, ind1), axes(lm, 2))
         # this is the column describing the second node
-        _, ind2 = findmax(x -> find_column_helper(x, lm, current_ind, ind1), 1:size(lm, 2))
+        #_, ind2 = findmax(x -> find_column_helper(x, lm, current_ind, ind1), 1:size(lm, 2))
         
         n1 = from_leave_incidence_recurser(lm, names, ind1)
         n2 = from_leave_incidence_recurser(lm, names, ind2)
