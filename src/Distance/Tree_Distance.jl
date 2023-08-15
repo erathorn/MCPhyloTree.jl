@@ -168,6 +168,43 @@ function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:Abstr
 end
 
 
+
+"""
+    BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:AbstractNode
+
+This function calculates the lower and upper bounds of the geodesic in the
+Billera-Holmes-Vogtman space.
+
+Returns tuple of floats.
+"""
+function BHV_bounds(tree1::AbstractMatrix, blv1::Vector{T}, tree2::AbstractMatrix, blv2::Vector{T})::Tuple{T, T} where T<:AbstractFloat
+    
+    T1minusT2 = zero(T)
+    T2minusT1 = zero(T)
+    T1andT2 = zero(T)
+    inds = Int[]
+    for i in axes(tree1)
+        ind1 = findfirst(isequal(tree1[i]), tree2)
+        if !isnothing
+            T1andT2 += (blv1[i] - blv2[ind1])^2
+            push!(inds, ind1)
+        else
+            T1minusT2 += blv1[i]^2
+        end
+    end
+    for i in setdiff(axes(tree2), inds)
+        T2minusT1 += blv2[i]^2
+    end
+
+    res_low = T1minusT2+T2minusT1+T1andT2
+    res_high = (sqrt(T1minusT2)+sqrt(T2minusT1))^2+T1andT2
+
+    sqrt(res_low), sqrt(res_high)
+end
+
+
+
+
 """
     get_bipartitions(tree::T)::Vector{Tuple} where T <:AbstractNode
 
