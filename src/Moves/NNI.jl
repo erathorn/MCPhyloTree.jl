@@ -127,6 +127,8 @@ function NNI!(lm_r::A, target::Int) where A<:AbstractArray{<:Real, 2}
         if lm[i, child] == 1
             lm[i, target] = 0 # remove child from target
         end
+    end
+    @inbounds for i in axes(lm, 1)
         if lm[i, sister] == 1
             lm[i, target] = 1 # add sister to target
         end
