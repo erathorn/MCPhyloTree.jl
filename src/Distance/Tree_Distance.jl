@@ -177,7 +177,7 @@ Billera-Holmes-Vogtman space.
 
 Returns tuple of floats.
 """
-function BHV_bounds(tree1::AbstractMatrix, blv1::Vector{T}, tree2::AbstractMatrix, blv2::Vector{T})::Tuple{T, T} where T<:AbstractFloat
+function BHV_bounds(tree1::AbstractMatrix, blv1::AbstractVector{T}, tree2::AbstractMatrix, blv2::AbstractVector{T})::Tuple{T, T} where T<:AbstractFloat
     
     T1minusT2 = zero(T)
     T2minusT1 = zero(T)
