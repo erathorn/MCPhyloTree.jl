@@ -185,7 +185,7 @@ function BHV_bounds(tree1::AbstractMatrix, blv1::AbstractVector{T}, tree2::Abstr
     inds = Int[]
     for i in axes(tree1)
         ind1 = findfirst(isequal(tree1[i]), tree2)
-        if !isnothing
+        if !isnothing(ind1)
             T1andT2 += (blv1[i] - blv2[ind1])^2
             push!(inds, ind1)
         else
