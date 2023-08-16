@@ -19,6 +19,23 @@ function RF(tree1::T, tree2::T)::Int64 where T <: GeneralNode
     return r
 end
 
+"""
+    RF(m1::M, m2::M)::Int where M<:Matrix
+
+Calculate the Robinson-Foulds distance between the two trees, represented as
+leave incidedence matrices.
+
+Returns result of algorithm as integer.
+
+* `m1` : tree used to determine RF distance.
+
+* `m2` : tree used to determine RF distance.
+"""
+function RF(m1::AbstractMatrix, m2::AbstractMatrix)::Int
+    @assert size(m1) == size(m2)
+    inter = length(intersect(eachcol(m1), eachcol(m2)))
+    2*size(m1, 2) - 2 * inter
+end
 
 function RF_int(tree1::T, tree2::T)::Tuple{Int64, Int64} where T <: GeneralNode
     bt3 = get_bipartitions(tree1)
@@ -149,6 +166,43 @@ function BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:Abstr
 
     sqrt(res_low), sqrt(res_high)
 end
+
+
+
+"""
+    BHV_bounds(tree1::T, tree2::T)::Tuple{Float64, Float64} where T <:AbstractNode
+
+This function calculates the lower and upper bounds of the geodesic in the
+Billera-Holmes-Vogtman space.
+
+Returns tuple of floats.
+"""
+function BHV_bounds(tree1::AbstractMatrix, blv1::AbstractVector{T}, tree2::AbstractMatrix, blv2::AbstractVector{T})::Tuple{T, T} where T<:AbstractFloat
+    
+    T1minusT2 = zero(T)
+    T2minusT1 = zero(T)
+    T1andT2 = zero(T)
+    inds = Int[]
+    for i in axes(tree1, 2)
+        ind1 = findfirst(isequal(tree1[:, i]), eachcol(tree2))
+        if !isnothing(ind1)
+            T1andT2 += (blv1[i] - blv2[ind1])^2
+            push!(inds, ind1)
+        else
+            T1minusT2 += blv1[i]^2
+        end
+    end
+    for i in setdiff(axes(tree2, 2), inds)
+        T2minusT1 += blv2[i]^2
+    end
+
+    res_low = T1minusT2+T2minusT1+T1andT2
+    res_high = (sqrt(T1minusT2)+sqrt(T2minusT1))^2+T1andT2
+
+    sqrt(res_low), sqrt(res_high)
+end
+
+
 
 
 """

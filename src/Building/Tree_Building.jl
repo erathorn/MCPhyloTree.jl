@@ -265,7 +265,7 @@ end
 
 
 """
-    from_leave_incidence_matrix(lm::Matrix, names)
+    from_leave_incidence_matrix(lm::A, names) where A<:AbstractArray{<:Real, 2}
 
 Build the tree which is specified through a leave incidence matrix. The function ``leave_incidence_matrix``
 from this package creates such a matrix.
@@ -275,7 +275,7 @@ Returns the root node of the tree build from the matrix.
 * `lm` : leave incidence matrix
 * `names` : list of names for the leaves (in order of the rows)
 """
-function from_leave_incidence_matrix(lm::Matrix, names)
+function from_leave_incidence_matrix(lm::A, names) where A<:AbstractArray{<:Real, 2}
     root = from_leave_incidence_recurser(hcat(lm,ones(eltype(lm), size(lm, 1))), names, -1)
     set_binary!(root)
     tree_height(root)
@@ -283,7 +283,7 @@ function from_leave_incidence_matrix(lm::Matrix, names)
 end
 
 """
-    from_leave_incidence_matrix(lm::Matrix, names, blv::Vector{<:AbstractFloat})
+    from_leave_incidence_matrix(lm::A, names, blv::Vector{<:AbstractFloat}) where A<:AbstractArray{<:Real, 2}
 
 Build the tree which is specified through a leave incidence matrix. The function ``leave_incidence_matrix``
 from this package creates such a matrix. This function additionally takes a vector of branch lengths, which
@@ -295,7 +295,7 @@ Returns the root node of the tree build from the matrix.
 * `names` : list of names for the leaves (in order of the rows)
 * `blv` : vector of branch lengths used for this tree
 """
-function from_leave_incidence_matrix(lm::Matrix, names, blv::Vector{<:AbstractFloat})
+function from_leave_incidence_matrix(lm::A, names, blv::Vector{<:AbstractFloat}) where A<:AbstractArray{<:Real, 2}
     root = from_leave_incidence_recurser(hcat(lm,ones(eltype(lm), size(lm, 1))), names, -1)
     set_branchlength_vector!(root, blv)
     set_binary!(root)
@@ -303,29 +303,6 @@ function from_leave_incidence_matrix(lm::Matrix, names, blv::Vector{<:AbstractFl
     return root
 end
 
-
-function find_column_helper(x_r, lm, current_ind) 
-    
-    x = lm[:, x_r]
-    rv = sum(x)
-    if rv >= sum(lm[:, current_ind]) || length(intersect(findall(isone.(x)), findall(isone.(lm[:, current_ind])))) == 0
-        rv = -Inf
-    end
-    
-    rv
-end
-
-function find_column_helper(x_r, lm, current_ind, sister_ind) 
-    if x_r == sister_ind
-        return -Inf
-    end
-    x = lm[:, x_r]
-    rv = sum(x)
-    if rv >= sum(lm[:, current_ind]) || length(intersect(findall(isone.(x)), findall(isone.(lm[:, current_ind])))) == 0
-        rv = -Inf
-    end
-    return rv
-end
 
 
 
@@ -346,9 +323,10 @@ function from_leave_incidence_recurser(lm, names, current_ind)
 
         # this is the column describing one node
         _, ind1 = findmax(x->find_column_helper(x, lm, current_ind), 1:size(lm, 2))
-       
+        _, mother = findmin(x->find_mother_helper(x, lm, ind1), axes(lm, 2))
         # this is the column describing the second node
-        _, ind2 = findmax(x -> find_column_helper(x, lm, current_ind, ind1), 1:size(lm, 2))
+        ind2 = findfirst(x -> lm[:, x] == (lm[:, mother] .!= lm[:, ind1]), axes(lm, 2))
+        
         
         n1 = from_leave_incidence_recurser(lm, names, ind1)
         n2 = from_leave_incidence_recurser(lm, names, ind2)

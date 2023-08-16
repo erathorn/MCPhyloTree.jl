@@ -100,3 +100,40 @@ function NNI(root::T)::T where T<:AbstractNode
     NNI!(new_root)
     return new_root
 end
+
+
+function NNI(lm_r::A) where A<:AbstractArray{<:Real, 2}
+    lm = deepcopy(lm_r)
+    NNI!(lm)
+    return lm
+end
+
+function NNI!(lm_r::A) where A<:AbstractArray{<:Real, 2}
+    NNI!(lm_r, rand(axes(lm_r, 2)))
+end
+
+function NNI_int!(lm_r, target, child)
+    lm = hcat(lm_r, ones(size(lm_r, 1))) 
+    _, mother = findmin(x->find_mother_helper(x, lm, target), axes(lm, 2))
+    sister = findfirst(x -> lm[:, x] == (lm[:, mother] .!= lm[:, target]), axes(lm, 2))
+    # remove child from target
+    lm[:, target] .-= lm[:, child]
+    # add sister to target
+    lm[:, target] .+= lm[:, sister]
+    
+    lm_r .= lm[:, 1:end-1] 
+    return 1
+end
+
+function NNI!(lm_r::A, target::Int) where A<:AbstractArray{<:Real, 2}
+    if sum(lm_r[:, target]) == 1
+        return 0
+    end
+    
+    _, child1 = findmax(x->find_column_helper(x, lm_r, target), axes(lm_r, 2))
+    child2 = findfirst(x -> lm_r[:, x] == (lm_r[:, child1] .!= lm_r[:, target]), axes(lm_r, 2))
+    child = rand() > 0.5 ? child1 : child2
+    NNI_int!(lm_r, target, child)
+    
+    return 1
+end
