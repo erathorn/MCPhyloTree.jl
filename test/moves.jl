@@ -112,7 +112,7 @@ end
         0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  1.0  1.0  1.0
     ]
 
-    res = NNI_int!(lm1, 11, 10)
+    res = MCPhyloTree.NNI_int!(lm1, 11, 10)
     @test res == 1
     @test all(lm1 .== target)
 
