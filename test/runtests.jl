@@ -4,6 +4,9 @@ using MCPhyloTree
     include("basics.jl")
     println("done basics")
 
+    include("utils.jl")
+    println("done utils")
+    
     include("search.jl")
     println("done search")
 
