@@ -109,7 +109,7 @@ function NNI(lm_r::A) where A<:AbstractArray{<:Real, 2}
 end
 
 function NNI!(lm_r::A) where A<:AbstractArray{<:Real, 2}
-    NNI!(lm_r, rand(axes(lm, 2)))
+    NNI!(lm_r, rand(axes(lm_r, 2)))
 end
 
 function NNI_int!(lm_r, target, child)
