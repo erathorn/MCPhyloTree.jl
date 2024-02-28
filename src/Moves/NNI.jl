@@ -125,15 +125,18 @@ function NNI_int!(lm_r, target, child)
     return 1
 end
 
-function NNI!(lm_r::A, target::Int) where A<:AbstractArray{<:Real, 2}
+function NNI!(rng::AbstractRNG, lm_r::A, target::Int) where A<:AbstractArray{<:Real, 2}
     if sum(lm_r[:, target]) == 1
         return 0
     end
     
     _, child1 = findmax(x->find_column_helper(x, lm_r, target), axes(lm_r, 2))
     child2 = findfirst(x -> lm_r[:, x] == (lm_r[:, child1] .!= lm_r[:, target]), axes(lm_r, 2))
-    child = rand() > 0.5 ? child1 : child2
+    child = rand(rng) > 0.5 ? child1 : child2
     NNI_int!(lm_r, target, child)
-    
-    return 1
+end
+
+
+function NNI!(lm_r::A, target::Int) where A<:AbstractArray{<:Real, 2}
+    NNI!(Random.GLOBAL_RNG, lm_r, target)
 end
