@@ -125,7 +125,7 @@ function NNI_int!(lm_r, target, child)
     return 1
 end
 
-function NNI!(rng::AbstractRNG, lm_r::A, target::Int) where A<:AbstractArray{<:Real, 2}
+function NNI!(rng::Random.AbstractRNG, lm_r::A, target::Int) where A<:AbstractArray{<:Real, 2}
     if sum(lm_r[:, target]) == 1
         return 0
     end
