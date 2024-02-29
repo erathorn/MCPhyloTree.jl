@@ -11,21 +11,25 @@ daughters.
 * `root` : root Node of tree.
 """
 function slide!(root::T) where {T<:AbstractNode}
+    slide!(Random.GLOBAL_RNG, root)
+end
+
+function slide!(rng::Random.AbstractRNG,root::T) where {T<:AbstractNode}
 
     available = [node.num for node in post_order(root)]
-    n = rand(available)
+    n = rand(rng, available)
     target::T = find_num(root, n)
 
     while target.nchild == 0 || isroot(target)
-        n = rand(available)
+        n = rand(rng, available)
         target = find_num(root, n)
     end
 
 
     # proportion of slide move is randomly selected
-    proportion::Float64 = rand()
+    proportion::Float64 = rand(rng)
     # pick a random child
-    child::T = rand(target.children)
+    child::T = rand(rng, target.children)
 
     # calculate and set new values
     move!(target, child, proportion)
@@ -60,16 +64,20 @@ moved along the path specified by its two children.
 * `root` : root Node of tree.
 """
 function swing!(root::T) where {T<:AbstractNode}
+    swing!(Random.GLOBAL_RNG, root)
+end
+
+function swing!(rng::Random.AbstractRNG, root::T) where {T<:AbstractNode}
 
     available = [node.num for node in post_order(root)]
-    n = rand(available)
+    n = rand(rng, available)
     target::T = find_num(root, n)
 
     while target.nchild < 2
-        n = rand(available)
+        n = rand(rng, available)
         target = find_num(root, n)
     end
-    proportion::Float64 = rand()
+    proportion::Float64 = rand(rng)
 
     child1 = target.children[1]
     child2 = target.children[2]
@@ -126,13 +134,17 @@ Pick a random node and increase or decrease its length randomly.
 * `root` : root node of tree.
 """
 function change_edge_length!(root::T) where {T<:AbstractNode}
+    change_edge_length!(Random.GLOBAL_RNG, root)
+end
+
+function change_edge_length!(rng::Random.AbstractRNG, root::T) where {T<:AbstractNode}
     available = [node.num for node in post_order(root)]
-    n = rand(available)
+    n = rand(rng, available)
     target::T = find_num(root, n)
     while isroot(target)
-        n = rand(available)
+        n = rand(rng, available)
         target = find_num(root, n)
     end
-    factor = abs(randn())
+    factor = abs(randn(rng,))
     target.inc_length *= factor
 end

@@ -441,10 +441,13 @@ end # update_tree
 This function returns a random node from the tree.
 """
 function random_node(root::T)::T  where T<:AbstractNode
-    post_order_trav = collect(post_order(root))
-    return rand(post_order_trav)
+    return random_node(Random.GLOBAL_RNG, root)
 end # function random_node
 
+function random_node(rng::Random.AbstractRNG, root::T)::T  where T<:AbstractNode
+    post_order_trav = collect(post_order(root))
+    return rand(rng, post_order_trav)
+end # function random_node
 
 
 #################### Vector of branch lengths: get & set ####################

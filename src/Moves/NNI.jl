@@ -61,8 +61,12 @@ by `root`. The target is identified by the number of the target node.
 The function returns 1 if the move was successfull and 0 else.
 """
 function NNI!(root::T, target::Int64)::Int64  where T<:AbstractNode
+    NNI!(Random.GLOBAL_RNG, root, target)
+end
+
+function NNI!(rng::Random.AbstractRNG, root::T, target::Int64)::Int64  where T<:AbstractNode
    tn::T = find_num(root, target)
-   lor::Bool = 0.5 > rand()
+   lor::Bool = 0.5 > rand(rng)
    NNI!(root, tn, lor)
 end #function
 
@@ -78,9 +82,13 @@ The function returns 1 if the move was successful and 0 else.
 
 """
 function NNI!(root::T)::Int64  where T<:AbstractNode
-    n = rand(1:size(root)[1])
+    NNI!(Random.GLOBAL_RNG, root)
+end
+
+function NNI!(rng::Random.AbstractRNG, root::T)::Int64  where T<:AbstractNode
+    n = rand(rng, 1:size(root)[1])
     tn::T = find_num(root, n)
-    lor::Bool = 0.5 > rand()
+    lor::Bool = 0.5 > rand(rng)
     NNI!(root, tn, lor)
 end #function
 
@@ -109,7 +117,11 @@ function NNI(lm_r::A) where A<:AbstractArray{<:Real, 2}
 end
 
 function NNI!(lm_r::A) where A<:AbstractArray{<:Real, 2}
-    NNI!(lm_r, rand(axes(lm_r, 2)))
+    NNI!(Random.GLOBAL_RNG,lm_r)
+end
+
+function NNI!(rng::Random.AbstractRNG, lm_r::A) where A<:AbstractArray{<:Real, 2}
+    NNI!(lm_r, rand(rng, axes(lm_r, 2)))
 end
 
 function NNI_int!(lm_r, target, child)
