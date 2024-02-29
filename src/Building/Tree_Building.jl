@@ -19,9 +19,9 @@ function tree_from_leaves(rng::Random.AbstractRNG, leaf_nodes::Vector{String}, f
         # create a new mother node to which the two first nodes are added as children
         # add the new mother node to the list and reshuffle
         first_child::GeneralNode = pop!(my_node_list)
-        first_child.inc_length = rand()
+        first_child.inc_length = rand(rng)
         second_child::GeneralNode = pop!(my_node_list)
-        second_child.inc_length = rand()
+        second_child.inc_length = rand(rng)
         curr_node::GeneralNode = Node(string(temp_name))
 
         add_child!(curr_node, first_child)
@@ -66,18 +66,18 @@ function create_tree_from_leaves(rng::Random.AbstractRNG, leaf_nodes::Vector{Str
     root = Node(string(temp_name))
     if rooted
         lchild = pop!(my_node_list)
-        lchild.inc_length = rand()
+        lchild.inc_length = rand(rng)
         rchild = pop!(my_node_list)
-        rchild.inc_length = rand()
+        rchild.inc_length = rand(rng)
         add_child!(root, lchild)
         add_child!(root, rchild)
     else 
         lchild = pop!(my_node_list)
-        lchild.inc_length = rand()
+        lchild.inc_length = rand(rng)
         mchild = pop!(my_node_list)
-        mchild.inc_length = rand()
+        mchild.inc_length = rand(rng)
         rchild = pop!(my_node_list)
-        rchild.inc_length = rand()
+        rchild.inc_length = rand(rng)
         add_child!(root, lchild)
         add_child!(root, rchild)
         add_child!(root, mchild)
