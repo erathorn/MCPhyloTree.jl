@@ -1,5 +1,6 @@
 using Test
 using MCPhyloTree
+using Random
 @testset "MCPhyloTree" begin
     include("basics.jl")
     println("done basics")

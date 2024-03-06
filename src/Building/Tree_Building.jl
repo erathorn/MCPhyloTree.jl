@@ -1,5 +1,5 @@
 
-function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tuple{Vector{GeneralNode}, Int}
+function tree_from_leaves(rng::Random.AbstractRNG, leaf_nodes::Vector{String}, final_length::Int64)::Tuple{Vector{GeneralNode}, Int}
     my_node_list::Array{GeneralNode,1} = []
 
     # first create a list of leaf nodes
@@ -12,23 +12,23 @@ function tree_from_leaves(leaf_nodes::Vector{String}, final_length::Int64)::Tupl
     temp_name::Int = length(my_node_list)+1
 
     # shuffle the node list to get a random tree
-    Random.shuffle!(my_node_list)
+    Random.shuffle!(rng, my_node_list)
 
     while length(my_node_list) > final_length
         # get two nodes
         # create a new mother node to which the two first nodes are added as children
         # add the new mother node to the list and reshuffle
         first_child::GeneralNode = pop!(my_node_list)
-        first_child.inc_length = rand()
+        first_child.inc_length = rand(rng)
         second_child::GeneralNode = pop!(my_node_list)
-        second_child.inc_length = rand()
+        second_child.inc_length = rand(rng)
         curr_node::GeneralNode = Node(string(temp_name))
 
         add_child!(curr_node, first_child)
         add_child!(curr_node, second_child)
         push!(my_node_list, curr_node)
         temp_name += 1
-        Random.shuffle!(my_node_list)
+        Random.shuffle!(rng, my_node_list)
     end # while
 
     return my_node_list, temp_name
@@ -46,23 +46,38 @@ Returns the root node of the new tree.
 * `rooted` : Boolean indicating if the tree should be rooted
 """
 function create_tree_from_leaves(leaf_nodes::Vector{String}, rooted::Bool=false)::GeneralNode{Float64, Int64}
+    create_tree_from_leaves(Random.GLOBAL_RNG, leaf_nodes, rooted)::GeneralNode{Float64, Int64}
+end
+
+"""
+    function create_tree_from_leaves(rng::Random.AbstractRNG, leaf_nodes::Vector{String}, rooted::Bool=false<:AbstractNode    
     
-    my_node_list, temp_name = rooted ? tree_from_leaves(leaf_nodes, 2) : tree_from_leaves(leaf_nodes, 3)
+Build a random tree from a list of leaf names. The tree is unrooted by default.
+
+Returns the root node of the new tree.
+
+* `leaf_nodes` : A list of strings which are used as the names of the leaves.
+
+* `rooted` : Boolean indicating if the tree should be rooted
+"""
+function create_tree_from_leaves(rng::Random.AbstractRNG, leaf_nodes::Vector{String}, rooted::Bool=false)::GeneralNode{Float64, Int64}
+    
+    my_node_list, temp_name = rooted ? tree_from_leaves(rng, leaf_nodes, 2) : tree_from_leaves(rng, leaf_nodes, 3)
     root = Node(string(temp_name))
     if rooted
         lchild = pop!(my_node_list)
-        lchild.inc_length = rand()
+        lchild.inc_length = rand(rng)
         rchild = pop!(my_node_list)
-        rchild.inc_length = rand()
+        rchild.inc_length = rand(rng)
         add_child!(root, lchild)
         add_child!(root, rchild)
     else 
         lchild = pop!(my_node_list)
-        lchild.inc_length = rand()
+        lchild.inc_length = rand(rng)
         mchild = pop!(my_node_list)
-        mchild.inc_length = rand()
+        mchild.inc_length = rand(rng)
         rchild = pop!(my_node_list)
-        rchild.inc_length = rand()
+        rchild.inc_length = rand(rng)
         add_child!(root, lchild)
         add_child!(root, rchild)
         add_child!(root, mchild)

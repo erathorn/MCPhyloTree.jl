@@ -50,12 +50,13 @@ end
 @testset "LargeNewick" begin
     Nleaves = 6000
     leave_list = ["leave_$i" for i in 1:Nleaves]
-
-    gs_tree = MCPhyloTree.create_tree_from_leaves(leave_list, true)
+    rng = Random.MersenneTwister()
+    Random.seed!(rng, 123)
+    gs_tree = MCPhyloTree.create_tree_from_leaves(rng, leave_list, true)
     nstring = newick(gs_tree)
     tree = ParseNewick(nstring)
     # rounding is necessary because newick() rounds for readability
-    @test round(gs_tree.height, digits=4) ≈ round(tree.height, digits=4)
+    @test 17.9712 ≈ round(tree.height, digits=4)
     @test length(collect(get_leaves(tree))) == Nleaves
     @test RF(gs_tree, tree) == 0
 end
